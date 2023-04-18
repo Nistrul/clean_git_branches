@@ -17,13 +17,33 @@ Clean Git Branches is a command-line tool that helps maintain a tidy Git reposit
 git clone https://github.com/yourusername/clean_git_branches.git
 ```
 
+2. Make the script executable by running the following command in your terminal:
+
+```bash
+chmod +x clean_git_branches.sh
+```
+
 2. Add the clean_git_branches script to your shell configuration file (e.g. .bashrc, .zshrc, etc.):
 
 ```bash
 source /path/to/clean_git_branches/clean_git_branches.sh
 ```
 
-3. Restart your terminal or run source on your shell configuration file to load the new functions.
+3. (Optional) Add the script to your system's **PATH** to use it from any directory. One way to do this is to create a symbolic link to the script in a directory that is already in your **PATH**. For example:
+
+```bash
+ln -s /path/to/clean_git_branches.sh /usr/local/bin/clean-git-branches
+```
+
+Replace **/path/to/clean_git_branches.sh** with the actual path to the script on your system. After doing this, you can run the script using the command **clean-git-branches**.
+
+4. Set the **PROTECTED_BRANCHES** environment variable if you want to customize the protected branches. By default, the script protects the "main", "master", "prod", and "dev" branches. To set the variable, add the following line to your shell's configuration file (e.g., **.bashrc**, **.zshrc**, etc.):
+
+```bash
+export PROTECTED_BRANCHES="main|master|prod|dev|custom-branch"
+```
+
+5. Restart your terminal or run source on your shell configuration file to load the new functions.
 
 ## Usage
 
@@ -35,35 +55,9 @@ clean_git_branches
 
 The script will display branches categorized by status and remove any merged branches, excluding those specified as protected.
 
-To customize protected branches, set the **PROTECTED_BRANCHES** environment variable in your shell configuration file:
-
-```bash
-export PROTECTED_BRANCHES="main|master|prod|dev|custom_branch"
-```
-
 ## License
 
 This project is licensed under the MIT License.
-
-Copyright (c) 2023 Dale Freya
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
 
 ## Contributing
 
