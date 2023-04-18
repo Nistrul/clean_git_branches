@@ -157,3 +157,8 @@ function clean_git_branches() {
 
   echo
 }
+
+# Call the clean_git_branches function when the script is executed directly
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  clean_git_branches
+fi
