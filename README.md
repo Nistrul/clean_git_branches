@@ -23,13 +23,15 @@ Then, install the clean-git-branches script:
 brew install clean-git-branches
 ```
 
-## Updating
+## Usage
 
-To update the clean-git-branches script to the latest version, run:
+Simply run the clean_git_branches function in your terminal from inside a git repository:
 
 ```bash
-brew update && brew upgrade clean-git-branches
+clean_git_branches
 ```
+
+The script will display branches categorized by status and remove any merged branches, excluding those specified as protected.
 
 ## Configuration
 
@@ -39,15 +41,13 @@ Set the **PROTECTED_BRANCHES** environment variable if you want to customize the
 export PROTECTED_BRANCHES="main|master|prod|dev|custom-branch"
 ```
 
-## Usage
+## Updating
 
-Simply run the clean_git_branches function in your terminal:
+To update the clean-git-branches script to the latest version, run:
 
 ```bash
-clean_git_branches
+brew update && brew upgrade clean-git-branches
 ```
-
-The script will display branches categorized by status and remove any merged branches, excluding those specified as protected.
 
 ## License
 
