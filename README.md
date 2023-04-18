@@ -11,39 +11,33 @@ Clean Git Branches is a command-line tool that helps maintain a tidy Git reposit
 
 ## Installation
 
-1. Clone the clean_git_branches repository:
+install the clean-git-branches script using Homebrew, first tap this repository:
 
 ```bash
-git clone https://github.com/yourusername/clean_git_branches.git
+brew tap your-username/clean-git-branches
 ```
 
-2. Make the script executable by running the following command in your terminal:
+Then, install the clean-git-branches script:
 
 ```bash
-chmod +x clean_git_branches.sh
+brew install clean-git-branches
 ```
 
-2. Add the clean_git_branches script to your shell configuration file (e.g. .bashrc, .zshrc, etc.):
+## Updating
+
+To update the clean-git-branches script to the latest version, run:
 
 ```bash
-source /path/to/clean_git_branches/clean_git_branches.sh
+brew update && brew upgrade clean-git-branches
 ```
 
-3. (Optional) Add the script to your system's **PATH** to use it from any directory. One way to do this is to create a symbolic link to the script in a directory that is already in your **PATH**. For example:
+## Configuration
 
-```bash
-ln -s /path/to/clean_git_branches.sh /usr/local/bin/clean-git-branches
-```
-
-Replace **/path/to/clean_git_branches.sh** with the actual path to the script on your system. After doing this, you can run the script using the command **clean-git-branches**.
-
-4. Set the **PROTECTED_BRANCHES** environment variable if you want to customize the protected branches. By default, the script protects the "main", "master", "prod", and "dev" branches. To set the variable, add the following line to your shell's configuration file (e.g., **.bashrc**, **.zshrc**, etc.):
+Set the **PROTECTED_BRANCHES** environment variable if you want to customize the protected branches. By default, the script protects the "main", "master", "prod", and "dev" branches. To set the variable, add the following line to your shell's configuration file (e.g., **.bashrc**, **.zshrc**, etc.):
 
 ```bash
 export PROTECTED_BRANCHES="main|master|prod|dev|custom-branch"
 ```
-
-5. Restart your terminal or run source on your shell configuration file to load the new functions.
 
 ## Usage
 
