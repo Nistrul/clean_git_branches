@@ -14,7 +14,7 @@ Clean Git Branches is a command-line tool that helps maintain a tidy Git reposit
 install the clean-git-branches script using Homebrew, first tap this repository:
 
 ```bash
-brew tap your-username/clean-git-branches
+brew tap Nistrul/clean-git-branches
 ```
 
 Then, install the clean-git-branches script:
