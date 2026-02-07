@@ -1,13 +1,13 @@
 # Tracker: Integration Test Backlog Execution
 
 - Initiative ID: `INIT-2026-02-shell-script-testing`
-- Scope: Execution tracking for `docs/project-management/integration-test-backlog.md`
+- Scope: Execution tracking for `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/backlog.md`
 - Status: In Progress
 - Last updated: 2026-02-07
 
 ## Tracking Rules
 
-1. Scenario status (`todo|in_progress|done|blocked`) is maintained in `docs/project-management/integration-test-backlog.md`.
+1. Scenario status (`todo|in_progress|done|blocked`) is maintained in `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/backlog.md`.
 2. This tracker logs execution slices, decisions, and handoff notes.
 3. Keep entries chronological and concise.
 

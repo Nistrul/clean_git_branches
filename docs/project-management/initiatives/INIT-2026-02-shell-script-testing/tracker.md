@@ -2,6 +2,7 @@
 
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Status: In Progress
+- Current Feature Focus: `FEAT-001` Deletion workflows and safety gates (`INT-006`, `INT-007`, `INT-008`)
 - Last updated: 2026-02-07
 
 ## Completion Legend
@@ -28,8 +29,8 @@
 - Mocked run helper is at `test/helpers/run-with-mock-git.sh`.
 - Scenarios are in `test/fixtures/mock-git/`.
 - This tracker is the source of truth for what is done vs pending.
-- Prioritized scenario backlog is in `docs/project-management/integration-test-backlog.md`.
-- Backlog execution log is in `docs/project-management/integration-test-backlog-tracker.md`.
+- Prioritized scenario backlog is in `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/backlog.md`.
+- Backlog execution log is in `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/backlog-tracker.md`.
 
 ## Next Actions
 

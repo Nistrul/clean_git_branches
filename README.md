@@ -114,10 +114,16 @@ test/run-tests.sh
 
 ## Project Management
 
-Initiative planning and completion tracking are in:
+Project management entrypoint:
 
-- `docs/project-management/initiative-shell-script-testing.md`
-- `docs/project-management/initiative-shell-script-testing-tracker.md`
+- `docs/project-management/index.md`
+
+Current initiative planning and tracking files:
+
+- `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/initiative.md`
+- `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/tracker.md`
+- `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/backlog.md`
+- `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/backlog-tracker.md`
 
 ## Updating
 
