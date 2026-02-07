@@ -8,4 +8,6 @@ if ! command -v bats >/dev/null 2>&1; then
   exit 127
 fi
 
-bats "$repo_root/test/clean_git_branches.bats"
+bats \
+  "$repo_root/test/clean_git_branches.bats" \
+  "$repo_root/test/clean_git_branches.integration.bats"

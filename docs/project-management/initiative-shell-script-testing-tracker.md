@@ -19,7 +19,7 @@
 5. `[x]` Scaffold Bats test harness.
 6. `[x]` Add first mocked success-path test.
 7. `[x]` Add mocked failure-path tests.
-8. `[ ]` Add real Git integration tests.
+8. `[x]` Add real Git integration tests.
 9. `[ ]` Add CI entrypoint for tests.
 
 ## Working Notes
@@ -31,6 +31,6 @@
 
 ## Next Actions
 
-1. Add real Git integration tests for critical paths.
-2. Add CI entrypoint for automated test execution.
-3. Expand mocked scenarios for additional edge cases as needed.
+1. Add CI entrypoint for automated test execution.
+2. Expand mocked scenarios for additional edge cases as needed.
+3. Add one more integration test for confirmation prompt behavior.

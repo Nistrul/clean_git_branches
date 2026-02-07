@@ -2,14 +2,22 @@
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
-setup() {
+setup_test_env() {
   export TEST_TMPDIR="$(mktemp -d -t clean-git-branches-test.XXXXXX)"
   export MOCK_GIT_LOG="$TEST_TMPDIR/mock-git.log"
   : > "$MOCK_GIT_LOG"
 }
 
-teardown() {
+teardown_test_env() {
   rm -rf "$TEST_TMPDIR"
+}
+
+setup() {
+  setup_test_env
+}
+
+teardown() {
+  teardown_test_env
 }
 
 run_with_mock_scenario() {
