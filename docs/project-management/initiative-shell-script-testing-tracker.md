@@ -28,9 +28,10 @@
 - Mocked run helper is at `test/helpers/run-with-mock-git.sh`.
 - Scenarios are in `test/fixtures/mock-git/`.
 - This tracker is the source of truth for what is done vs pending.
+- Prioritized scenario backlog is in `docs/project-management/integration-test-backlog.md`.
 
 ## Next Actions
 
-1. Add CI entrypoint for automated test execution.
-2. Expand mocked scenarios for additional edge cases as needed.
-3. Add one more integration test for confirmation prompt behavior.
+1. Execute `P0` backlog slice (`INT-003`, `INT-004`, `INT-005`, `INT-011`, `INT-012`, `INT-013`).
+2. Add CI entrypoint for automated test execution.
+3. Execute `P1` classification scenarios from the backlog.
