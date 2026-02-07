@@ -87,6 +87,38 @@ FORCE_DELETE_GONE_BRANCHES=true
 
 Command-line flags (`--force-delete-gone` / `--no-force-delete-gone`) override this config.
 
+## Mocked Git Workflow
+
+Use the included mocked `git` harness when you want to work on output/layout behavior without a real repository:
+
+```bash
+test/helpers/run-with-mock-git.sh test/fixtures/mock-git/default.env --diagnose --no-force-delete-gone
+```
+
+Additional scenarios:
+
+- `test/fixtures/mock-git/no-upstream.env`
+- `test/fixtures/mock-git/delete-failure.env`
+
+The helper prints a log path containing all mocked `git` invocations.
+
+## Testing
+
+Run the automated tests with:
+
+```bash
+test/run-tests.sh
+```
+
+`test/run-tests.sh` executes the Bats suite (`test/clean_git_branches.bats`) and expects `bats` to be installed.
+
+## Project Management
+
+Initiative planning and completion tracking are in:
+
+- `docs/project-management/initiative-shell-script-testing.md`
+- `docs/project-management/initiative-shell-script-testing-tracker.md`
+
 ## Updating
 
 To update the clean-git-branches script to the latest version, run:
