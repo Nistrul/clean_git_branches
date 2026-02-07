@@ -216,7 +216,7 @@ function _clean_git_branches_confirm_force_delete() {
 
   if [ ! -t 0 ]; then
     echo "Force deletion requires confirmation. Re-run with --silent to proceed non-interactively." >&2
-    return 1
+    return 2
   fi
 
   echo >&2
@@ -399,11 +399,15 @@ function clean_git_branches() {
         echo
       fi
     else
+      confirmation_status=$?
       echo -e "\033[1;93mSkipped remote-gone force deletion\033[0m"
       echo "──────────────────────────────────"
       echo "You chose to skip force deletion."
       echo
       show_remote_gone_report=0
+      if [ "$confirmation_status" -eq 2 ]; then
+        return 1
+      fi
     fi
   else
     _clean_git_branches_diagnose "Skipping remote-gone deletions"

@@ -3,6 +3,7 @@
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Status: Active
 - Last updated: 2026-02-07
+- Tracker: `docs/project-management/integration-test-backlog-tracker.md`
 
 ## Prioritization Model
 
@@ -25,17 +26,17 @@
 |---|---|---|---|---|
 | INT-001 | Delete merged unprotected branch in real repo | P0 | S | done |
 | INT-002 | Force-delete remote-gone branch with local bare `origin.git` | P0 | S | done |
-| INT-003 | `--dry-run --force-delete-gone` previews but does not delete | P0 | S | todo |
-| INT-004 | `--no-force-delete-gone` reports gone branches only | P0 | S | todo |
-| INT-005 | Non-interactive force-delete without `--silent` returns confirmation error | P0 | S | todo |
+| INT-003 | `--dry-run --force-delete-gone` previews but does not delete | P0 | S | done |
+| INT-004 | `--no-force-delete-gone` reports gone branches only | P0 | S | done |
+| INT-005 | Non-interactive force-delete without `--silent` returns confirmation error | P0 | S | done |
 | INT-006 | Interactive confirm accepts `DELETE` and deletes gone branches | P0 | M | todo |
 | INT-007 | Interactive confirm with empty input skips deletion | P0 | M | todo |
 | INT-008 | Protected branch in gone state is never force-deleted | P0 | M | todo |
 | INT-009 | Mixed gone set where one delete fails and one succeeds | P0 | M | done |
 | INT-010 | Unknown CLI flag exits non-zero and prints help | P0 | S | done |
-| INT-011 | `.clean_git_branches.conf` true enables deletion in auto mode | P0 | M | todo |
-| INT-012 | CLI `--no-force-delete-gone` overrides config true | P0 | S | todo |
-| INT-013 | CLI `--force-delete-gone` overrides config false | P0 | S | todo |
+| INT-011 | `.clean_git_branches.conf` true enables deletion in auto mode | P0 | M | done |
+| INT-012 | CLI `--no-force-delete-gone` overrides config true | P0 | S | done |
+| INT-013 | CLI `--force-delete-gone` overrides config false | P0 | S | done |
 | INT-014 | Default protected branches (`main|master|prod|dev`) are preserved | P1 | S | todo |
 | INT-015 | Custom `PROTECTED_BRANCHES` prevents deletion of custom protected names | P1 | S | todo |
 | INT-016 | Mixed tracked/untracked/gone/protected branches are classified correctly | P1 | M | todo |
@@ -61,15 +62,12 @@
 
 ## Suggested Execution Order
 
-1. Complete remaining `P0` scenarios (`INT-003` to `INT-013`).
+1. Complete remaining `P0` scenarios (`INT-006`, `INT-007`, `INT-008`).
 2. Execute `P1` correctness/classification scenarios.
 3. Execute `P2` hardening scenarios and decide support boundaries.
 
 ## Sprintable Next Slice
 
-1. `INT-003`
-2. `INT-004`
-3. `INT-005`
-4. `INT-011`
-5. `INT-012`
-6. `INT-013`
+1. `INT-006`
+2. `INT-007`
+3. `INT-008`
