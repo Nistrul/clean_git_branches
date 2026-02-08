@@ -2,7 +2,7 @@
 
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Status: In Progress
-- Current Feature Focus: `FEAT-004` CLI diagnostics (`INT-026`)
+- Current Feature Focus: `FEAT-005` hardening (`INT-029`)
 - Last updated: 2026-02-08
 
 ## Completion Legend
@@ -34,6 +34,6 @@
 
 ## Next Actions
 
-1. Execute `FEAT-004` `P1` scenario (`INT-026`).
-2. Execute next `FEAT-005` or `FEAT-003` small slice (`INT-029` or `INT-035`).
+1. Execute `FEAT-005` `P2` scenario (`INT-029`).
+2. Execute next `FEAT-003` small slice (`INT-035`) or continue `FEAT-005` hardening.
 3. Add CI entrypoint for automated test execution.

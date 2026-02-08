@@ -59,7 +59,7 @@
 | INT-023 | FEAT-002 | Config parse tolerates whitespace/case (`TRUE`, ` yes `) | P1 | S | done |
 | INT-024 | FEAT-002 | Malformed config falls back to safe default behavior | P1 | S | done |
 | INT-025 | FEAT-004 | `--help` includes all supported flags and exits zero | P1 | S | done |
-| INT-026 | FEAT-004 | `--diagnose` emits expected diagnostic lines to stderr | P1 | S | todo |
+| INT-026 | FEAT-004 | `--diagnose` emits expected diagnostic lines to stderr | P1 | S | done |
 | INT-027 | FEAT-001 | `--silent` warning appears only for destructive force-delete mode | P1 | S | done |
 | INT-028 | FEAT-003 | Worktree dirty state does not break classification/deletion flow | P1 | M | done |
 | INT-029 | FEAT-005 | Large branch set executes reliably (stress sanity) | P2 | M | todo |
@@ -73,15 +73,14 @@
 
 ## Suggested Execution Order
 
-1. `FEAT-004` CLI contract and diagnostics
-   - Execute remaining `P1` CLI scenario: `INT-026`.
-   - Schedule low-priority diagnostics UX follow-up: `INT-036`.
-2. `FEAT-005` Hardening and edge-path reliability
+1. `FEAT-005` Hardening and edge-path reliability
    - Execute `P2` hardening scenarios: `INT-029`, `INT-030`, `INT-031`, `INT-032`, `INT-033`, `INT-034`.
-3. `FEAT-003` Branch classification and protection rules
+2. `FEAT-003` Branch classification and protection rules
    - Execute remaining `P2` presentation scenario: `INT-035`.
+3. `FEAT-004` CLI contract and diagnostics
+   - Schedule low-priority diagnostics UX follow-up: `INT-036`.
 
 ## Sprintable Next Slice
 
-1. `FEAT-004`: `INT-026`
-2. `FEAT-005`: `INT-029` (or `INT-035` as an alternative small slice)
+1. `FEAT-005`: `INT-029`
+2. `FEAT-003`: `INT-035` (alternative small slice)
