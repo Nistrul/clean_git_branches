@@ -79,6 +79,7 @@ Bad:
 3. If the agent defers PR creation, it must have a concrete cohesion or sequencing reason and continue until a PR-ready slice boundary is reached.
 4. Keep PRs maximally cohesive: one feature slice (or tightly coupled slices) per PR, with aligned code, tests, and tracker updates.
 5. Process changes and agent-instruction changes (for example, edits to `AGENTS.md`) must be delivered in a separate PR from feature implementation changes.
+6. Documentation-only, tracker-only, and other non-code slices still require creating or updating a PR as the final step before handoff; do not skip PR creation because a change is "docs only."
 
 ## Title Style Rules (Mandatory)
 
