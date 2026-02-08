@@ -12,7 +12,7 @@ Agents can skip workflow steps when instructions are implied instead of explicit
 1. Put high-priority process rules in explicit, top-level instructions.
 2. Use ordered, deterministic checklists before and after implementation work.
 3. Prefer fail-closed gates over best-effort reminders.
-4. Encode required output fields for specific user intents (for example, post-PR progress metrics).
+4. Encode required output fields as default handoff output contracts when process visibility is required (for example, post-PR progress metrics).
 5. Keep examples concrete and imperative so action order is unambiguous.
 
 ## Prompting Pattern We Adopted
@@ -29,7 +29,7 @@ Agents can skip workflow steps when instructions are implied instead of explicit
    - update trackers for delivered/deferred scope
    - create or update PR
    - sync latest `main` into feature branch (prefer rebase), rerun relevant tests, push
-4. User-requested post-PR reporting:
+4. Default post-PR reporting in handoff:
    - initiative completion percentage
    - features complete vs remaining
    - active initiative count and next initiative (or explicitly none)
@@ -55,7 +55,7 @@ Use this structure when adding new mandatory process rules.
 4. Close-out: Before handoff, always:
    - <verification step 1>
    - <verification step 2>
-5. Output contract: If user asks for <report type>, include:
+5. Output contract: If required by repository workflow, include:
    - <required metric 1>
    - <required metric 2>
 ```
