@@ -21,6 +21,21 @@ git status --short
 git commit -m "<clear message>"
 ```
 
+## Sandbox Command Policy (Mandatory)
+
+1. Always start commands with the actual executable token.
+2. Do not prefix commands with inline environment-variable assignments.
+3. Do not wrap commands in `sh -c` / `bash -lc` unless explicitly required.
+
+Good:
+- `git -c core.editor=true rebase --continue`
+
+Bad:
+- `GIT_EDITOR=true git rebase --continue`
+- `VAR=1 cmd ...`
+- `sh -c "<command>"`
+- `bash -lc "<command>"`
+
 ## Feature Branch and Merge Strategy (Mandatory)
 
 1. Create the feature branch before making any code or documentation changes for that slice.
