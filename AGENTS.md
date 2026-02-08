@@ -42,6 +42,7 @@ git commit -m "<clear message>"
 8. Use squash merge into `main` for feature branches so main history stays cohesive and readable.
 9. If scope expands mid-branch, stop and split remaining work into a new branch and backlog slice.
 10. End each completed slice with a pull request (create a new PR or update an existing PR for that branch) before handoff.
+11. After creating or updating a PR, sync the latest `main` into the feature branch (prefer rebase), resolve conflicts, rerun relevant tests, and push the updated branch before handoff.
 
 ## Pull Request Formatting Rules (Mandatory)
 
