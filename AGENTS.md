@@ -10,7 +10,10 @@ This file defines repository-level operating rules for coding agents and contrib
 2. Never run `git add` and `git commit` in parallel tool calls or parallel shell segments.
 3. Before committing, confirm intended files with `git status --short`.
 4. Stage explicitly (path-based), then commit in a separate command.
-5. If `.git/index.lock` exists, stop, resolve lock state safely, then continue sequentially.
+5. Run all Git commands sequentially; do not execute multiple Git commands in parallel tool calls or parallel shell segments.
+6. If a Git command fails with `.git/index.lock` present (or lock-related error), assume another Git process is active and re-run the same command after a short wait.
+7. Do not assume a lock is stale by default. Only treat it as stale after confirming no active Git process is running.
+8. Never delete `.git/index.lock` preemptively; remove it only when explicitly confirmed stale.
 
 Recommended commit sequence:
 
@@ -20,6 +23,21 @@ git add <explicit-file-paths>
 git status --short
 git commit -m "<clear message>"
 ```
+
+## Sandbox Command Policy (Mandatory)
+
+1. Always start commands with the actual executable token.
+2. Do not prefix commands with inline environment-variable assignments.
+3. Do not wrap commands in `sh -c` / `bash -lc` unless explicitly required.
+
+Good:
+- `git -c core.editor=true rebase --continue`
+
+Bad:
+- `GIT_EDITOR=true git rebase --continue`
+- `VAR=1 cmd ...`
+- `sh -c "<command>"`
+- `bash -lc "<command>"`
 
 ## Feature Branch and Merge Strategy (Mandatory)
 
