@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [ -n "${MOCK_GIT_LOG:-}" ]; then
+  printf '%s\n' "$*" >> "$MOCK_GIT_LOG"
+fi
+
+fail_for_branches="${MOCK_GIT_FAIL_FORCE_DELETE_BRANCHES:-}"
+
+contains_word() {
+  local needle="$1"
+  local haystack="$2"
+  local item
+  for item in $haystack; do
+    if [ "$item" = "$needle" ]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+cmd="${1:-}"
+if [ -z "$cmd" ]; then
+  echo "mock git: missing command" >&2
+  exit 1
+fi
+shift || true
+
+case "$cmd" in
+  rev-parse)
+    if [ "${1:-}" = "--show-toplevel" ]; then
+      echo "${MOCK_GIT_TOPLEVEL:-$PWD}"
+      exit 0
+    fi
+
+    if [ "${1:-}" = "--abbrev-ref" ] && [ "${2:-}" = "--symbolic-full-name" ] && [ "${3:-}" = "@{upstream}" ]; then
+      if [ -n "${MOCK_GIT_UPSTREAM_FAIL:-}" ] || [ -z "${MOCK_GIT_UPSTREAM:-}" ]; then
+        exit 128
+      fi
+      echo "$MOCK_GIT_UPSTREAM"
+      exit 0
+    fi
+    ;;
+
+  status)
+    if [ "${1:-}" = "-sb" ]; then
+      echo "${MOCK_GIT_STATUS_SB:-## main...origin/main}"
+      exit 0
+    fi
+    ;;
+
+  branch)
+    case "${1:-}" in
+      --show-current)
+        echo "${MOCK_GIT_BRANCH_CURRENT:-main}"
+        exit 0
+        ;;
+
+      --merged)
+        printf '%b\n' "${MOCK_GIT_BRANCH_MERGED:-* main\n  feature/old}"
+        exit 0
+        ;;
+
+      -vv)
+        printf '%b\n' "${MOCK_GIT_BRANCH_VV:-* main 1111111 [origin/main] main\n  feature/gone 2222222 [origin/feature/gone: gone] removed upstream\n  feature/tracked 3333333 [origin/feature/tracked] tracked branch\n  local-only 4444444 local only}"
+        exit 0
+        ;;
+
+      -d)
+        shift || true
+        for branch in "$@"; do
+          echo "Deleted branch $branch (was deadbee)."
+        done
+        exit 0
+        ;;
+
+      -D)
+        shift || true
+        branch="${1:-}"
+        if [ -z "$branch" ]; then
+          echo "mock git: missing branch name for -D" >&2
+          exit 1
+        fi
+
+        if contains_word "$branch" "$fail_for_branches"; then
+          echo "error: could not delete $branch" >&2
+          exit 1
+        fi
+
+        echo "Deleted branch $branch (was deadbee)."
+        exit 0
+        ;;
+    esac
+    ;;
+esac
+
+echo "mock git: unsupported invocation: git $cmd $*" >&2
+exit 1
