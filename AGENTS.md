@@ -21,6 +21,27 @@ git status --short
 git commit -m "<clear message>"
 ```
 
+## Feature Branch and Merge Strategy (Mandatory)
+
+1. Create the feature branch before making any code or documentation changes for that slice.
+2. Branch from `main` for each feature slice; do not combine unrelated features on one branch.
+3. Align branch scope to one backlog slice under one feature (or a tightly coupled pair of slices).
+4. Keep branches cohesive and small:
+   - target 1-3 focused commits
+   - target completion within 1-2 working days
+   - if a branch grows beyond ~300 net lines changed or multiple unrelated filesets, split it
+5. Branch naming must map to planning artifacts:
+   - format: `feat/<initiative-id>/<feature-id>-<short-slug>`
+   - example: `feat/INIT-2026-02-shell-script-testing/FEAT-001-delete-safety-gates`
+6. Before merge, if the branch is out of date with `main`, rebase onto `main`, resolve conflicts, and rerun relevant tests.
+7. Merge only when all are true:
+   - linked backlog items are `done`
+   - acceptance checks/tests pass locally
+   - trackers are updated in the same change set
+   - commit message(s) match delivered scope
+8. Use squash merge into `main` for feature branches so main history stays cohesive and readable.
+9. If scope expands mid-branch, stop and split remaining work into a new branch and backlog slice.
+
 ## Project Management Approach (Best Practice)
 
 Use a three-layer tracking model with clear separation of concerns:
@@ -31,10 +52,12 @@ Use a three-layer tracking model with clear separation of concerns:
 
 Current project-management files:
 
-1. `docs/project-management/initiative-shell-script-testing.md`
-2. `docs/project-management/initiative-shell-script-testing-tracker.md`
-3. `docs/project-management/integration-test-backlog.md`
-4. `docs/project-management/integration-test-backlog-tracker.md`
+1. `docs/project-management/index.md`
+2. `docs/project-management/strategy.md`
+3. `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/initiative.md`
+4. `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/tracker.md`
+5. `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/backlog.md`
+6. `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/backlog-tracker.md`
 
 ## Tracking Hygiene Rules (Mandatory)
 
