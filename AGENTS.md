@@ -19,8 +19,7 @@ This file defines repository-level operating rules for coding agents and contrib
    - do not continue on a branch that mixes unrelated slices
 4. Before handoff, run an execution-close checklist:
    - ensure tracking docs reflect the delivered or deferred scope
-   - create/update PR for the slice
-   - sync latest `main` into the branch (prefer rebase), rerun relevant tests, and push
+   - apply PR creation/update and post-PR sync rules defined below (see Feature Branch and Pull Request sections)
 5. If the user asks for post-PR progress reporting, include:
    - initiative completion percentage
    - features complete vs remaining
@@ -132,13 +131,8 @@ Use a three-layer tracking model with clear separation of concerns:
 
 Current project-management files:
 
-1. `docs/project-management/index.md`
-2. `docs/project-management/strategy.md`
-3. `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/initiative.md`
-4. `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/tracker.md`
-5. `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/backlog.md`
-6. `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/backlog-tracker.md`
-7. `docs/project-management/agent-prompting-research.md`
+1. `docs/project-management/index.md` (source of truth for planning/tracking file locations)
+2. `docs/project-management/agent-prompting-research.md` (mandatory reference when adjusting workflow/process rules)
 
 ## Tracking Hygiene Rules (Mandatory)
 
