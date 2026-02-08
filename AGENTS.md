@@ -4,6 +4,28 @@
 
 This file defines repository-level operating rules for coding agents and contributors.
 
+## Prompt Intake Workflow (Mandatory)
+
+1. On every new user request, run a pre-flight workflow before making any non-read command:
+   - classify request type (`implement`, `review`, `research`, `docs/process`)
+   - run `git status --short --branch`
+   - confirm current branch is correct for the requested slice
+2. If branch/scope is wrong, stop and fix workflow first:
+   - stash or commit in-progress unrelated work
+   - switch to `main`, fast-forward, create a correctly scoped feature branch
+   - only then start file edits
+3. Fail closed on workflow checks:
+   - do not start implementation while branch alignment is unresolved
+   - do not continue on a branch that mixes unrelated slices
+4. Before handoff, run an execution-close checklist:
+   - ensure tracking docs reflect the delivered or deferred scope
+   - create/update PR for the slice
+   - sync latest `main` into the branch (prefer rebase), rerun relevant tests, and push
+5. If the user asks for post-PR progress reporting, include:
+   - initiative completion percentage
+   - features complete vs remaining
+   - active initiative count and next initiative (or clearly state none is defined)
+
 ## Git Workflow Rules (Mandatory)
 
 1. Run Git staging and commit steps sequentially.
