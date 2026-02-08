@@ -54,14 +54,14 @@
 | INT-018 | FEAT-003 | Branch names with slashes (`feature/a/b`) behave correctly | P1 | S | done |
 | INT-019 | FEAT-003 | Branch names with dots/dashes/underscores behave correctly | P1 | S | done |
 | INT-020 | FEAT-003 | Current branch with no upstream continues gracefully | P1 | S | done |
-| INT-021 | FEAT-003 | Detached HEAD does not crash and still reports branch sections safely | P1 | M | todo |
-| INT-022 | FEAT-003 | Run from subdirectory within repo; behavior remains correct | P1 | S | todo |
+| INT-021 | FEAT-003 | Detached HEAD does not crash and still reports branch sections safely | P1 | M | done |
+| INT-022 | FEAT-003 | Run from subdirectory within repo; behavior remains correct | P1 | S | done |
 | INT-023 | FEAT-002 | Config parse tolerates whitespace/case (`TRUE`, ` yes `) | P1 | S | todo |
 | INT-024 | FEAT-002 | Malformed config falls back to safe default behavior | P1 | S | todo |
 | INT-025 | FEAT-004 | `--help` includes all supported flags and exits zero | P1 | S | done |
 | INT-026 | FEAT-004 | `--diagnose` emits expected diagnostic lines to stderr | P1 | S | todo |
 | INT-027 | FEAT-001 | `--silent` warning appears only for destructive force-delete mode | P1 | S | done |
-| INT-028 | FEAT-003 | Worktree dirty state does not break classification/deletion flow | P1 | M | todo |
+| INT-028 | FEAT-003 | Worktree dirty state does not break classification/deletion flow | P1 | M | done |
 | INT-029 | FEAT-005 | Large branch set executes reliably (stress sanity) | P2 | M | todo |
 | INT-030 | FEAT-005 | Branch names with spaces are handled or explicitly documented unsupported | P2 | L | todo |
 | INT-031 | FEAT-005 | Unicode branch names are handled or documented unsupported | P2 | M | todo |
@@ -73,7 +73,7 @@
 ## Suggested Execution Order
 
 1. `FEAT-003` Branch classification and protection rules
-   - Execute remaining `P1` correctness/classification scenarios: `INT-021`, `INT-022`, `INT-028`.
+   - Execute remaining `P2` presentation scenario: `INT-035`.
 2. `FEAT-002` Configuration parsing and precedence
    - Execute remaining `P1` config scenarios: `INT-023`, `INT-024`.
 3. `FEAT-004` CLI contract and diagnostics
@@ -85,4 +85,4 @@
 
 ## Sprintable Next Slice
 
-1. `FEAT-003`: `INT-021`, `INT-022`, `INT-028`
+1. `FEAT-002`: `INT-023`, `INT-024`
