@@ -3,6 +3,7 @@
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Status: In Progress
 - Current Feature Focus: `FEAT-002` Configuration parsing and precedence (`INT-023`, `INT-024`)
+- Current Feature Focus: `FEAT-002` Configuration parsing and precedence (`INT-023`, `INT-024`) and `FEAT-004` CLI diagnostics (`INT-026`)
 - Last updated: 2026-02-08
 
 ## Completion Legend
