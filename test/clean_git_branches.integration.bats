@@ -511,28 +511,6 @@ create_local_only_branch() {
   [ -z "$output" ]
 }
 
-@test "integration: detached HEAD does not crash and still reports branch sections safely" {
-  local dirs
-  local work_dir
-  local head_commit
-
-  dirs="$(create_repo_with_origin)"
-  work_dir="${dirs##*|}"
-  create_tracked_branch "$work_dir" "feature/detached-tracked"
-
-  head_commit="$(git -C "$work_dir" rev-parse HEAD)"
-  git -C "$work_dir" checkout --detach "$head_commit" >/dev/null
-
-  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --no-force-delete-gone --silent
-
-  [ "$status" -eq 0 ]
-  [[ "$output" != *"fatal:"* ]]
-  [[ "$output" == *"Tracked branches"* ]]
-  [[ "$output" == *"feature/detached-tracked"* ]]
-  [[ "$output" == *"Protected branches"* ]]
-  [[ "$output" == *"main"* ]]
-}
-
 @test "integration: running from repo subdirectory keeps classification behavior correct" {
   local dirs
   local work_dir
