@@ -65,7 +65,7 @@
 | INT-028 | FEAT-003 | Worktree dirty state does not break classification/deletion flow | P1 | M | done |
 | INT-029 | FEAT-005 | Large branch set executes reliably (stress sanity) | P2 | M | done |
 | INT-030 | FEAT-005 | Branch names with spaces are handled or explicitly documented unsupported | P2 | L | done |
-| INT-031 | FEAT-005 | Unicode branch names are handled or documented unsupported | P2 | M | todo |
+| INT-031 | FEAT-005 | Unicode branch names are handled or documented unsupported | P2 | M | done |
 | INT-032 | FEAT-005 | `git rev-parse --show-toplevel` failure fallback path stays safe | P2 | M | todo |
 | INT-033 | FEAT-005 | `git branch -vv` failure path exits predictably | P2 | M | todo |
 | INT-034 | FEAT-005 | Remote fetch/prune timing edge still leaves deterministic assertions | P2 | M | todo |
@@ -76,7 +76,7 @@
 ## Suggested Execution Order
 
 1. `FEAT-005` Hardening and edge-path reliability
-   - Execute `P2` hardening scenarios: `INT-029`, `INT-030`, `INT-031`, `INT-032`, `INT-033`, `INT-034`.
+   - Execute remaining `P2` hardening scenarios: `INT-032`, `INT-033`, `INT-034`.
 2. `FEAT-003` Branch classification and protection rules
    - Execute remaining `P2` presentation scenario: `INT-035`.
 3. `FEAT-004` CLI contract and diagnostics
@@ -86,6 +86,6 @@
 
 ## Sprintable Next Slice
 
-1. `FEAT-005`: `INT-031`
+1. `FEAT-005`: `INT-032`
 2. `FEAT-003`: `INT-035` (alternative small slice)
 3. `FEAT-006`: `INT-037` (request-driven reporting slice)

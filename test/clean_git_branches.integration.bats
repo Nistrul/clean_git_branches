@@ -402,6 +402,32 @@ create_local_only_branch() {
   [ -z "$output" ]
 }
 
+@test "integration: unicode branch names are handled correctly" {
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+
+  create_tracked_branch "$work_dir" "feature/unicode-ßeta"
+  create_local_only_branch "$work_dir" "feature/unicode-東京-local"
+  create_gone_branch "$work_dir" "feature/unicode-gone-ñ"
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --force-delete-gone --silent
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Deleted remote-gone branches"* ]]
+  [[ "$output" == *"feature/unicode-gone-ñ"* ]]
+  [[ "$output" == *"Tracked branches"* ]]
+  [[ "$output" == *"feature/unicode-ßeta"* ]]
+  [[ "$output" == *"Untracked branches"* ]]
+  [[ "$output" == *"feature/unicode-東京-local"* ]]
+
+  run git -C "$work_dir" branch --list "feature/unicode-gone-ñ"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
 @test "integration: detached HEAD does not crash and still reports branch sections safely" {
   local dirs
   local work_dir
