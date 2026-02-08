@@ -69,11 +69,13 @@
 | INT-033 | FEAT-005 | `git branch -vv` failure path exits predictably | P2 | M | todo |
 | INT-034 | FEAT-005 | Remote fetch/prune timing edge still leaves deterministic assertions | P2 | M | todo |
 | INT-035 | FEAT-003 | Section headers only render when corresponding section has content | P2 | S | todo |
+| INT-036 | FEAT-004 | Replace `--diagnose` with `--verbose` and present richer formatted diagnostics | P2 | M | todo |
 
 ## Suggested Execution Order
 
 1. `FEAT-004` CLI contract and diagnostics
    - Execute remaining `P1` CLI scenario: `INT-026`.
+   - Schedule low-priority diagnostics UX follow-up: `INT-036`.
 2. `FEAT-005` Hardening and edge-path reliability
    - Execute `P2` hardening scenarios: `INT-029`, `INT-030`, `INT-031`, `INT-032`, `INT-033`, `INT-034`.
 3. `FEAT-003` Branch classification and protection rules
