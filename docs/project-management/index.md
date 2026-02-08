@@ -5,6 +5,7 @@ This directory is the entrypoint for planning and execution tracking.
 ## Standards
 
 1. Strategy and process: `docs/project-management/strategy.md`
+2. Agent workflow prompting research: `docs/project-management/agent-prompting-research.md`
 
 ## Active Initiatives
 

@@ -1,0 +1,77 @@
+# Agent Prompting Research: Workflow Reliability
+
+- Last updated: 2026-02-08
+- Purpose: Document prompt patterns that reduce workflow misses (branching, PR sequencing, and handoff checks).
+
+## Problem
+
+Agents can skip workflow steps when instructions are implied instead of explicit (for example: editing before branch alignment, or handing off before PR/rebase checks).
+
+## Findings
+
+1. Put high-priority process rules in explicit, top-level instructions.
+2. Use ordered, deterministic checklists before and after implementation work.
+3. Prefer fail-closed gates over best-effort reminders.
+4. Encode required output fields for specific user intents (for example, post-PR progress metrics).
+5. Keep examples concrete and imperative so action order is unambiguous.
+
+## Prompting Pattern We Adopted
+
+1. Intake pre-flight on every request:
+   - classify request type
+   - run `git status --short --branch`
+   - verify branch/scope alignment before any non-read command
+2. If alignment fails:
+   - stop implementation
+   - move/shelve unrelated work
+   - branch from updated `main` using naming convention
+3. Close-out checklist before handoff:
+   - update trackers for delivered/deferred scope
+   - create or update PR
+   - sync latest `main` into feature branch (prefer rebase), rerun relevant tests, push
+4. User-requested post-PR reporting:
+   - initiative completion percentage
+   - features complete vs remaining
+   - active initiative count and next initiative (or explicitly none)
+
+## Repository Mapping
+
+The above pattern is enforced in `AGENTS.md` under `Prompt Intake Workflow (Mandatory)`.
+
+## Template: Writing Future `AGENTS.md` Rules
+
+Use this structure when adding new mandatory process rules.
+
+```md
+## <Rule Section Name> (Mandatory)
+
+1. Trigger: On every <event>, run:
+   - <explicit command/check 1>
+   - <explicit command/check 2>
+2. Gate: If <condition fails>, stop and do:
+   - <recovery step 1>
+   - <recovery step 2>
+3. Prohibition: Do not <unsafe/ambiguous behavior>.
+4. Close-out: Before handoff, always:
+   - <verification step 1>
+   - <verification step 2>
+5. Output contract: If user asks for <report type>, include:
+   - <required metric 1>
+   - <required metric 2>
+```
+
+### Rule Quality Checklist
+
+1. Is the trigger explicit and testable?
+2. Are commands concrete (no implied steps)?
+3. Does the rule fail closed when checks fail?
+4. Is prohibited behavior stated directly?
+5. Is there a close-out checklist before handoff?
+6. If reporting is required, are fields enumerated?
+7. Is wording imperative and unambiguous?
+
+## References
+
+1. OpenAI Prompt Engineering Guide: https://platform.openai.com/docs/guides/prompt-engineering
+2. OpenAI Model Spec: https://model-spec.openai.com/
+3. OpenAI Cookbook prompting examples: https://cookbook.openai.com/examples/gpt-5/gpt-5_prompting_guide
