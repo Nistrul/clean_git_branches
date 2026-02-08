@@ -21,6 +21,7 @@ Agents can skip workflow steps when instructions are implied instead of explicit
    - classify request type
    - run `git status --short --branch`
    - verify branch/scope alignment before any non-read command
+   - treat "still on previous feature branch" as a normal start state; run routine alignment to `main` + new scoped branch
 2. If alignment fails:
    - stop implementation
    - move/shelve unrelated work

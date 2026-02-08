@@ -10,6 +10,7 @@ This file defines repository-level operating rules for coding agents and contrib
    - classify request type (`implement`, `review`, `research`, `docs/process`)
    - run `git status --short --branch`
    - confirm current branch is correct for the requested slice
+   - expected baseline: starting a new slice from the previous feature branch is normal; treat switching to `main`, updating, and branching as routine alignment
 2. If branch/scope is wrong, stop and fix workflow first:
    - stash or commit in-progress unrelated work
    - switch to `main`, fast-forward, create a correctly scoped feature branch
