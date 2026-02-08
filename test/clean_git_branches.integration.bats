@@ -154,6 +154,65 @@ create_gone_branch() {
   [[ "$output" == *"feature/non-interactive"* ]]
 }
 
+@test "integration: interactive confirm accepts DELETE and deletes gone branches" {
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+  create_gone_branch "$work_dir" "feature/interactive-delete"
+
+  run bash -c "printf 'DELETE\\n' | CLEAN_GIT_BRANCHES_ASSUME_TTY=1 '$repo_root/test/helpers/run-in-repo.sh' '$work_dir' --force-delete-gone"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Type DELETE to continue, or press Enter to skip:"* ]]
+  [[ "$output" == *"Deleted remote-gone branches"* ]]
+  [[ "$output" == *"feature/interactive-delete"* ]]
+
+  run git -C "$work_dir" branch --list feature/interactive-delete
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "integration: interactive confirm with empty input skips deletion" {
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+  create_gone_branch "$work_dir" "feature/interactive-skip"
+
+  run bash -c "printf '\\n' | CLEAN_GIT_BRANCHES_ASSUME_TTY=1 '$repo_root/test/helpers/run-in-repo.sh' '$work_dir' --force-delete-gone"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Type DELETE to continue, or press Enter to skip:"* ]]
+  [[ "$output" == *"Skipped remote-gone force deletion"* ]]
+
+  run git -C "$work_dir" branch --list feature/interactive-skip
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"feature/interactive-skip"* ]]
+}
+
+@test "integration: protected gone branch is never force deleted" {
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+  create_gone_branch "$work_dir" "dev"
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --force-delete-gone --silent
+
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"Deleted remote-gone branches"* ]]
+  [[ "$output" == *"Remote-gone branches (not deleted)"* ]]
+  [[ "$output" == *"dev"* ]]
+
+  run git -C "$work_dir" branch --list dev
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"dev"* ]]
+}
+
 @test "integration: config true enables force delete in auto mode" {
   local dirs
   local work_dir
