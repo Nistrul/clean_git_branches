@@ -97,7 +97,7 @@ function _clean_git_branches_load_delete_gone_default() {
 
   DELETE_GONE_DEFAULT=0
   if [ -f "$config_file" ]; then
-    config_value=$(grep -E '^[[:space:]]*FORCE_DELETE_GONE_BRANCHES=' "$config_file" | tail -n 1 | cut -d '=' -f 2- | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
+    config_value=$(grep -E '^[[:space:]]*FORCE_DELETE_GONE_BRANCHES[[:space:]]*=' "$config_file" | tail -n 1 | cut -d '=' -f 2- | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
     if [ "$config_value" = "true" ] || [ "$config_value" = "1" ] || [ "$config_value" = "yes" ]; then
       DELETE_GONE_DEFAULT=1
     fi

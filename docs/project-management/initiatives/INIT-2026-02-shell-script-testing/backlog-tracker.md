@@ -36,8 +36,11 @@
 12. Completed `FEAT-003` remaining `P1` slice: `INT-021`, `INT-022`, `INT-028`.
 13. Added integration coverage for detached HEAD stability, subdirectory execution behavior, and dirty worktree flow safety.
 14. Verified full suite passes via `test/run-tests.sh` (25 tests).
+15. Completed `FEAT-002` remaining `P1` slice: `INT-023`, `INT-024`.
+16. Added integration coverage for tolerant config parsing of whitespace/case true-like values and malformed-value safe fallback behavior.
+17. Verified full suite passes via `test/run-tests.sh` (27 tests).
 
 ## Current Focus
 
-1. Execute `FEAT-002` remaining `P1` scenarios (`INT-023`, `INT-024`).
-2. Execute `FEAT-004` remaining `P1` scenario (`INT-026`).
+1. Execute `FEAT-004` remaining `P1` scenario (`INT-026`).
+2. Execute `FEAT-005` next hardening slice (`INT-029`) or `FEAT-003` presentation slice (`INT-035`).

@@ -511,6 +511,47 @@ create_local_only_branch() {
   [ -z "$output" ]
 }
 
+@test "integration: config parsing tolerates whitespace and case for true-like values" {
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+  create_gone_branch "$work_dir" "feature/config-whitespace-case"
+  echo " FORCE_DELETE_GONE_BRANCHES =  YeS  " > "$work_dir/.clean_git_branches.conf"
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --silent
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Deleted remote-gone branches"* ]]
+  [[ "$output" == *"feature/config-whitespace-case"* ]]
+
+  run git -C "$work_dir" branch --list feature/config-whitespace-case
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "integration: malformed config value falls back to safe default behavior" {
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+  create_gone_branch "$work_dir" "feature/config-malformed"
+  echo "FORCE_DELETE_GONE_BRANCHES=definitely-not-a-boolean" > "$work_dir/.clean_git_branches.conf"
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --silent
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Remote-gone branches (deletion disabled)"* ]]
+  [[ "$output" == *"feature/config-malformed"* ]]
+  [[ "$output" != *"Deleted remote-gone branches"* ]]
+
+  run git -C "$work_dir" branch --list feature/config-malformed
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"feature/config-malformed"* ]]
+}
+
 @test "integration: running from repo subdirectory keeps classification behavior correct" {
   local dirs
   local work_dir

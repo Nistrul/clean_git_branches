@@ -56,8 +56,8 @@
 | INT-020 | FEAT-003 | Current branch with no upstream continues gracefully | P1 | S | done |
 | INT-021 | FEAT-003 | Detached HEAD does not crash and still reports branch sections safely | P1 | M | done |
 | INT-022 | FEAT-003 | Run from subdirectory within repo; behavior remains correct | P1 | S | done |
-| INT-023 | FEAT-002 | Config parse tolerates whitespace/case (`TRUE`, ` yes `) | P1 | S | todo |
-| INT-024 | FEAT-002 | Malformed config falls back to safe default behavior | P1 | S | todo |
+| INT-023 | FEAT-002 | Config parse tolerates whitespace/case (`TRUE`, ` yes `) | P1 | S | done |
+| INT-024 | FEAT-002 | Malformed config falls back to safe default behavior | P1 | S | done |
 | INT-025 | FEAT-004 | `--help` includes all supported flags and exits zero | P1 | S | done |
 | INT-026 | FEAT-004 | `--diagnose` emits expected diagnostic lines to stderr | P1 | S | todo |
 | INT-027 | FEAT-001 | `--silent` warning appears only for destructive force-delete mode | P1 | S | done |
@@ -72,16 +72,14 @@
 
 ## Suggested Execution Order
 
-1. `FEAT-002` Configuration parsing and precedence
-   - Execute remaining `P1` config scenarios: `INT-023`, `INT-024`.
-2. `FEAT-004` CLI contract and diagnostics
+1. `FEAT-004` CLI contract and diagnostics
    - Execute remaining `P1` CLI scenario: `INT-026`.
-3. `FEAT-005` Hardening and edge-path reliability
+2. `FEAT-005` Hardening and edge-path reliability
    - Execute `P2` hardening scenarios: `INT-029`, `INT-030`, `INT-031`, `INT-032`, `INT-033`, `INT-034`.
-4. `FEAT-003` Branch classification and protection rules
+3. `FEAT-003` Branch classification and protection rules
    - Execute remaining `P2` presentation scenario: `INT-035`.
 
 ## Sprintable Next Slice
 
-1. `FEAT-002`: `INT-023`, `INT-024`
-2. `FEAT-004`: `INT-026`
+1. `FEAT-004`: `INT-026`
+2. `FEAT-005`: `INT-029` (or `INT-035` as an alternative small slice)

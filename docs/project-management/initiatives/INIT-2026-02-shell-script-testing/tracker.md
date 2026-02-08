@@ -2,8 +2,7 @@
 
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Status: In Progress
-- Current Feature Focus: `FEAT-002` Configuration parsing and precedence (`INT-023`, `INT-024`)
-- Current Feature Focus: `FEAT-002` Configuration parsing and precedence (`INT-023`, `INT-024`) and `FEAT-004` CLI diagnostics (`INT-026`)
+- Current Feature Focus: `FEAT-004` CLI diagnostics (`INT-026`)
 - Last updated: 2026-02-08
 
 ## Completion Legend
@@ -35,6 +34,6 @@
 
 ## Next Actions
 
-1. Execute next `FEAT-002` `P1` slice (`INT-023`, `INT-024`).
-2. Execute `FEAT-004` `P1` scenario (`INT-026`) after config parsing slice.
+1. Execute `FEAT-004` `P1` scenario (`INT-026`).
+2. Execute next `FEAT-005` or `FEAT-003` small slice (`INT-029` or `INT-035`).
 3. Add CI entrypoint for automated test execution.
