@@ -53,6 +53,14 @@ git commit -m "<clear message>"
 4. After create/edit, verify rendered formatting with `gh pr view <number>` before handoff.
 5. If formatting is wrong, immediately fix with `gh pr edit` and re-verify.
 
+## Pull Request Decision Rules (Mandatory)
+
+1. The agent decides when to create or update a pull request; do not ask for approval on routine PR timing.
+2. After completing a slice, the default action is to create a new PR or update the existing PR for that branch before handoff.
+3. If the agent defers PR creation, it must have a concrete cohesion or sequencing reason and continue until a PR-ready slice boundary is reached.
+4. Keep PRs maximally cohesive: one feature slice (or tightly coupled slices) per PR, with aligned code, tests, and tracker updates.
+5. Process changes and agent-instruction changes (for example, edits to `AGENTS.md`) must be delivered in a separate PR from feature implementation changes.
+
 ## Title Style Rules (Mandatory)
 
 1. Write commit subjects and PR titles in imperative mood.
