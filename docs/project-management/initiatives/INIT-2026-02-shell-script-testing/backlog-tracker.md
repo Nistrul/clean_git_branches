@@ -64,8 +64,11 @@
 40. Completed next `FEAT-005` `P2` hardening slice: `INT-034`.
 41. Added integration coverage for remote delete timing around local ref state: pre-prune run remains tracked/report-only deterministic, post-prune run deterministically reports remote-gone.
 42. Verified full suite passes via `test/run-tests.sh` (36 tests).
+43. Completed `FEAT-003` `P2` presentation slice: `INT-035`.
+44. Added integration coverage asserting section headers only render when corresponding sections have content.
+45. Verified full suite passes via `test/run-tests.sh` (37 tests).
 
 ## Current Focus
 
-1. Execute `FEAT-003` presentation slice (`INT-035`).
-2. Execute `FEAT-006` handoff progress reporting slice (`INT-037`) when requested.
+1. Execute `FEAT-006` handoff progress reporting slice (`INT-037`) when requested.
+2. Execute `FEAT-004` diagnostics UX follow-up slice (`INT-036`).

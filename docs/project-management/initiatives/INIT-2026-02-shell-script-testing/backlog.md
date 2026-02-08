@@ -69,21 +69,18 @@
 | INT-032 | FEAT-005 | `git rev-parse --show-toplevel` failure fallback path stays safe | P2 | M | done |
 | INT-033 | FEAT-005 | `git branch -vv` failure path exits predictably | P2 | M | done |
 | INT-034 | FEAT-005 | Remote fetch/prune timing edge still leaves deterministic assertions | P2 | M | done |
-| INT-035 | FEAT-003 | Section headers only render when corresponding section has content | P2 | S | todo |
+| INT-035 | FEAT-003 | Section headers only render when corresponding section has content | P2 | S | done |
 | INT-036 | FEAT-004 | Replace `--diagnose` with `--verbose` and present richer formatted diagnostics | P2 | M | todo |
 | INT-037 | FEAT-006 | After PR creation, report initiative completeness %, completed vs remaining features, total initiatives, and next initiative before handoff | P1 | S | todo |
 
 ## Suggested Execution Order
 
-1. `FEAT-003` Branch classification and protection rules
-   - Execute remaining `P2` presentation scenario: `INT-035`.
+1. `FEAT-006` PR handoff progress reporting
+   - Implement post-PR handoff summary metrics and initiative sequencing: `INT-037`.
 2. `FEAT-004` CLI contract and diagnostics
    - Schedule low-priority diagnostics UX follow-up: `INT-036`.
-3. `FEAT-006` PR handoff progress reporting
-   - Implement post-PR handoff summary metrics and initiative sequencing: `INT-037`.
 
 ## Sprintable Next Slice
 
-1. `FEAT-003`: `INT-035`
-2. `FEAT-006`: `INT-037` (request-driven reporting slice)
-3. `FEAT-004`: `INT-036` (diagnostics UX follow-up)
+1. `FEAT-006`: `INT-037` (request-driven reporting slice)
+2. `FEAT-004`: `INT-036` (diagnostics UX follow-up)

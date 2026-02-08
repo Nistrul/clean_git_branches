@@ -769,6 +769,23 @@ EOF
   [[ "$output" == *"README.md"* ]]
 }
 
+@test "integration: section headers render only when their sections have content" {
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+
+  run bash -c "PROTECTED_BRANCHES='^$' '$repo_root/test/helpers/run-in-repo.sh' '$work_dir' --no-force-delete-gone --silent"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"Deleted merged branches"* ]]
+  [[ "$output" != *"Untracked branches"* ]]
+  [[ "$output" != *"Remote-gone branches"* ]]
+  [[ "$output" != *"Tracked branches"* ]]
+  [[ "$output" != *"Protected branches"* ]]
+}
+
 @test "integration: large branch set executes reliably with mixed branch classes" {
   local dirs
   local work_dir
