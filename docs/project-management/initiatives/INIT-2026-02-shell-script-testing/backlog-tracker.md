@@ -3,7 +3,7 @@
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Scope: Execution tracking for `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/backlog.md`
 - Status: In Progress
-- Last updated: 2026-02-07
+- Last updated: 2026-02-08
 
 ## Tracking Rules
 
@@ -20,7 +20,15 @@
 3. Updated confirmation flow so non-interactive force-delete without `--silent` exits non-zero.
 4. Deferred higher-work `P0` scenarios for next pass: `INT-006`, `INT-007`, `INT-008`.
 
+### 2026-02-08
+
+1. Completed remaining `P0` slice: `INT-006`, `INT-007`, `INT-008`.
+2. Added integration coverage for interactive confirmation accept (`DELETE`) and skip (empty input).
+3. Added integration coverage to ensure protected remote-gone branches are never force-deleted.
+4. Added `CLEAN_GIT_BRANCHES_ASSUME_TTY=1` test-only hook to exercise interactive confirmation flow in non-TTY test runners.
+5. Verified full suite passes via `test/run-tests.sh` (16 tests).
+
 ## Current Focus
 
-1. Finish remaining `P0` scenarios (`INT-006`, `INT-007`, `INT-008`).
-2. Then proceed to `P1` scenarios in priority order.
+1. Execute `FEAT-003` `P1` scenarios (`INT-014`, `INT-015`, `INT-016`, `INT-017`, `INT-018`, `INT-019`, `INT-021`, `INT-022`, `INT-028`).
+2. Then continue with remaining `P1` config and CLI scenarios (`INT-023`, `INT-024`, `INT-026`).

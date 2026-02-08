@@ -203,6 +203,7 @@ function _clean_git_branches_delete_gone() {
 function _clean_git_branches_confirm_force_delete() {
   local candidate_count="$1"
   local candidate_list="$2"
+  local assume_tty_for_tests="${CLEAN_GIT_BRANCHES_ASSUME_TTY:-0}"
   local response
   local branch_info
 
@@ -214,7 +215,7 @@ function _clean_git_branches_confirm_force_delete() {
     return 0
   fi
 
-  if [ ! -t 0 ]; then
+  if [ ! -t 0 ] && [ "$assume_tty_for_tests" -ne 1 ]; then
     echo "Force deletion requires confirmation. Re-run with --silent to proceed non-interactively." >&2
     return 2
   fi

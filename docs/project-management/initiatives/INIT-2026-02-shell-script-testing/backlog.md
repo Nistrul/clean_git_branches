@@ -2,7 +2,7 @@
 
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Status: Active
-- Last updated: 2026-02-07
+- Last updated: 2026-02-08
 - Tracker: `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/backlog-tracker.md`
 
 ## Prioritization Model
@@ -39,9 +39,9 @@
 | INT-003 | FEAT-001 | `--dry-run --force-delete-gone` previews but does not delete | P0 | S | done |
 | INT-004 | FEAT-001 | `--no-force-delete-gone` reports gone branches only | P0 | S | done |
 | INT-005 | FEAT-001 | Non-interactive force-delete without `--silent` returns confirmation error | P0 | S | done |
-| INT-006 | FEAT-001 | Interactive confirm accepts `DELETE` and deletes gone branches | P0 | M | todo |
-| INT-007 | FEAT-001 | Interactive confirm with empty input skips deletion | P0 | M | todo |
-| INT-008 | FEAT-001 | Protected branch in gone state is never force-deleted | P0 | M | todo |
+| INT-006 | FEAT-001 | Interactive confirm accepts `DELETE` and deletes gone branches | P0 | M | done |
+| INT-007 | FEAT-001 | Interactive confirm with empty input skips deletion | P0 | M | done |
+| INT-008 | FEAT-001 | Protected branch in gone state is never force-deleted | P0 | M | done |
 | INT-009 | FEAT-001 | Mixed gone set where one delete fails and one succeeds | P0 | M | done |
 | INT-010 | FEAT-004 | Unknown CLI flag exits non-zero and prints help | P0 | S | done |
 | INT-011 | FEAT-002 | `.clean_git_branches.conf` true enables deletion in auto mode | P0 | M | done |
@@ -72,19 +72,17 @@
 
 ## Suggested Execution Order
 
-1. `FEAT-001` Deletion workflows and safety gates
-   - Complete remaining `P0` scenarios: `INT-006`, `INT-007`, `INT-008`.
-2. `FEAT-003` Branch classification and protection rules
+1. `FEAT-003` Branch classification and protection rules
    - Execute `P1` correctness/classification scenarios: `INT-014`, `INT-015`, `INT-016`, `INT-017`, `INT-018`, `INT-019`, `INT-021`, `INT-022`, `INT-028`.
-3. `FEAT-002` Configuration parsing and precedence
+2. `FEAT-002` Configuration parsing and precedence
    - Execute remaining `P1` config scenarios: `INT-023`, `INT-024`.
-4. `FEAT-004` CLI contract and diagnostics
+3. `FEAT-004` CLI contract and diagnostics
    - Execute remaining `P1` CLI scenario: `INT-026`.
-5. `FEAT-005` Hardening and edge-path reliability
+4. `FEAT-005` Hardening and edge-path reliability
    - Execute `P2` hardening scenarios: `INT-029`, `INT-030`, `INT-031`, `INT-032`, `INT-033`, `INT-034`.
-6. `FEAT-003` Branch classification and protection rules
+5. `FEAT-003` Branch classification and protection rules
    - Execute remaining `P2` presentation scenario: `INT-035`.
 
 ## Sprintable Next Slice
 
-1. `FEAT-001`: `INT-006`, `INT-007`, `INT-008`
+1. `FEAT-003`: `INT-014`, `INT-015`, `INT-016`

@@ -2,8 +2,8 @@
 
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Status: In Progress
-- Current Feature Focus: `FEAT-001` Deletion workflows and safety gates (`INT-006`, `INT-007`, `INT-008`)
-- Last updated: 2026-02-07
+- Current Feature Focus: `FEAT-003` Branch classification and protection rules (`INT-014`, `INT-015`, `INT-016`)
+- Last updated: 2026-02-08
 
 ## Completion Legend
 
@@ -34,6 +34,6 @@
 
 ## Next Actions
 
-1. Continue executing backlog scenarios according to priority.
-2. Add CI entrypoint for automated test execution.
-3. Execute the next backlog slice after remaining `P0` scenarios.
+1. Execute next `FEAT-003` `P1` slice (`INT-014`, `INT-015`, `INT-016`).
+2. Continue executing backlog scenarios according to priority.
+3. Add CI entrypoint for automated test execution.
