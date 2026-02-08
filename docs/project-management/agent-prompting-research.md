@@ -33,6 +33,7 @@ Agents can skip workflow steps when instructions are implied instead of explicit
    - initiative completion percentage
    - features complete vs remaining
    - active initiative count and next initiative (or explicitly none)
+   - concise prioritization summary covering what will be worked on next and why it is prioritized over other available tasks
 
 ## Repository Mapping
 

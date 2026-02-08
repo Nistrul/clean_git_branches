@@ -24,6 +24,7 @@ This file defines repository-level operating rules for coding agents and contrib
    - initiative completion percentage
    - features complete vs remaining
    - active initiative count and next initiative (or clearly state none is defined)
+   - concise prioritization summary: what slice is next and why it is prioritized over other currently available tasks
 6. When creating or modifying agent workflow/process rules, consult:
    - `docs/project-management/agent-prompting-research.md`
    - update that document in the same slice if prompting guidance changes

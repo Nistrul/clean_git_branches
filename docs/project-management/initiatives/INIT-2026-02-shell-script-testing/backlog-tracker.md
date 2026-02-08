@@ -71,6 +71,7 @@
 47. Captured post-PR handoff metrics in the handoff format: initiative completion percentage, completed vs remaining feature counts, active initiative count, and next initiative (or explicit none).
 48. Clarified agent process rules so post-PR progress reporting is a default handoff requirement after PR create/update, not request-only.
 49. Clarified PR cohesion rule: process-slice changes may combine agent rules and supporting project-management docs in one PR, while remaining separate from functional feature implementation changes.
+50. Extended default post-PR handoff reporting to include a concise prioritization summary (next slice + rationale versus other currently available tasks).
 
 ## Current Focus
 
