@@ -50,9 +50,9 @@
 | INT-014 | FEAT-003 | Default protected branches (`main|master|prod|dev`) are preserved | P1 | S | done |
 | INT-015 | FEAT-003 | Custom `PROTECTED_BRANCHES` prevents deletion of custom protected names | P1 | S | done |
 | INT-016 | FEAT-003 | Mixed tracked/untracked/gone/protected branches are classified correctly | P1 | M | done |
-| INT-017 | FEAT-003 | No merged branches yields no merged-deletion section noise | P1 | S | todo |
-| INT-018 | FEAT-003 | Branch names with slashes (`feature/a/b`) behave correctly | P1 | S | todo |
-| INT-019 | FEAT-003 | Branch names with dots/dashes/underscores behave correctly | P1 | S | todo |
+| INT-017 | FEAT-003 | No merged branches yields no merged-deletion section noise | P1 | S | done |
+| INT-018 | FEAT-003 | Branch names with slashes (`feature/a/b`) behave correctly | P1 | S | done |
+| INT-019 | FEAT-003 | Branch names with dots/dashes/underscores behave correctly | P1 | S | done |
 | INT-020 | FEAT-003 | Current branch with no upstream continues gracefully | P1 | S | done |
 | INT-021 | FEAT-003 | Detached HEAD does not crash and still reports branch sections safely | P1 | M | todo |
 | INT-022 | FEAT-003 | Run from subdirectory within repo; behavior remains correct | P1 | S | todo |
@@ -73,7 +73,7 @@
 ## Suggested Execution Order
 
 1. `FEAT-003` Branch classification and protection rules
-   - Execute `P1` correctness/classification scenarios: `INT-014`, `INT-015`, `INT-016`, `INT-017`, `INT-018`, `INT-019`, `INT-021`, `INT-022`, `INT-028`.
+   - Execute remaining `P1` correctness/classification scenarios: `INT-021`, `INT-022`, `INT-028`.
 2. `FEAT-002` Configuration parsing and precedence
    - Execute remaining `P1` config scenarios: `INT-023`, `INT-024`.
 3. `FEAT-004` CLI contract and diagnostics
@@ -85,4 +85,4 @@
 
 ## Sprintable Next Slice
 
-1. `FEAT-003`: `INT-017`, `INT-018`, `INT-019`
+1. `FEAT-003`: `INT-021`, `INT-022`, `INT-028`

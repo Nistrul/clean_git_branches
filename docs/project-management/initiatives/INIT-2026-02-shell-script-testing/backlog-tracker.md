@@ -30,8 +30,11 @@
 6. Completed `FEAT-003` `P1` slice: `INT-014`, `INT-015`, `INT-016`.
 7. Added integration coverage for default protected branch preservation, custom protected branch preservation, and mixed tracked/untracked/gone/protected classification.
 8. Verified full suite passes via `test/run-tests.sh` (19 tests).
+9. Completed next `FEAT-003` `P1` slice: `INT-017`, `INT-018`, `INT-019`.
+10. Added integration coverage for no merged-deletion section noise and branch-name handling for slash and dot/dash/underscore patterns.
+11. Verified full suite passes via `test/run-tests.sh` (22 tests).
 
 ## Current Focus
 
-1. Execute `FEAT-003` `P1` scenarios (`INT-017`, `INT-018`, `INT-019`, `INT-021`, `INT-022`, `INT-028`).
+1. Execute `FEAT-003` remaining `P1` scenarios (`INT-021`, `INT-022`, `INT-028`).
 2. Then continue with remaining `P1` config and CLI scenarios (`INT-023`, `INT-024`, `INT-026`).

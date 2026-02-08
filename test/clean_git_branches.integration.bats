@@ -316,6 +316,70 @@ create_local_only_branch() {
   [[ "$output" == *"dev"* ]]
 }
 
+@test "integration: no merged branches does not print merged deletion section" {
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+  create_tracked_branch "$work_dir" "feature/not-merged"
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --no-force-delete-gone --silent
+
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"Deleted merged branches"* ]]
+  [[ "$output" == *"Tracked branches"* ]]
+  [[ "$output" == *"feature/not-merged"* ]]
+}
+
+@test "integration: branch names with slashes are classified correctly" {
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+
+  create_tracked_branch "$work_dir" "feature/a/b"
+  create_local_only_branch "$work_dir" "feature/local/only"
+  create_gone_branch "$work_dir" "feature/gone/a"
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --no-force-delete-gone --silent
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Tracked branches"* ]]
+  [[ "$output" == *"feature/a/b"* ]]
+  [[ "$output" == *"Untracked branches"* ]]
+  [[ "$output" == *"feature/local/only"* ]]
+  [[ "$output" == *"Remote-gone branches (deletion disabled)"* ]]
+  [[ "$output" == *"feature/gone/a"* ]]
+}
+
+@test "integration: branch names with dots dashes and underscores are handled correctly" {
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+
+  create_tracked_branch "$work_dir" "feature/release.v1-2_3"
+  create_local_only_branch "$work_dir" "feature/local.v1-2_3"
+  create_gone_branch "$work_dir" "feature/gone.v1-2_3"
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --force-delete-gone --silent
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Deleted remote-gone branches"* ]]
+  [[ "$output" == *"feature/gone.v1-2_3"* ]]
+  [[ "$output" == *"Tracked branches"* ]]
+  [[ "$output" == *"feature/release.v1-2_3"* ]]
+  [[ "$output" == *"Untracked branches"* ]]
+  [[ "$output" == *"feature/local.v1-2_3"* ]]
+
+  run git -C "$work_dir" branch --list feature/gone.v1-2_3
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
 @test "integration: config true enables force delete in auto mode" {
   local dirs
   local work_dir

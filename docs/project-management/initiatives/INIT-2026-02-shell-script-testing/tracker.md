@@ -2,7 +2,7 @@
 
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Status: In Progress
-- Current Feature Focus: `FEAT-003` Branch classification and protection rules (`INT-017`, `INT-018`, `INT-019`)
+- Current Feature Focus: `FEAT-003` Branch classification and protection rules (`INT-021`, `INT-022`, `INT-028`)
 - Last updated: 2026-02-08
 
 ## Completion Legend
@@ -34,6 +34,6 @@
 
 ## Next Actions
 
-1. Execute next `FEAT-003` `P1` slice (`INT-017`, `INT-018`, `INT-019`).
+1. Execute next `FEAT-003` `P1` slice (`INT-021`, `INT-022`, `INT-028`).
 2. Continue executing backlog scenarios according to priority.
 3. Add CI entrypoint for automated test execution.
