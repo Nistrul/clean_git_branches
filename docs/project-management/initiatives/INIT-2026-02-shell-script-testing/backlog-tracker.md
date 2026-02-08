@@ -58,8 +58,11 @@
 34. Completed next `FEAT-005` `P2` hardening slice: `INT-032`.
 35. Added integration coverage for `git rev-parse --show-toplevel` failure fallback path and verified the run remains safe (report-only, no unintended force-delete).
 36. Verified full suite passes via `test/run-tests.sh` (34 tests).
+37. Completed next `FEAT-005` `P2` hardening slice: `INT-033`.
+38. Added integration coverage for a simulated `git branch -vv` failure path and asserted deterministic non-zero exit behavior with stable error output.
+39. Hardened script startup by failing fast when `git branch -vv` cannot list branches, returning deterministic non-zero behavior.
 
 ## Current Focus
 
-1. Execute `FEAT-005` next hardening slice (`INT-033`).
+1. Execute `FEAT-005` next hardening slice (`INT-034`).
 2. Execute `FEAT-003` presentation slice (`INT-035`) as an alternative small slice.

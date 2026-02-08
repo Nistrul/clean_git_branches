@@ -333,6 +333,7 @@ function _clean_git_branches_show_protected() {
 function clean_git_branches() {
   local current_branch
   local upstream_branch
+  local branch_vv_probe_output
   local gone_candidates
   local gone_candidate_count
   local show_remote_gone_report=1
@@ -350,6 +351,11 @@ function clean_git_branches() {
   fi
   _clean_git_branches_diagnose "Branch status: $(git status -sb | head -n 1)"
   _clean_git_branches_should_delete_gone
+  if ! branch_vv_probe_output=$(git branch -vv 2>&1); then
+    echo "Failed to list branches via 'git branch -vv'." >&2
+    echo "$branch_vv_probe_output" >&2
+    return 1
+  fi
   gone_candidates=$(_clean_git_branches_gone_branch_names)
   gone_candidate_count=$(echo "$gone_candidates" | sed '/^$/d' | wc -l | tr -d ' ')
   _clean_git_branches_diagnose "Remote-gone deletion candidates: $gone_candidate_count"
