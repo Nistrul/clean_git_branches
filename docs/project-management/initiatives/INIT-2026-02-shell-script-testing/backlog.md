@@ -60,7 +60,7 @@
 | INT-023 | FEAT-002 | Config parse tolerates whitespace/case (`TRUE`, ` yes `) | P1 | S | done |
 | INT-024 | FEAT-002 | Malformed config falls back to safe default behavior | P1 | S | done |
 | INT-025 | FEAT-004 | `--help` includes all supported flags and exits zero | P1 | S | done |
-| INT-026 | FEAT-004 | `--diagnose` emits expected diagnostic lines to stderr | P1 | S | done |
+| INT-026 | FEAT-004 | `--verbose` emits expected diagnostic lines to stderr | P1 | S | done |
 | INT-027 | FEAT-001 | `--silent` warning appears only for destructive force-delete mode | P1 | S | done |
 | INT-028 | FEAT-003 | Worktree dirty state does not break classification/deletion flow | P1 | M | done |
 | INT-029 | FEAT-005 | Large branch set executes reliably (stress sanity) | P2 | M | done |
@@ -70,14 +70,13 @@
 | INT-033 | FEAT-005 | `git branch -vv` failure path exits predictably | P2 | M | done |
 | INT-034 | FEAT-005 | Remote fetch/prune timing edge still leaves deterministic assertions | P2 | M | done |
 | INT-035 | FEAT-003 | Section headers only render when corresponding section has content | P2 | S | done |
-| INT-036 | FEAT-004 | Replace `--diagnose` with `--verbose` and present richer formatted diagnostics | P2 | M | todo |
+| INT-036 | FEAT-004 | Replace `--diagnose` with `--verbose` and present richer formatted diagnostics | P2 | M | done |
 | INT-037 | FEAT-006 | After PR creation, report initiative completeness %, completed vs remaining features, total initiatives, and next initiative before handoff | P1 | S | done |
 
 ## Suggested Execution Order
 
-1. `FEAT-004` CLI contract and diagnostics
-   - Schedule low-priority diagnostics UX follow-up: `INT-036`.
+1. All currently defined backlog scenarios are complete.
 
 ## Sprintable Next Slice
 
-1. `FEAT-004`: `INT-036` (diagnostics UX follow-up)
+1. No additional scenario backlog slices are currently defined.
