@@ -380,6 +380,77 @@ create_local_only_branch() {
   [ -z "$output" ]
 }
 
+@test "integration: detached HEAD does not crash and still reports branch sections safely" {
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+  create_tracked_branch "$work_dir" "feature/detached-tracked"
+
+  git -C "$work_dir" checkout --detach >/dev/null
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --no-force-delete-gone --silent
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Tracked branches"* ]]
+  [[ "$output" == *"feature/detached-tracked"* ]]
+  [[ "$output" == *"Protected branches"* ]]
+  [[ "$output" == *"main"* ]]
+}
+
+@test "integration: running from subdirectory in repo keeps behavior correct" {
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+  create_tracked_branch "$work_dir" "feature/subdir-tracked"
+  mkdir -p "$work_dir/src/components"
+
+  run bash -c "cd '$work_dir/src/components' && '$repo_root/clean_git_branches.sh' --no-force-delete-gone --silent"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Tracked branches"* ]]
+  [[ "$output" == *"feature/subdir-tracked"* ]]
+  [[ "$output" == *"Protected branches"* ]]
+  [[ "$output" == *"main"* ]]
+}
+
+@test "integration: dirty worktree does not break cleanup and classification flow" {
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+
+  git -C "$work_dir" checkout -b feature/dirty-merged >/dev/null
+  echo "dirty merged content" >> "$work_dir/README.md"
+  git -C "$work_dir" add README.md
+  git -C "$work_dir" commit -m "dirty merged commit" >/dev/null
+  git -C "$work_dir" checkout main >/dev/null
+  git -C "$work_dir" merge --no-ff feature/dirty-merged -m "merge dirty branch" >/dev/null
+
+  create_tracked_branch "$work_dir" "feature/dirty-tracked"
+  create_local_only_branch "$work_dir" "feature/dirty-local"
+
+  echo "uncommitted change" >> "$work_dir/README.md"
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --no-force-delete-gone --silent
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Deleted merged branches"* ]]
+  [[ "$output" == *"feature/dirty-merged"* ]]
+  [[ "$output" == *"Tracked branches"* ]]
+  [[ "$output" == *"feature/dirty-tracked"* ]]
+  [[ "$output" == *"Untracked branches"* ]]
+  [[ "$output" == *"feature/dirty-local"* ]]
+
+  run git -C "$work_dir" branch --list feature/dirty-merged
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
 @test "integration: config true enables force delete in auto mode" {
   local dirs
   local work_dir

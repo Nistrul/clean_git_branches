@@ -33,8 +33,11 @@
 9. Completed next `FEAT-003` `P1` slice: `INT-017`, `INT-018`, `INT-019`.
 10. Added integration coverage for no merged-deletion section noise and branch-name handling for slash and dot/dash/underscore patterns.
 11. Verified full suite passes via `test/run-tests.sh` (22 tests).
+12. Completed `FEAT-003` remaining `P1` slice: `INT-021`, `INT-022`, `INT-028`.
+13. Added integration coverage for detached HEAD stability, subdirectory execution behavior, and dirty worktree flow safety.
+14. Verified full suite passes via `test/run-tests.sh` (25 tests).
 
 ## Current Focus
 
-1. Execute `FEAT-003` remaining `P1` scenarios (`INT-021`, `INT-022`, `INT-028`).
-2. Then continue with remaining `P1` config and CLI scenarios (`INT-023`, `INT-024`, `INT-026`).
+1. Execute `FEAT-002` remaining `P1` scenarios (`INT-023`, `INT-024`).
+2. Execute `FEAT-004` remaining `P1` scenario (`INT-026`).
