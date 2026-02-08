@@ -53,6 +53,22 @@ git commit -m "<clear message>"
 4. After create/edit, verify rendered formatting with `gh pr view <number>` before handoff.
 5. If formatting is wrong, immediately fix with `gh pr edit` and re-verify.
 
+## Title Style Rules (Mandatory)
+
+1. Write commit subjects and PR titles in imperative mood.
+2. Use this test: prepend `This change will ...`; if the result reads naturally, the title is acceptable.
+3. Avoid past tense, gerunds, and vague nouns in titles.
+4. PR titles must comply with this rule.
+5. Squash-merge commit titles must comply with this rule.
+
+Good examples:
+- `Add integration test for interactive DELETE confirmation`
+- `Prevent force deletion of protected gone branches`
+
+Bad examples:
+- `Added integration test for interactive DELETE confirmation`
+- `Interactive DELETE confirmation changes`
+
 ## Project Management Approach (Best Practice)
 
 Use a three-layer tracking model with clear separation of concerns:
