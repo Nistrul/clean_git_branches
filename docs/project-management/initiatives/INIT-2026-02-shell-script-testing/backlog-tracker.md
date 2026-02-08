@@ -46,8 +46,12 @@
 22. Completed first `FEAT-005` `P2` hardening slice: `INT-029`.
 23. Added stress-sanity integration coverage for a large mixed branch set (tracked, local-only, remote-gone) with deterministic assertions.
 24. Verified full suite passes via `test/run-tests.sh` (31 tests).
+25. Completed next `FEAT-005` `P2` hardening slice: `INT-030`.
+26. Added integration coverage documenting Git-ref-format rejection of branch names with spaces and verified normal classification remains stable.
+27. Documented branch-name constraint in `README.md` (`Branch Name Constraints`).
+28. Verified full suite passes via `test/run-tests.sh` (32 tests).
 
 ## Current Focus
 
-1. Execute `FEAT-005` next hardening slice (`INT-030`).
+1. Execute `FEAT-005` next hardening slice (`INT-031`).
 2. Execute `FEAT-003` presentation slice (`INT-035`) as an alternative small slice.

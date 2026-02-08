@@ -354,6 +354,28 @@ create_local_only_branch() {
   [[ "$output" == *"feature/gone/a"* ]]
 }
 
+@test "integration: branch names with spaces are unsupported by git ref format" {
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+
+  run git -C "$work_dir" branch "feature/space name"
+  [ "$status" -ne 0 ]
+
+  create_tracked_branch "$work_dir" "feature/space-control"
+  create_gone_branch "$work_dir" "feature/space-control-gone"
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --no-force-delete-gone --silent
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Tracked branches"* ]]
+  [[ "$output" == *"feature/space-control"* ]]
+  [[ "$output" == *"Remote-gone branches (deletion disabled)"* ]]
+  [[ "$output" == *"feature/space-control-gone"* ]]
+}
+
 @test "integration: branch names with dots dashes and underscores are handled correctly" {
   local dirs
   local work_dir
