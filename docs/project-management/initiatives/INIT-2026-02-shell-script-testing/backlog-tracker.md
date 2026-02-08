@@ -39,6 +39,7 @@
 15. Completed `FEAT-002` remaining `P1` slice: `INT-023`, `INT-024`.
 16. Added integration coverage for tolerant config parsing of whitespace/case true-like values and malformed-value safe fallback behavior.
 17. Verified full suite passes via `test/run-tests.sh` (27 tests).
+18. Added deferred low-priority backlog scenario `INT-036` under `FEAT-004` to replace `--diagnose` with `--verbose` and improve diagnostics formatting/readability.
 
 ## Current Focus
 
