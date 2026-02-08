@@ -120,6 +120,32 @@ create_local_only_branch() {
   [ -z "$output" ]
 }
 
+@test "integration: remote delete before local prune remains deterministic across pre and post prune runs" {
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+
+  create_tracked_branch "$work_dir" "feature/fetch-prune-edge"
+  git -C "$work_dir" push origin --delete "feature/fetch-prune-edge" >/dev/null
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --no-force-delete-gone --silent
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Tracked branches"* ]]
+  [[ "$output" == *"feature/fetch-prune-edge"* ]]
+  [[ "$output" != *"Remote-gone branches (deletion disabled)"* ]]
+
+  git -C "$work_dir" fetch --prune >/dev/null
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --no-force-delete-gone --silent
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Remote-gone branches (deletion disabled)"* ]]
+  [[ "$output" == *"feature/fetch-prune-edge"* ]]
+}
+
 @test "integration: dry run with force delete previews gone branches and does not delete" {
   local dirs
   local work_dir
