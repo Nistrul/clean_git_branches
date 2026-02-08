@@ -552,6 +552,26 @@ create_local_only_branch() {
   [[ "$output" == *"feature/config-malformed"* ]]
 }
 
+@test "integration: diagnose flag emits diagnostic lines for repository state and mode selection" {
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+  create_gone_branch "$work_dir" "feature/diagnose-gone"
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --diagnose --no-force-delete-gone --silent
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"[diagnose]"* ]]
+  [[ "$output" == *"Repository: "* ]]
+  [[ "$output" == *"Current branch: main"* ]]
+  [[ "$output" == *"Delete remote-gone mode: off"* ]]
+  [[ "$output" == *"Delete remote-gone effective: 0"* ]]
+  [[ "$output" == *"Remote-gone deletion candidates: 1"* ]]
+  [[ "$output" == *"Remote-gone mode: deletion disabled (report only)"* ]]
+}
+
 @test "integration: running from repo subdirectory keeps classification behavior correct" {
   local dirs
   local work_dir

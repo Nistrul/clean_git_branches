@@ -40,8 +40,11 @@
 16. Added integration coverage for tolerant config parsing of whitespace/case true-like values and malformed-value safe fallback behavior.
 17. Verified full suite passes via `test/run-tests.sh` (27 tests).
 18. Added deferred low-priority backlog scenario `INT-036` under `FEAT-004` to replace `--diagnose` with `--verbose` and improve diagnostics formatting/readability.
+19. Completed `FEAT-004` remaining `P1` slice: `INT-026`.
+20. Added integration coverage asserting `--diagnose` emits expected repository-state and mode-selection diagnostics.
+21. Verified full suite passes via `test/run-tests.sh` (30 tests).
 
 ## Current Focus
 
-1. Execute `FEAT-004` remaining `P1` scenario (`INT-026`).
-2. Execute `FEAT-005` next hardening slice (`INT-029`) or `FEAT-003` presentation slice (`INT-035`).
+1. Execute `FEAT-005` next hardening slice (`INT-029`).
+2. Execute `FEAT-003` presentation slice (`INT-035`) as an alternative small slice.
