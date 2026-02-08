@@ -72,17 +72,16 @@
 
 ## Suggested Execution Order
 
-1. `FEAT-003` Branch classification and protection rules
-   - Execute remaining `P2` presentation scenario: `INT-035`.
-2. `FEAT-002` Configuration parsing and precedence
+1. `FEAT-002` Configuration parsing and precedence
    - Execute remaining `P1` config scenarios: `INT-023`, `INT-024`.
-3. `FEAT-004` CLI contract and diagnostics
+2. `FEAT-004` CLI contract and diagnostics
    - Execute remaining `P1` CLI scenario: `INT-026`.
-4. `FEAT-005` Hardening and edge-path reliability
+3. `FEAT-005` Hardening and edge-path reliability
    - Execute `P2` hardening scenarios: `INT-029`, `INT-030`, `INT-031`, `INT-032`, `INT-033`, `INT-034`.
-5. `FEAT-003` Branch classification and protection rules
+4. `FEAT-003` Branch classification and protection rules
    - Execute remaining `P2` presentation scenario: `INT-035`.
 
 ## Sprintable Next Slice
 
 1. `FEAT-002`: `INT-023`, `INT-024`
+2. `FEAT-004`: `INT-026`

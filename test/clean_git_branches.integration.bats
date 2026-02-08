@@ -510,3 +510,53 @@ create_local_only_branch() {
   [ "$status" -eq 0 ]
   [ -z "$output" ]
 }
+
+@test "integration: running from repo subdirectory keeps classification behavior correct" {
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+  mkdir -p "$work_dir/sub/dir"
+
+  create_tracked_branch "$work_dir" "feature/subdir-tracked"
+  create_local_only_branch "$work_dir" "feature/subdir-local-only"
+  create_gone_branch "$work_dir" "feature/subdir-gone"
+
+  run bash -c "cd '$work_dir/sub/dir' && '$repo_root/clean_git_branches.sh' --no-force-delete-gone --silent"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Tracked branches"* ]]
+  [[ "$output" == *"feature/subdir-tracked"* ]]
+  [[ "$output" == *"Untracked branches"* ]]
+  [[ "$output" == *"feature/subdir-local-only"* ]]
+  [[ "$output" == *"Remote-gone branches (deletion disabled)"* ]]
+  [[ "$output" == *"feature/subdir-gone"* ]]
+}
+
+@test "integration: dirty worktree does not break classification and reporting flow" {
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+
+  create_tracked_branch "$work_dir" "feature/dirty-tracked"
+  create_local_only_branch "$work_dir" "feature/dirty-local-only"
+  create_gone_branch "$work_dir" "feature/dirty-gone"
+  echo "dirty change" >> "$work_dir/README.md"
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --no-force-delete-gone --silent
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Tracked branches"* ]]
+  [[ "$output" == *"feature/dirty-tracked"* ]]
+  [[ "$output" == *"Untracked branches"* ]]
+  [[ "$output" == *"feature/dirty-local-only"* ]]
+  [[ "$output" == *"Remote-gone branches (deletion disabled)"* ]]
+  [[ "$output" == *"feature/dirty-gone"* ]]
+
+  run git -C "$work_dir" status --short
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"README.md"* ]]
+}
