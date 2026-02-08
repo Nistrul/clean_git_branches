@@ -643,6 +643,37 @@ create_local_only_branch() {
   [[ "$output" == *"feature/subdir-gone"* ]]
 }
 
+@test "integration: branch vv failure exits non-zero with predictable error output" {
+  local dirs
+  local work_dir
+  local real_git
+  local shim_dir
+  local shim_git
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+  create_gone_branch "$work_dir" "feature/branch-vv-failure"
+
+  real_git="$(command -v git)"
+  shim_dir="$TEST_TMPDIR/git-shim-branch-vv"
+  shim_git="$shim_dir/git"
+  mkdir -p "$shim_dir"
+  cat > "$shim_git" <<EOF
+#!/usr/bin/env bash
+if [ "\${1:-}" = "branch" ] && [ "\${2:-}" = "-vv" ]; then
+  echo "simulated git branch -vv failure" >&2
+  exit 23
+fi
+exec "$real_git" "\$@"
+EOF
+  chmod +x "$shim_git"
+
+  run env PATH="$shim_dir:$PATH" bash -c "cd '$work_dir' && '$repo_root/clean_git_branches.sh' --no-force-delete-gone --silent"
+
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"Failed to list branches via 'git branch -vv'."* ]]
+}
+
 @test "integration: rev-parse show-toplevel failure falls back safely to current directory" {
   local dirs
   local work_dir
@@ -663,13 +694,17 @@ create_local_only_branch() {
   cat > "$shim_git" <<EOF
 #!/usr/bin/env bash
 if [ "\${1:-}" = "rev-parse" ] && [ "\${2:-}" = "--show-toplevel" ]; then
-  exit 1
+  marker_file="$shim_dir/rev-parse-failed-once"
+  if [ ! -f "\$marker_file" ]; then
+    touch "\$marker_file"
+    exit 1
+  fi
 fi
 exec "$real_git" "\$@"
 EOF
   chmod +x "$shim_git"
 
-  run bash -c "cd '$work_dir/sub/dir' && PATH='$shim_dir:\$PATH' '$repo_root/clean_git_branches.sh' --silent"
+  run env PATH="$shim_dir:$PATH" bash -c "cd '$work_dir/sub/dir' && '$repo_root/clean_git_branches.sh' --silent"
 
   [ "$status" -eq 0 ]
   [[ "$output" == *"Remote-gone branches (deletion disabled)"* ]]
