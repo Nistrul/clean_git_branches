@@ -87,6 +87,10 @@ FORCE_DELETE_GONE_BRANCHES=true
 
 Command-line flags (`--force-delete-gone` / `--no-force-delete-gone`) override this config.
 
+## Branch Name Constraints
+
+Git ref rules apply directly to branch names. Branch names containing spaces are unsupported because Git rejects them at creation time.
+
 ## Mocked Git Workflow
 
 Use the included mocked `git` harness when you want to work on output/layout behavior without a real repository:

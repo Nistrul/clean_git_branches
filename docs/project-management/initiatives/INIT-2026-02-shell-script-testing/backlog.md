@@ -63,7 +63,7 @@
 | INT-027 | FEAT-001 | `--silent` warning appears only for destructive force-delete mode | P1 | S | done |
 | INT-028 | FEAT-003 | Worktree dirty state does not break classification/deletion flow | P1 | M | done |
 | INT-029 | FEAT-005 | Large branch set executes reliably (stress sanity) | P2 | M | done |
-| INT-030 | FEAT-005 | Branch names with spaces are handled or explicitly documented unsupported | P2 | L | todo |
+| INT-030 | FEAT-005 | Branch names with spaces are handled or explicitly documented unsupported | P2 | L | done |
 | INT-031 | FEAT-005 | Unicode branch names are handled or documented unsupported | P2 | M | todo |
 | INT-032 | FEAT-005 | `git rev-parse --show-toplevel` failure fallback path stays safe | P2 | M | todo |
 | INT-033 | FEAT-005 | `git branch -vv` failure path exits predictably | P2 | M | todo |
@@ -82,5 +82,5 @@
 
 ## Sprintable Next Slice
 
-1. `FEAT-005`: `INT-030`
+1. `FEAT-005`: `INT-031`
 2. `FEAT-003`: `INT-035` (alternative small slice)
