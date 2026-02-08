@@ -2,7 +2,7 @@
 
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Status: In Progress
-- Current Feature Focus: `FEAT-005` hardening (`INT-034`)
+- Current Feature Focus: `FEAT-003` presentation hardening (`INT-035`)
 - Last updated: 2026-02-08
 
 ## Completion Legend
@@ -34,6 +34,6 @@
 
 ## Next Actions
 
-1. Execute `FEAT-005` `P2` scenario (`INT-034`).
-2. Execute next `FEAT-003` small slice (`INT-035`) or continue `FEAT-005` hardening.
+1. Execute `FEAT-003` `P2` scenario (`INT-035`).
+2. Execute request-driven handoff reporting slice (`FEAT-006`, `INT-037`).
 3. Add CI entrypoint for automated test execution.

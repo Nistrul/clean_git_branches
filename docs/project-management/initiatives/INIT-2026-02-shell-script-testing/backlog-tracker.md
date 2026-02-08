@@ -61,8 +61,11 @@
 37. Completed next `FEAT-005` `P2` hardening slice: `INT-033`.
 38. Added integration coverage for a simulated `git branch -vv` failure path and asserted deterministic non-zero exit behavior with stable error output.
 39. Hardened script startup by failing fast when `git branch -vv` cannot list branches, returning deterministic non-zero behavior.
+40. Completed next `FEAT-005` `P2` hardening slice: `INT-034`.
+41. Added integration coverage for remote delete timing around local ref state: pre-prune run remains tracked/report-only deterministic, post-prune run deterministically reports remote-gone.
+42. Verified full suite passes via `test/run-tests.sh` (36 tests).
 
 ## Current Focus
 
-1. Execute `FEAT-005` next hardening slice (`INT-034`).
-2. Execute `FEAT-003` presentation slice (`INT-035`) as an alternative small slice.
+1. Execute `FEAT-003` presentation slice (`INT-035`).
+2. Execute `FEAT-006` handoff progress reporting slice (`INT-037`) when requested.
