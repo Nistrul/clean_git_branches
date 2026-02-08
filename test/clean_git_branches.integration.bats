@@ -643,6 +643,44 @@ create_local_only_branch() {
   [[ "$output" == *"feature/subdir-gone"* ]]
 }
 
+@test "integration: rev-parse show-toplevel failure falls back safely to current directory" {
+  local dirs
+  local work_dir
+  local real_git
+  local shim_dir
+  local shim_git
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+  create_gone_branch "$work_dir" "feature/rev-parse-fallback-gone"
+  mkdir -p "$work_dir/sub/dir"
+  echo "FORCE_DELETE_GONE_BRANCHES=true" > "$work_dir/.clean_git_branches.conf"
+
+  real_git="$(command -v git)"
+  shim_dir="$TEST_TMPDIR/git-shim"
+  shim_git="$shim_dir/git"
+  mkdir -p "$shim_dir"
+  cat > "$shim_git" <<EOF
+#!/usr/bin/env bash
+if [ "\${1:-}" = "rev-parse" ] && [ "\${2:-}" = "--show-toplevel" ]; then
+  exit 1
+fi
+exec "$real_git" "\$@"
+EOF
+  chmod +x "$shim_git"
+
+  run bash -c "cd '$work_dir/sub/dir' && PATH='$shim_dir:\$PATH' '$repo_root/clean_git_branches.sh' --silent"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Remote-gone branches (deletion disabled)"* ]]
+  [[ "$output" == *"feature/rev-parse-fallback-gone"* ]]
+  [[ "$output" != *"Deleted remote-gone branches"* ]]
+
+  run git -C "$work_dir" branch --list feature/rev-parse-fallback-gone
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"feature/rev-parse-fallback-gone"* ]]
+}
+
 @test "integration: dirty worktree does not break classification and reporting flow" {
   local dirs
   local work_dir
