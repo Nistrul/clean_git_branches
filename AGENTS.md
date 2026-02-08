@@ -25,6 +25,9 @@ This file defines repository-level operating rules for coding agents and contrib
    - initiative completion percentage
    - features complete vs remaining
    - active initiative count and next initiative (or clearly state none is defined)
+6. When creating or modifying agent workflow/process rules, consult:
+   - `docs/project-management/agent-prompting-research.md`
+   - update that document in the same slice if prompting guidance changes
 
 ## Git Workflow Rules (Mandatory)
 
@@ -135,6 +138,7 @@ Current project-management files:
 4. `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/tracker.md`
 5. `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/backlog.md`
 6. `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/backlog-tracker.md`
+7. `docs/project-management/agent-prompting-research.md`
 
 ## Tracking Hygiene Rules (Mandatory)
 
