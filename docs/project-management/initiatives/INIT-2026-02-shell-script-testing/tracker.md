@@ -2,7 +2,7 @@
 
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Status: In Progress
-- Current Feature Focus: `FEAT-006` PR handoff reporting (`INT-037`)
+- Current Feature Focus: `FEAT-004` diagnostics UX follow-up (`INT-036`)
 - Last updated: 2026-02-08
 
 ## Completion Legend
@@ -34,6 +34,5 @@
 
 ## Next Actions
 
-1. Execute request-driven handoff reporting slice (`FEAT-006`, `INT-037`).
-2. Execute `FEAT-004` diagnostics UX follow-up (`INT-036`).
-3. Add CI entrypoint for automated test execution.
+1. Execute `FEAT-004` diagnostics UX follow-up (`INT-036`).
+2. Add CI entrypoint for automated test execution.

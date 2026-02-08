@@ -10,6 +10,7 @@ This file defines repository-level operating rules for coding agents and contrib
    - classify request type (`implement`, `review`, `research`, `docs/process`)
    - run `git status --short --branch`
    - confirm current branch is correct for the requested slice
+   - expected baseline: starting a new slice from the previous feature branch is normal; treat switching to `main`, updating, and branching as routine alignment
 2. If branch/scope is wrong, stop and fix workflow first:
    - stash or commit in-progress unrelated work
    - switch to `main`, fast-forward, create a correctly scoped feature branch
@@ -20,10 +21,11 @@ This file defines repository-level operating rules for coding agents and contrib
 4. Before handoff, run an execution-close checklist:
    - ensure tracking docs reflect the delivered or deferred scope
    - apply PR creation/update and post-PR sync rules defined below (see Feature Branch and Pull Request sections)
-5. If the user asks for post-PR progress reporting, include:
+5. After creating or updating a PR, include a post-PR progress report in handoff by default:
    - initiative completion percentage
    - features complete vs remaining
    - active initiative count and next initiative (or clearly state none is defined)
+   - concise prioritization summary: what slice is next and why it is prioritized over other currently available tasks
 6. When creating or modifying agent workflow/process rules, consult:
    - `docs/project-management/agent-prompting-research.md`
    - update that document in the same slice if prompting guidance changes
@@ -102,7 +104,7 @@ Bad:
 2. After completing a slice, the default action is to create a new PR or update the existing PR for that branch before handoff.
 3. If the agent defers PR creation, it must have a concrete cohesion or sequencing reason and continue until a PR-ready slice boundary is reached.
 4. Keep PRs maximally cohesive: one feature slice (or tightly coupled slices) per PR, with aligned code, tests, and tracker updates.
-5. Process changes and agent-instruction changes (for example, edits to `AGENTS.md`) must be delivered in a separate PR from feature implementation changes.
+5. Process and agent-instruction changes (for example, edits to `AGENTS.md`) must be delivered separately from functional feature implementation changes; however, cohesive process-slice updates (agent rules + supporting project-management docs/trackers) may be delivered together in one PR.
 6. Documentation-only, tracker-only, and other non-code slices still require creating or updating a PR as the final step before handoff; do not skip PR creation because a change is "docs only."
 
 ## Title Style Rules (Mandatory)
