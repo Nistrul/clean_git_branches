@@ -29,6 +29,7 @@
 | FEAT-003 | Branch classification and protection rules | Ensure tracked/untracked/gone/protected behavior is classified and enforced correctly. |
 | FEAT-004 | CLI contract and diagnostics | Ensure flag behavior, help output, and diagnostics are stable and testable. |
 | FEAT-005 | Hardening and edge-path reliability | Ensure rare and failure-path behavior stays deterministic and safe. |
+| FEAT-006 | PR handoff progress reporting | Ensure handoff includes initiative completion percentage and remaining feature counts after PR creation. |
 
 ## Backlog
 
@@ -70,6 +71,7 @@
 | INT-034 | FEAT-005 | Remote fetch/prune timing edge still leaves deterministic assertions | P2 | M | todo |
 | INT-035 | FEAT-003 | Section headers only render when corresponding section has content | P2 | S | todo |
 | INT-036 | FEAT-004 | Replace `--diagnose` with `--verbose` and present richer formatted diagnostics | P2 | M | todo |
+| INT-037 | FEAT-006 | After PR creation, report initiative completeness %, completed vs remaining features, total initiatives, and next initiative before handoff | P1 | S | todo |
 
 ## Suggested Execution Order
 
@@ -79,8 +81,11 @@
    - Execute remaining `P2` presentation scenario: `INT-035`.
 3. `FEAT-004` CLI contract and diagnostics
    - Schedule low-priority diagnostics UX follow-up: `INT-036`.
+4. `FEAT-006` PR handoff progress reporting
+   - Implement post-PR handoff summary metrics and initiative sequencing: `INT-037`.
 
 ## Sprintable Next Slice
 
 1. `FEAT-005`: `INT-031`
 2. `FEAT-003`: `INT-035` (alternative small slice)
+3. `FEAT-006`: `INT-037` (request-driven reporting slice)
