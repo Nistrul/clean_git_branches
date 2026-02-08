@@ -47,9 +47,9 @@
 | INT-011 | FEAT-002 | `.clean_git_branches.conf` true enables deletion in auto mode | P0 | M | done |
 | INT-012 | FEAT-002 | CLI `--no-force-delete-gone` overrides config true | P0 | S | done |
 | INT-013 | FEAT-002 | CLI `--force-delete-gone` overrides config false | P0 | S | done |
-| INT-014 | FEAT-003 | Default protected branches (`main|master|prod|dev`) are preserved | P1 | S | todo |
-| INT-015 | FEAT-003 | Custom `PROTECTED_BRANCHES` prevents deletion of custom protected names | P1 | S | todo |
-| INT-016 | FEAT-003 | Mixed tracked/untracked/gone/protected branches are classified correctly | P1 | M | todo |
+| INT-014 | FEAT-003 | Default protected branches (`main|master|prod|dev`) are preserved | P1 | S | done |
+| INT-015 | FEAT-003 | Custom `PROTECTED_BRANCHES` prevents deletion of custom protected names | P1 | S | done |
+| INT-016 | FEAT-003 | Mixed tracked/untracked/gone/protected branches are classified correctly | P1 | M | done |
 | INT-017 | FEAT-003 | No merged branches yields no merged-deletion section noise | P1 | S | todo |
 | INT-018 | FEAT-003 | Branch names with slashes (`feature/a/b`) behave correctly | P1 | S | todo |
 | INT-019 | FEAT-003 | Branch names with dots/dashes/underscores behave correctly | P1 | S | todo |
@@ -85,4 +85,4 @@
 
 ## Sprintable Next Slice
 
-1. `FEAT-003`: `INT-014`, `INT-015`, `INT-016`
+1. `FEAT-003`: `INT-017`, `INT-018`, `INT-019`

@@ -43,6 +43,29 @@ create_gone_branch() {
   git -C "$work_dir" fetch --prune >/dev/null
 }
 
+create_tracked_branch() {
+  local work_dir="$1"
+  local branch_name="$2"
+
+  git -C "$work_dir" checkout -b "$branch_name" >/dev/null
+  echo "tracked branch content for $branch_name" >> "$work_dir/README.md"
+  git -C "$work_dir" add README.md
+  git -C "$work_dir" commit -m "tracked branch commit for $branch_name" >/dev/null
+  git -C "$work_dir" push -u origin "$branch_name" >/dev/null
+  git -C "$work_dir" checkout main >/dev/null
+}
+
+create_local_only_branch() {
+  local work_dir="$1"
+  local branch_name="$2"
+
+  git -C "$work_dir" checkout -b "$branch_name" >/dev/null
+  echo "local only branch content for $branch_name" >> "$work_dir/README.md"
+  git -C "$work_dir" add README.md
+  git -C "$work_dir" commit -m "local only branch commit for $branch_name" >/dev/null
+  git -C "$work_dir" checkout main >/dev/null
+}
+
 @test "integration: deletes merged branches in real repository" {
   local dirs
   local origin_dir
@@ -210,6 +233,86 @@ create_gone_branch() {
 
   run git -C "$work_dir" branch --list dev
   [ "$status" -eq 0 ]
+  [[ "$output" == *"dev"* ]]
+}
+
+@test "integration: default protected branches are preserved during merged and gone cleanup" {
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+
+  git -C "$work_dir" checkout -b dev >/dev/null
+  echo "dev branch content" >> "$work_dir/README.md"
+  git -C "$work_dir" add README.md
+  git -C "$work_dir" commit -m "dev branch commit" >/dev/null
+  git -C "$work_dir" push -u origin dev >/dev/null
+  git -C "$work_dir" checkout main >/dev/null
+  git -C "$work_dir" merge --no-ff dev -m "merge dev branch" >/dev/null
+  git -C "$work_dir" push origin --delete dev >/dev/null
+  git -C "$work_dir" fetch --prune >/dev/null
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --force-delete-gone --silent
+
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"Deleted merged branches"* ]]
+  [[ "$output" != *"Deleted remote-gone branches"* ]]
+  [[ "$output" == *"Remote-gone branches (not deleted)"* ]]
+  [[ "$output" == *"dev"* ]]
+  [[ "$output" == *"Protected branches"* ]]
+  [[ "$output" == *"main"* ]]
+  [[ "$output" == *"dev"* ]]
+
+  run git -C "$work_dir" branch --list dev
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"dev"* ]]
+}
+
+@test "integration: custom protected branch names are preserved when gone" {
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+  create_gone_branch "$work_dir" "release"
+
+  run bash -c "PROTECTED_BRANCHES='main|release' '$repo_root/test/helpers/run-in-repo.sh' '$work_dir' --force-delete-gone --silent"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"Deleted remote-gone branches"* ]]
+  [[ "$output" == *"Remote-gone branches (not deleted)"* ]]
+  [[ "$output" == *"release"* ]]
+  [[ "$output" == *"Protected branches"* ]]
+  [[ "$output" == *"release"* ]]
+
+  run git -C "$work_dir" branch --list release
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"release"* ]]
+}
+
+@test "integration: mixed tracked untracked gone and protected branches are classified correctly" {
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+
+  create_tracked_branch "$work_dir" "feature/tracked"
+  create_local_only_branch "$work_dir" "feature/local-only"
+  create_gone_branch "$work_dir" "feature/gone"
+  create_tracked_branch "$work_dir" "dev"
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --no-force-delete-gone --silent
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Untracked branches"* ]]
+  [[ "$output" == *"feature/local-only"* ]]
+  [[ "$output" == *"Remote-gone branches (deletion disabled)"* ]]
+  [[ "$output" == *"feature/gone"* ]]
+  [[ "$output" == *"Tracked branches"* ]]
+  [[ "$output" == *"feature/tracked"* ]]
+  [[ "$output" == *"Protected branches"* ]]
   [[ "$output" == *"dev"* ]]
 }
 
