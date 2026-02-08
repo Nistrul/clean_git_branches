@@ -50,6 +50,7 @@
 26. Added integration coverage documenting Git-ref-format rejection of branch names with spaces and verified normal classification remains stable.
 27. Documented branch-name constraint in `README.md` (`Branch Name Constraints`).
 28. Verified full suite passes via `test/run-tests.sh` (32 tests).
+29. Captured new request as deferred backlog slice `INT-037` (`FEAT-006`) for post-PR handoff progress reporting (initiative completeness %, feature complete/remaining counts, initiative totals, and next initiative).
 
 ## Current Focus
 
