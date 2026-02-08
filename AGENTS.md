@@ -42,6 +42,16 @@ git commit -m "<clear message>"
 8. Use squash merge into `main` for feature branches so main history stays cohesive and readable.
 9. If scope expands mid-branch, stop and split remaining work into a new branch and backlog slice.
 
+## Pull Request Formatting Rules (Mandatory)
+
+1. Use explicit markdown headings and bullets in PR descriptions (`## Summary`, `## Testing`).
+2. Do not pass literal escaped newline sequences (`\n`) as PR body text.
+3. When using `gh`, provide PR body with one of these safe patterns:
+   - ANSI-C quoting: `--body $'line1\nline2\n'`
+   - file input: `--body-file <path-to-markdown>`
+4. After create/edit, verify rendered formatting with `gh pr view <number>` before handoff.
+5. If formatting is wrong, immediately fix with `gh pr edit` and re-verify.
+
 ## Project Management Approach (Best Practice)
 
 Use a three-layer tracking model with clear separation of concerns:
