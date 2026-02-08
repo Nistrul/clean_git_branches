@@ -38,6 +38,38 @@ Agents can skip workflow steps when instructions are implied instead of explicit
 
 The above pattern is enforced in `AGENTS.md` under `Prompt Intake Workflow (Mandatory)`.
 
+## Template: Writing Future `AGENTS.md` Rules
+
+Use this structure when adding new mandatory process rules.
+
+```md
+## <Rule Section Name> (Mandatory)
+
+1. Trigger: On every <event>, run:
+   - <explicit command/check 1>
+   - <explicit command/check 2>
+2. Gate: If <condition fails>, stop and do:
+   - <recovery step 1>
+   - <recovery step 2>
+3. Prohibition: Do not <unsafe/ambiguous behavior>.
+4. Close-out: Before handoff, always:
+   - <verification step 1>
+   - <verification step 2>
+5. Output contract: If user asks for <report type>, include:
+   - <required metric 1>
+   - <required metric 2>
+```
+
+### Rule Quality Checklist
+
+1. Is the trigger explicit and testable?
+2. Are commands concrete (no implied steps)?
+3. Does the rule fail closed when checks fail?
+4. Is prohibited behavior stated directly?
+5. Is there a close-out checklist before handoff?
+6. If reporting is required, are fields enumerated?
+7. Is wording imperative and unambiguous?
+
 ## References
 
 1. OpenAI Prompt Engineering Guide: https://platform.openai.com/docs/guides/prompt-engineering
