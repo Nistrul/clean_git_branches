@@ -10,7 +10,10 @@ This file defines repository-level operating rules for coding agents and contrib
 2. Never run `git add` and `git commit` in parallel tool calls or parallel shell segments.
 3. Before committing, confirm intended files with `git status --short`.
 4. Stage explicitly (path-based), then commit in a separate command.
-5. If `.git/index.lock` exists, stop, resolve lock state safely, then continue sequentially.
+5. Run all Git commands sequentially; do not execute multiple Git commands in parallel tool calls or parallel shell segments.
+6. If a Git command fails with `.git/index.lock` present (or lock-related error), assume another Git process is active and re-run the same command after a short wait.
+7. Do not assume a lock is stale by default. Only treat it as stale after confirming no active Git process is running.
+8. Never delete `.git/index.lock` preemptively; remove it only when explicitly confirmed stale.
 
 Recommended commit sequence:
 
