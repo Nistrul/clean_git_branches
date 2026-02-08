@@ -27,8 +27,11 @@
 3. Added integration coverage to ensure protected remote-gone branches are never force-deleted.
 4. Added `CLEAN_GIT_BRANCHES_ASSUME_TTY=1` test-only hook to exercise interactive confirmation flow in non-TTY test runners.
 5. Verified full suite passes via `test/run-tests.sh` (16 tests).
+6. Completed `FEAT-003` `P1` slice: `INT-014`, `INT-015`, `INT-016`.
+7. Added integration coverage for default protected branch preservation, custom protected branch preservation, and mixed tracked/untracked/gone/protected classification.
+8. Verified full suite passes via `test/run-tests.sh` (19 tests).
 
 ## Current Focus
 
-1. Execute `FEAT-003` `P1` scenarios (`INT-014`, `INT-015`, `INT-016`, `INT-017`, `INT-018`, `INT-019`, `INT-021`, `INT-022`, `INT-028`).
+1. Execute `FEAT-003` `P1` scenarios (`INT-017`, `INT-018`, `INT-019`, `INT-021`, `INT-022`, `INT-028`).
 2. Then continue with remaining `P1` config and CLI scenarios (`INT-023`, `INT-024`, `INT-026`).
