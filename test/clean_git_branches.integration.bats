@@ -621,3 +621,55 @@ create_local_only_branch() {
   [ "$status" -eq 0 ]
   [[ "$output" == *"README.md"* ]]
 }
+
+@test "integration: large branch set executes reliably with mixed branch classes" {
+  local dirs
+  local work_dir
+  local i
+  local branch_name
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+
+  for i in $(seq 1 12); do
+    create_tracked_branch "$work_dir" "feature/stress-tracked-$i"
+    create_local_only_branch "$work_dir" "feature/stress-local-$i"
+  done
+
+  for i in $(seq 1 12); do
+    branch_name="feature/stress-gone-$i"
+    git -C "$work_dir" checkout -b "$branch_name" >/dev/null
+    echo "stress gone branch content for $branch_name" >> "$work_dir/README.md"
+    git -C "$work_dir" add README.md
+    git -C "$work_dir" commit -m "stress gone branch commit for $branch_name" >/dev/null
+    git -C "$work_dir" push -u origin "$branch_name" >/dev/null
+    git -C "$work_dir" checkout main >/dev/null
+    git -C "$work_dir" push origin --delete "$branch_name" >/dev/null
+  done
+  git -C "$work_dir" fetch --prune >/dev/null
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --force-delete-gone --silent
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Deleted remote-gone branches"* ]]
+  [[ "$output" == *"feature/stress-gone-1"* ]]
+  [[ "$output" == *"feature/stress-gone-12"* ]]
+  [[ "$output" == *"Tracked branches"* ]]
+  [[ "$output" == *"feature/stress-tracked-1"* ]]
+  [[ "$output" == *"feature/stress-tracked-12"* ]]
+  [[ "$output" == *"Untracked branches"* ]]
+  [[ "$output" == *"feature/stress-local-1"* ]]
+  [[ "$output" == *"feature/stress-local-12"* ]]
+
+  run bash -c "git -C '$work_dir' branch --list 'feature/stress-gone-*' | wc -l | tr -d ' '"
+  [ "$status" -eq 0 ]
+  [ "$output" -eq 0 ]
+
+  run bash -c "git -C '$work_dir' branch --list 'feature/stress-tracked-*' | wc -l | tr -d ' '"
+  [ "$status" -eq 0 ]
+  [ "$output" -eq 12 ]
+
+  run bash -c "git -C '$work_dir' branch --list 'feature/stress-local-*' | wc -l | tr -d ' '"
+  [ "$status" -eq 0 ]
+  [ "$output" -eq 12 ]
+}
