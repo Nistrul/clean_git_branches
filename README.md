@@ -90,6 +90,7 @@ Command-line flags (`--force-delete-gone` / `--no-force-delete-gone`) override t
 ## Branch Name Constraints
 
 Git ref rules apply directly to branch names. Branch names containing spaces are unsupported because Git rejects them at creation time.
+Unicode branch names are supported when they satisfy Git ref-format rules (for example, `feature/unicode-ßeta`).
 
 ## Mocked Git Workflow
 

@@ -51,8 +51,12 @@
 27. Documented branch-name constraint in `README.md` (`Branch Name Constraints`).
 28. Verified full suite passes via `test/run-tests.sh` (32 tests).
 29. Captured new request as deferred backlog slice `INT-037` (`FEAT-006`) for post-PR handoff progress reporting (initiative completeness %, feature complete/remaining counts, initiative totals, and next initiative).
+30. Completed next `FEAT-005` `P2` hardening slice: `INT-031`.
+31. Added integration coverage for Unicode tracked/local/gone branch names and verified remote-gone Unicode branch force deletion flow.
+32. Updated `README.md` `Branch Name Constraints` to document supported Unicode branch names under Git ref-format rules.
+33. Verified full suite passes via `test/run-tests.sh` (33 tests).
 
 ## Current Focus
 
-1. Execute `FEAT-005` next hardening slice (`INT-031`).
+1. Execute `FEAT-005` next hardening slice (`INT-032`).
 2. Execute `FEAT-003` presentation slice (`INT-035`) as an alternative small slice.
