@@ -67,8 +67,9 @@
 43. Completed `FEAT-003` `P2` presentation slice: `INT-035`.
 44. Added integration coverage asserting section headers only render when corresponding sections have content.
 45. Verified full suite passes via `test/run-tests.sh` (37 tests).
+46. Completed request-driven reporting slice `INT-037` (`FEAT-006`) and standardized post-PR handoff reporting fields.
+47. Captured post-PR handoff metrics in the handoff format: initiative completion percentage, completed vs remaining feature counts, active initiative count, and next initiative (or explicit none).
 
 ## Current Focus
 
-1. Execute `FEAT-006` handoff progress reporting slice (`INT-037`) when requested.
-2. Execute `FEAT-004` diagnostics UX follow-up slice (`INT-036`).
+1. Execute `FEAT-004` diagnostics UX follow-up slice (`INT-036`).
