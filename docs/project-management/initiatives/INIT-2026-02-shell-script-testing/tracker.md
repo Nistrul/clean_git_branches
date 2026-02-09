@@ -35,5 +35,6 @@
 
 ## Next Actions
 
-1. Complete `FEAT-007` coverage validation (`INT-040`) and capture/add any missing high-risk integration scenarios.
-2. Add CI entrypoint for automated test execution.
+1. Complete `FEAT-007` coverage validation (`INT-040`) and add the non-interactive dry-run contract test (`INT-041`).
+2. Reduce integration runtime by shifting equivalent assertions to mocked tests (`INT-044`) and consolidating overlap (`INT-042`, `INT-043`).
+3. Add CI entrypoint for automated test execution.
