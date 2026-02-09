@@ -2,7 +2,7 @@
 
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Status: In Progress
-- Current Feature Focus: `FEAT-004` diagnostics UX follow-up (`INT-036`)
+- Current Feature Focus: Backlog scenario execution complete; next milestone is CI test entrypoint.
 - Last updated: 2026-02-08
 
 ## Completion Legend
@@ -34,5 +34,4 @@
 
 ## Next Actions
 
-1. Execute `FEAT-004` diagnostics UX follow-up (`INT-036`).
-2. Add CI entrypoint for automated test execution.
+1. Add CI entrypoint for automated test execution.

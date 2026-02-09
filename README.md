@@ -9,7 +9,7 @@ Clean Git Branches is a command-line tool that helps maintain a tidy Git reposit
 - Optionally force delete remote-gone branches with `git branch -D`
 - Easy-to-read, color-coded branch output
 - Customizable protected branches
-- Optional diagnostic mode for troubleshooting
+- Optional verbose diagnostics mode for troubleshooting
 
 ## Installation
 
@@ -68,7 +68,7 @@ clean_git_branches --force-delete-gone --silent
 To print additional runtime diagnostics while troubleshooting:
 
 ```bash
-clean_git_branches --diagnose
+clean_git_branches --verbose
 ```
 
 ## Configuration
@@ -97,7 +97,7 @@ Unicode branch names are supported when they satisfy Git ref-format rules (for e
 Use the included mocked `git` harness when you want to work on output/layout behavior without a real repository:
 
 ```bash
-test/helpers/run-with-mock-git.sh test/fixtures/mock-git/default.env --diagnose --no-force-delete-gone
+test/helpers/run-with-mock-git.sh test/fixtures/mock-git/default.env --verbose --no-force-delete-gone
 ```
 
 Additional scenarios:

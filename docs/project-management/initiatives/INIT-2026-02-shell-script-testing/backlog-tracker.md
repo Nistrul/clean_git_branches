@@ -41,7 +41,7 @@
 17. Verified full suite passes via `test/run-tests.sh` (27 tests).
 18. Added deferred low-priority backlog scenario `INT-036` under `FEAT-004` to replace `--diagnose` with `--verbose` and improve diagnostics formatting/readability.
 19. Completed `FEAT-004` remaining `P1` slice: `INT-026`.
-20. Added integration coverage asserting `--diagnose` emits expected repository-state and mode-selection diagnostics.
+20. Added integration coverage asserting diagnostics output emits expected repository-state and mode-selection details.
 21. Verified full suite passes via `test/run-tests.sh` (30 tests).
 22. Completed first `FEAT-005` `P2` hardening slice: `INT-029`.
 23. Added stress-sanity integration coverage for a large mixed branch set (tracked, local-only, remote-gone) with deterministic assertions.
@@ -73,7 +73,11 @@
 49. Clarified PR cohesion rule: process-slice changes may combine agent rules and supporting project-management docs in one PR, while remaining separate from functional feature implementation changes.
 50. Extended default post-PR handoff reporting to include a concise prioritization summary (next slice + rationale versus other currently available tasks).
 51. Added explicit workflow guidance that starting a new slice on the previous feature branch is normal and should trigger routine branch alignment (`main` update + new scoped branch), not error escalation.
+52. Completed `FEAT-004` diagnostics UX follow-up slice: `INT-036`.
+53. Replaced CLI diagnostics flag `--diagnose` with `--verbose` and upgraded diagnostics output to structured section + key/value formatting.
+54. Updated integration coverage to assert formatted verbose diagnostics for repository state and mode-selection output.
+55. Verified full suite passes via `test/run-tests.sh` (37 tests).
 
 ## Current Focus
 
-1. Execute `FEAT-004` diagnostics UX follow-up slice (`INT-036`).
+1. Plan and execute the remaining initiative milestone: add CI entrypoint for automated test execution.

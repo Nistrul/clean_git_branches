@@ -17,7 +17,7 @@
 # performs, and the supported command-line options and environment variables.
 function _clean_git_branches_display_help() {
   cat <<EOF
-Usage: clean_git_branches [--help] [--diagnose] [--force-delete-gone|--no-force-delete-gone] [--dry-run] [--silent]
+Usage: clean_git_branches [--help] [--verbose] [--force-delete-gone|--no-force-delete-gone] [--dry-run] [--silent]
 
 This script is a utility to help manage your Git branches. It performs the following actions:
 
@@ -30,7 +30,7 @@ This script is a utility to help manage your Git branches. It performs the follo
 
 Options:
   --help             Show this help message and exit
-  --diagnose         Print diagnostic information while running
+  --verbose          Print verbose diagnostics while running
   --force-delete-gone      Force delete remote-gone branches (-D)
   --no-force-delete-gone   Do not delete remote-gone branches
   --dry-run                Show what would be deleted without deleting
@@ -48,7 +48,7 @@ Repository Config:
 EOF
 }
 
-DIAGNOSE=0
+VERBOSE=0
 DELETE_GONE_MODE="auto"
 DRY_RUN=0
 SILENT=0
@@ -58,8 +58,8 @@ for arg in "$@"; do
       _clean_git_branches_display_help
       exit 0
       ;;
-    --diagnose)
-      DIAGNOSE=1
+    --verbose)
+      VERBOSE=1
       ;;
     --force-delete-gone)
       DELETE_GONE_MODE="on"
@@ -81,9 +81,22 @@ for arg in "$@"; do
   esac
 done
 
-function _clean_git_branches_diagnose() {
-  if [ "$DIAGNOSE" -eq 1 ]; then
-    echo -e "\033[0;36m[diagnose]\033[0m $*" >&2
+function _clean_git_branches_verbose_section() {
+  if [ "$VERBOSE" -eq 1 ]; then
+    echo >&2
+    echo -e "\033[1;36m[verbose] $*\033[0m" >&2
+  fi
+}
+
+function _clean_git_branches_verbose_log() {
+  if [ "$VERBOSE" -eq 1 ]; then
+    echo -e "\033[0;36m[verbose]\033[0m $*" >&2
+  fi
+}
+
+function _clean_git_branches_verbose_kv() {
+  if [ "$VERBOSE" -eq 1 ]; then
+    printf "\033[0;36m[verbose]\033[0m %-30s %s\n" "$1:" "$2" >&2
   fi
 }
 
@@ -101,10 +114,12 @@ function _clean_git_branches_load_delete_gone_default() {
     if [ "$config_value" = "true" ] || [ "$config_value" = "1" ] || [ "$config_value" = "yes" ]; then
       DELETE_GONE_DEFAULT=1
     fi
-    _clean_git_branches_diagnose "Config file: $config_file"
-    _clean_git_branches_diagnose "Config FORCE_DELETE_GONE_BRANCHES: ${config_value:-unset}"
+    _clean_git_branches_verbose_section "Configuration"
+    _clean_git_branches_verbose_kv "Config file" "$config_file"
+    _clean_git_branches_verbose_kv "FORCE_DELETE_GONE_BRANCHES" "${config_value:-unset}"
   else
-    _clean_git_branches_diagnose "Config file: (none)"
+    _clean_git_branches_verbose_section "Configuration"
+    _clean_git_branches_verbose_kv "Config file" "(none)"
   fi
 }
 
@@ -123,10 +138,11 @@ function _clean_git_branches_should_delete_gone() {
       ;;
   esac
 
-  _clean_git_branches_diagnose "Delete remote-gone mode: $DELETE_GONE_MODE"
-  _clean_git_branches_diagnose "Delete remote-gone effective: $DELETE_GONE_EFFECTIVE"
-  _clean_git_branches_diagnose "Dry run: $DRY_RUN"
-  _clean_git_branches_diagnose "Silent: $SILENT"
+  _clean_git_branches_verbose_section "Mode Selection"
+  _clean_git_branches_verbose_kv "Delete remote-gone mode" "$DELETE_GONE_MODE"
+  _clean_git_branches_verbose_kv "Delete remote-gone effective" "$DELETE_GONE_EFFECTIVE"
+  _clean_git_branches_verbose_kv "Dry run" "$DRY_RUN"
+  _clean_git_branches_verbose_kv "Silent" "$SILENT"
 }
 
 # Delete merged branches, excluding protected branches
@@ -145,11 +161,12 @@ function _clean_git_branches_delete_merged() {
   fi
 
   merged_candidates=$(git branch --merged | egrep -v "(^\*|$PROTECTED_BRANCHES)")
-  _clean_git_branches_diagnose "Protected branch regex: $PROTECTED_BRANCHES"
-  _clean_git_branches_diagnose "Merged branch candidates: $(echo "$merged_candidates" | sed '/^$/d' | wc -l | tr -d ' ')"
+  _clean_git_branches_verbose_section "Merged Cleanup"
+  _clean_git_branches_verbose_kv "Protected branch regex" "$PROTECTED_BRANCHES"
+  _clean_git_branches_verbose_kv "Merged branch candidates" "$(echo "$merged_candidates" | sed '/^$/d' | wc -l | tr -d ' ')"
   if [ -n "$merged_candidates" ]; then
-    _clean_git_branches_diagnose "Merged candidates list:"
-    _clean_git_branches_diagnose "$(echo "$merged_candidates" | sed '/^$/d' | tr '\n' '; ')"
+    _clean_git_branches_verbose_log "Merged candidates list:"
+    _clean_git_branches_verbose_log "$(echo "$merged_candidates" | sed '/^$/d' | tr '\n' '; ')"
     printf '%s\n' "$merged_candidates" | xargs git branch -d
   fi
 }
@@ -174,7 +191,8 @@ function _clean_git_branches_delete_gone() {
   local branch_info
   local gone_candidates="$1"
 
-  _clean_git_branches_diagnose "Remote-gone deletion candidates: $(echo "$gone_candidates" | sed '/^$/d' | wc -l | tr -d ' ')"
+  _clean_git_branches_verbose_section "Remote-Gone Cleanup"
+  _clean_git_branches_verbose_kv "Deletion candidates" "$(echo "$gone_candidates" | sed '/^$/d' | wc -l | tr -d ' ')"
 
   while IFS= read -r branch; do
     [ -z "$branch" ] && continue
@@ -194,7 +212,7 @@ function _clean_git_branches_delete_gone() {
           echo "  $branch"
         fi
       else
-        _clean_git_branches_diagnose "Could not delete '$branch': $output"
+        _clean_git_branches_verbose_log "Could not delete '$branch': $output"
       fi
     fi
   done <<< "$gone_candidates"
@@ -261,7 +279,7 @@ function _clean_git_branches_confirm_force_delete() {
       return 0
       ;;
     *)
-      _clean_git_branches_diagnose "Force deletion skipped by user input"
+      _clean_git_branches_verbose_log "Force deletion skipped by user input"
       return 1
       ;;
   esac
@@ -287,10 +305,11 @@ function _clean_git_branches_show_deleted() {
   local deleted
 
   deleted=$(git branch -vv | grep -vE '^\*' | grep -E 'gone')
-  _clean_git_branches_diagnose "Remote-gone local branches: $(echo "$deleted" | sed '/^$/d' | wc -l | tr -d ' ')"
+  _clean_git_branches_verbose_section "Remote-Gone Reporting"
+  _clean_git_branches_verbose_kv "Remote-gone local branches" "$(echo "$deleted" | sed '/^$/d' | wc -l | tr -d ' ')"
   if [ -n "$deleted" ]; then
-    _clean_git_branches_diagnose "Remote-gone branch list:"
-    _clean_git_branches_diagnose "$(echo "$deleted" | sed '/^$/d' | awk '{print $1}' | tr '\n' '; ')"
+    _clean_git_branches_verbose_log "Remote-gone branch list:"
+    _clean_git_branches_verbose_log "$(echo "$deleted" | sed '/^$/d' | awk '{print $1}' | tr '\n' '; ')"
   fi
   echo "$deleted"
 }
@@ -342,14 +361,15 @@ function clean_git_branches() {
 
   current_branch=$(git branch --show-current)
   upstream_branch=$(git rev-parse --abbrev-ref --symbolic-full-name "@{upstream}" 2>/dev/null || true)
-  _clean_git_branches_diagnose "Repository: $(pwd)"
-  _clean_git_branches_diagnose "Current branch: $current_branch"
+  _clean_git_branches_verbose_section "Repository State"
+  _clean_git_branches_verbose_kv "Repository" "$(pwd)"
+  _clean_git_branches_verbose_kv "Current branch" "$current_branch"
   if [ -n "$upstream_branch" ]; then
-    _clean_git_branches_diagnose "Current branch upstream: $upstream_branch"
+    _clean_git_branches_verbose_kv "Current branch upstream" "$upstream_branch"
   else
-    _clean_git_branches_diagnose "Current branch upstream: (none)"
+    _clean_git_branches_verbose_kv "Current branch upstream" "(none)"
   fi
-  _clean_git_branches_diagnose "Branch status: $(git status -sb | head -n 1)"
+  _clean_git_branches_verbose_kv "Branch status" "$(git status -sb | head -n 1)"
   _clean_git_branches_should_delete_gone
   if ! branch_vv_probe_output=$(git branch -vv 2>&1); then
     echo "Failed to list branches via 'git branch -vv'." >&2
@@ -358,7 +378,7 @@ function clean_git_branches() {
   fi
   gone_candidates=$(_clean_git_branches_gone_branch_names)
   gone_candidate_count=$(echo "$gone_candidates" | sed '/^$/d' | wc -l | tr -d ' ')
-  _clean_git_branches_diagnose "Remote-gone deletion candidates: $gone_candidate_count"
+  _clean_git_branches_verbose_kv "Remote-gone deletion candidates" "$gone_candidate_count"
 
   deleted_merged=$(_clean_git_branches_delete_merged)
   if [ -n "$deleted_merged" ]; then
@@ -378,12 +398,12 @@ function clean_git_branches() {
 
   if [ "$DELETE_GONE_EFFECTIVE" -eq 1 ]; then
     if [ "$DRY_RUN" -eq 1 ]; then
-      _clean_git_branches_diagnose "Remote-gone mode: dry run (force-delete preview only)"
+      _clean_git_branches_verbose_log "Remote-gone mode: dry run (force-delete preview only)"
     else
-      _clean_git_branches_diagnose "Remote-gone mode: force delete enabled"
+      _clean_git_branches_verbose_log "Remote-gone mode: force delete enabled"
     fi
   else
-    _clean_git_branches_diagnose "Remote-gone mode: deletion disabled (report only)"
+    _clean_git_branches_verbose_log "Remote-gone mode: deletion disabled (report only)"
   fi
 
   if [ "$DELETE_GONE_EFFECTIVE" -eq 1 ]; then
@@ -417,7 +437,7 @@ function clean_git_branches() {
       fi
     fi
   else
-    _clean_git_branches_diagnose "Skipping remote-gone deletions"
+    _clean_git_branches_verbose_log "Skipping remote-gone deletions"
   fi
 
   deleted=$(_clean_git_branches_show_deleted)
