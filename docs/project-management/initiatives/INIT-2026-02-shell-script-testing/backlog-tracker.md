@@ -24,6 +24,7 @@
 7. Refined `INT-038` comment style based on review feedback by removing `Regression risk` lines and adding focused Git feature notes (for example `git branch -vv`, `fetch --prune`, detached HEAD, `rev-parse --show-toplevel`).
 8. Expanded the pre-prune/post-prune timing comment into a more explicit plain-language paragraph to explain why the same branch is expected to appear tracked before prune and remote-gone after prune.
 9. Expanded additional moderate/high-complexity integration-test comments into natural-language paragraphs so behavior and Git concepts remain understandable without deep Git background.
+10. Added concise plain-language intent comments to every remaining test in both Bats suites so each scenario is understandable at a glance.
 
 ### 2026-02-07
 

@@ -67,6 +67,8 @@ create_local_only_branch() {
 }
 
 @test "integration: deletes merged branches in real repository" {
+  # This is the baseline merged-branch cleanup behavior in a real Git repo (not mocks). We create a feature
+  # branch, merge it into main, run the script, and then confirm the merged branch is actually deleted.
   local dirs
   local origin_dir
   local work_dir
@@ -94,6 +96,9 @@ create_local_only_branch() {
 }
 
 @test "integration: force deletes remote-gone branches with local origin" {
+  # Here we verify the destructive "gone branch cleanup" path when force-delete is enabled. The branch tracks
+  # origin, then we delete it on the remote so local Git marks it as gone; after running the script, it should
+  # be removed locally.
   local dirs
   local origin_dir
   local work_dir
@@ -152,6 +157,8 @@ create_local_only_branch() {
 }
 
 @test "integration: dry run with force delete previews gone branches and does not delete" {
+  # Dry-run mode should show what would be deleted without changing branch state. This test confirms we get the
+  # preview message and that the branch still exists afterward.
   local dirs
   local work_dir
 
@@ -171,6 +178,8 @@ create_local_only_branch() {
 }
 
 @test "integration: no-force-delete-gone reports gone branches without deleting" {
+  # This checks report-only mode for gone branches. We still want visibility into stale branches, but no local
+  # deletion should happen when force-delete is off.
   local dirs
   local work_dir
 
@@ -259,6 +268,8 @@ create_local_only_branch() {
 }
 
 @test "integration: protected gone branch is never force deleted" {
+  # Even with force-delete enabled, protected branches must never be removed. We use `dev` to prove protection
+  # rules override gone-branch deletion candidates.
   local dirs
   local work_dir
 
@@ -316,6 +327,8 @@ create_local_only_branch() {
 }
 
 @test "integration: custom protected branch names are preserved when gone" {
+  # This verifies that custom protection rules are honored, not just built-in defaults. We mark `release` as
+  # protected and confirm it is reported but not deleted when remote-gone.
   local dirs
   local work_dir
 
@@ -367,6 +380,8 @@ create_local_only_branch() {
 }
 
 @test "integration: no merged branches does not print merged deletion section" {
+  # When nothing is merged, we should avoid noisy output that suggests merged cleanup happened. This keeps the
+  # report honest and easier to scan.
   local dirs
   local work_dir
 
@@ -383,6 +398,8 @@ create_local_only_branch() {
 }
 
 @test "integration: branch names with slashes are classified correctly" {
+  # Branch names often include path-style slashes (`feature/a/b`). This test confirms those names are parsed
+  # correctly across tracked, local-only, and gone classifications.
   local dirs
   local work_dir
 
@@ -431,6 +448,8 @@ create_local_only_branch() {
 }
 
 @test "integration: branch names with dots dashes and underscores are handled correctly" {
+  # This covers common punctuation-heavy branch names to ensure parsing and deletion logic do not accidentally
+  # break on separators like `.`, `-`, or `_`.
   local dirs
   local work_dir
 
@@ -532,6 +551,8 @@ create_local_only_branch() {
 }
 
 @test "integration: dirty worktree does not break cleanup and classification flow" {
+  # Users often run cleanup with uncommitted changes present. This test confirms branch classification/deletion
+  # still works and the script does not require a clean working tree.
   local dirs
   local work_dir
 
@@ -566,6 +587,8 @@ create_local_only_branch() {
 }
 
 @test "integration: config true enables force delete in auto mode" {
+  # In auto mode, repo config can choose behavior. This test checks that setting
+  # `FORCE_DELETE_GONE_BRANCHES=true` enables deletion even without CLI override flags.
   local dirs
   local work_dir
 
@@ -586,6 +609,8 @@ create_local_only_branch() {
 }
 
 @test "integration: cli no-force-delete-gone overrides config true" {
+  # CLI flags should win over config for predictability. Here config says "delete", but explicit CLI
+  # `--no-force-delete-gone` must switch behavior back to report-only.
   local dirs
   local work_dir
 
@@ -606,6 +631,8 @@ create_local_only_branch() {
 }
 
 @test "integration: cli force-delete-gone overrides config false" {
+  # This is the opposite precedence case: config says "do not delete", but explicit CLI
+  # `--force-delete-gone` must take priority and perform deletion.
   local dirs
   local work_dir
 
@@ -673,6 +700,8 @@ create_local_only_branch() {
 }
 
 @test "integration: verbose flag emits formatted diagnostics for repository state and mode selection" {
+  # Verbose mode is a troubleshooting aid. This test verifies the diagnostic sections and key lines remain
+  # stable so users can trust the output when debugging behavior.
   local dirs
   local work_dir
 
@@ -694,6 +723,8 @@ create_local_only_branch() {
 }
 
 @test "integration: running from repo subdirectory keeps classification behavior correct" {
+  # This is a broader subdirectory case that includes tracked/local-only/gone classes together. Running from
+  # nested paths should not change classification results.
   local dirs
   local work_dir
 
@@ -798,6 +829,8 @@ EOF
 }
 
 @test "integration: dirty worktree does not break classification and reporting flow" {
+  # This is a reporting-focused dirty-worktree scenario. We verify output sections remain correct and that the
+  # original uncommitted file change is still present after the run.
   local dirs
   local work_dir
 
