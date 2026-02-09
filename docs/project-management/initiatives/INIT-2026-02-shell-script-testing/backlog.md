@@ -2,7 +2,7 @@
 
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Status: Active
-- Last updated: 2026-02-08
+- Last updated: 2026-02-09
 - Tracker: `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/backlog-tracker.md`
 
 ## Prioritization Model
@@ -30,6 +30,7 @@
 | FEAT-004 | CLI contract and diagnostics | Ensure flag behavior, help output, and diagnostics are stable and testable. |
 | FEAT-005 | Hardening and edge-path reliability | Ensure rare and failure-path behavior stays deterministic and safe. |
 | FEAT-006 | PR handoff progress reporting | Ensure handoff includes initiative completion percentage and remaining feature counts after PR creation. |
+| FEAT-007 | Integration test suite maintainability | Keep integration tests ordered by related behavior so intent and coverage are easier to review. |
 
 ## Backlog
 
@@ -73,6 +74,7 @@
 | INT-036 | FEAT-004 | Replace `--diagnose` with `--verbose` and present richer formatted diagnostics | P2 | M | done |
 | INT-037 | FEAT-006 | After PR creation, report initiative completeness %, completed vs remaining features, total initiatives, and next initiative before handoff | P1 | S | done |
 | INT-038 | FEAT-005 | Add intent comments for non-obvious advanced integration tests to document failure modes | P2 | S | done |
+| INT-039 | FEAT-007 | Reorder integration tests so related scenarios are grouped and the file has a logical progression | P2 | S | done |
 
 ## Suggested Execution Order
 

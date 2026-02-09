@@ -95,6 +95,45 @@ create_local_only_branch() {
   [ -z "$output" ]
 }
 
+@test "integration: no merged branches does not print merged deletion section" {
+  # When nothing is merged, we should avoid noisy output that suggests merged cleanup happened. This keeps the
+  # report honest and easier to scan.
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+  create_tracked_branch "$work_dir" "feature/not-merged"
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --no-force-delete-gone --silent
+
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"Deleted merged branches"* ]]
+  [[ "$output" == *"Tracked branches"* ]]
+  [[ "$output" == *"feature/not-merged"* ]]
+}
+
+@test "integration: no-force-delete-gone reports gone branches without deleting" {
+  # This checks report-only mode for gone branches. We still want visibility into stale branches, but no local
+  # deletion should happen when force-delete is off.
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+  create_gone_branch "$work_dir" "feature/report-gone"
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --no-force-delete-gone
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Remote-gone branches (deletion disabled)"* ]]
+  [[ "$output" == *"feature/report-gone"* ]]
+
+  run git -C "$work_dir" branch --list feature/report-gone
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"feature/report-gone"* ]]
+}
+
 @test "integration: force deletes remote-gone branches with local origin" {
   # Here we verify the destructive "gone branch cleanup" path when force-delete is enabled. The branch tracks
   # origin, then we delete it on the remote so local Git marks it as gone; after running the script, it should
@@ -123,6 +162,27 @@ create_local_only_branch() {
   run git -C "$work_dir" branch --list feature/gone
   [ "$status" -eq 0 ]
   [ -z "$output" ]
+}
+
+@test "integration: dry run with force delete previews gone branches and does not delete" {
+  # Dry-run mode should show what would be deleted without changing branch state. This test confirms we get the
+  # preview message and that the branch still exists afterward.
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+  create_gone_branch "$work_dir" "feature/dry-run-gone"
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --dry-run --force-delete-gone --silent
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Would delete remote-gone branches (dry run)"* ]]
+  [[ "$output" == *"feature/dry-run-gone"* ]]
+
+  run git -C "$work_dir" branch --list feature/dry-run-gone
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"feature/dry-run-gone"* ]]
 }
 
 @test "integration: remote delete before local prune remains deterministic across pre and post prune runs" {
@@ -154,48 +214,6 @@ create_local_only_branch() {
   [ "$status" -eq 0 ]
   [[ "$output" == *"Remote-gone branches (deletion disabled)"* ]]
   [[ "$output" == *"feature/fetch-prune-edge"* ]]
-}
-
-@test "integration: dry run with force delete previews gone branches and does not delete" {
-  # Dry-run mode should show what would be deleted without changing branch state. This test confirms we get the
-  # preview message and that the branch still exists afterward.
-  local dirs
-  local work_dir
-
-  dirs="$(create_repo_with_origin)"
-  work_dir="${dirs##*|}"
-  create_gone_branch "$work_dir" "feature/dry-run-gone"
-
-  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --dry-run --force-delete-gone --silent
-
-  [ "$status" -eq 0 ]
-  [[ "$output" == *"Would delete remote-gone branches (dry run)"* ]]
-  [[ "$output" == *"feature/dry-run-gone"* ]]
-
-  run git -C "$work_dir" branch --list feature/dry-run-gone
-  [ "$status" -eq 0 ]
-  [[ "$output" == *"feature/dry-run-gone"* ]]
-}
-
-@test "integration: no-force-delete-gone reports gone branches without deleting" {
-  # This checks report-only mode for gone branches. We still want visibility into stale branches, but no local
-  # deletion should happen when force-delete is off.
-  local dirs
-  local work_dir
-
-  dirs="$(create_repo_with_origin)"
-  work_dir="${dirs##*|}"
-  create_gone_branch "$work_dir" "feature/report-gone"
-
-  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --no-force-delete-gone
-
-  [ "$status" -eq 0 ]
-  [[ "$output" == *"Remote-gone branches (deletion disabled)"* ]]
-  [[ "$output" == *"feature/report-gone"* ]]
-
-  run git -C "$work_dir" branch --list feature/report-gone
-  [ "$status" -eq 0 ]
-  [[ "$output" == *"feature/report-gone"* ]]
 }
 
 @test "integration: non-interactive force delete requires confirmation without silent flag" {
@@ -379,24 +397,6 @@ create_local_only_branch() {
   [[ "$output" == *"dev"* ]]
 }
 
-@test "integration: no merged branches does not print merged deletion section" {
-  # When nothing is merged, we should avoid noisy output that suggests merged cleanup happened. This keeps the
-  # report honest and easier to scan.
-  local dirs
-  local work_dir
-
-  dirs="$(create_repo_with_origin)"
-  work_dir="${dirs##*|}"
-  create_tracked_branch "$work_dir" "feature/not-merged"
-
-  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --no-force-delete-gone --silent
-
-  [ "$status" -eq 0 ]
-  [[ "$output" != *"Deleted merged branches"* ]]
-  [[ "$output" == *"Tracked branches"* ]]
-  [[ "$output" == *"feature/not-merged"* ]]
-}
-
 @test "integration: branch names with slashes are classified correctly" {
   # Branch names often include path-style slashes (`feature/a/b`). This test confirms those names are parsed
   # correctly across tracked, local-only, and gone classifications.
@@ -419,32 +419,6 @@ create_local_only_branch() {
   [[ "$output" == *"feature/local/only"* ]]
   [[ "$output" == *"Remote-gone branches (deletion disabled)"* ]]
   [[ "$output" == *"feature/gone/a"* ]]
-}
-
-@test "integration: branch names with spaces are unsupported by git ref format" {
-  # This test documents a Git rule that can be surprising if you only think at script level: branch names
-  # cannot contain spaces. `git branch "feature/space name"` fails before our script even gets a chance to
-  # classify anything. We keep a valid control case in the same test to show the script still behaves normally
-  # once branch names obey Git ref-format rules.
-  local dirs
-  local work_dir
-
-  dirs="$(create_repo_with_origin)"
-  work_dir="${dirs##*|}"
-
-  run git -C "$work_dir" branch "feature/space name"
-  [ "$status" -ne 0 ]
-
-  create_tracked_branch "$work_dir" "feature/space-control"
-  create_gone_branch "$work_dir" "feature/space-control-gone"
-
-  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --no-force-delete-gone --silent
-
-  [ "$status" -eq 0 ]
-  [[ "$output" == *"Tracked branches"* ]]
-  [[ "$output" == *"feature/space-control"* ]]
-  [[ "$output" == *"Remote-gone branches (deletion disabled)"* ]]
-  [[ "$output" == *"feature/space-control-gone"* ]]
 }
 
 @test "integration: branch names with dots dashes and underscores are handled correctly" {
@@ -505,6 +479,32 @@ create_local_only_branch() {
   [ -z "$output" ]
 }
 
+@test "integration: branch names with spaces are unsupported by git ref format" {
+  # This test documents a Git rule that can be surprising if you only think at script level: branch names
+  # cannot contain spaces. `git branch "feature/space name"` fails before our script even gets a chance to
+  # classify anything. We keep a valid control case in the same test to show the script still behaves normally
+  # once branch names obey Git ref-format rules.
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+
+  run git -C "$work_dir" branch "feature/space name"
+  [ "$status" -ne 0 ]
+
+  create_tracked_branch "$work_dir" "feature/space-control"
+  create_gone_branch "$work_dir" "feature/space-control-gone"
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --no-force-delete-gone --silent
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Tracked branches"* ]]
+  [[ "$output" == *"feature/space-control"* ]]
+  [[ "$output" == *"Remote-gone branches (deletion disabled)"* ]]
+  [[ "$output" == *"feature/space-control-gone"* ]]
+}
+
 @test "integration: detached HEAD does not crash and still reports branch sections safely" {
   # In detached HEAD, Git is pointing directly at a commit instead of an active branch, so commands like
   # `git branch --show-current` return an empty value. That can easily break scripts that assume a current
@@ -550,6 +550,60 @@ create_local_only_branch() {
   [[ "$output" == *"main"* ]]
 }
 
+@test "integration: running from repo subdirectory keeps classification behavior correct" {
+  # This is a broader subdirectory case that includes tracked/local-only/gone classes together. Running from
+  # nested paths should not change classification results.
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+  mkdir -p "$work_dir/sub/dir"
+
+  create_tracked_branch "$work_dir" "feature/subdir-tracked"
+  create_local_only_branch "$work_dir" "feature/subdir-local-only"
+  create_gone_branch "$work_dir" "feature/subdir-gone"
+
+  run bash -c "cd '$work_dir/sub/dir' && '$repo_root/clean_git_branches.sh' --no-force-delete-gone --silent"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Tracked branches"* ]]
+  [[ "$output" == *"feature/subdir-tracked"* ]]
+  [[ "$output" == *"Untracked branches"* ]]
+  [[ "$output" == *"feature/subdir-local-only"* ]]
+  [[ "$output" == *"Remote-gone branches (deletion disabled)"* ]]
+  [[ "$output" == *"feature/subdir-gone"* ]]
+}
+
+@test "integration: dirty worktree does not break classification and reporting flow" {
+  # This is a reporting-focused dirty-worktree scenario. We verify output sections remain correct and that the
+  # original uncommitted file change is still present after the run.
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+
+  create_tracked_branch "$work_dir" "feature/dirty-tracked"
+  create_local_only_branch "$work_dir" "feature/dirty-local-only"
+  create_gone_branch "$work_dir" "feature/dirty-gone"
+  echo "dirty change" >> "$work_dir/README.md"
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --no-force-delete-gone --silent
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Tracked branches"* ]]
+  [[ "$output" == *"feature/dirty-tracked"* ]]
+  [[ "$output" == *"Untracked branches"* ]]
+  [[ "$output" == *"feature/dirty-local-only"* ]]
+  [[ "$output" == *"Remote-gone branches (deletion disabled)"* ]]
+  [[ "$output" == *"feature/dirty-gone"* ]]
+
+  run git -C "$work_dir" status --short
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"README.md"* ]]
+}
+
 @test "integration: dirty worktree does not break cleanup and classification flow" {
   # Users often run cleanup with uncommitted changes present. This test confirms branch classification/deletion
   # still works and the script does not require a clean working tree.
@@ -584,6 +638,26 @@ create_local_only_branch() {
   run git -C "$work_dir" branch --list feature/dirty-merged
   [ "$status" -eq 0 ]
   [ -z "$output" ]
+}
+
+@test "integration: section headers render only when their sections have content" {
+  # This test keeps output readable and trustworthy. If a section has no items, we do not want to print an
+  # empty header because that suggests some action or category exists when it does not. We disable protected
+  # matching and assert all section headers stay hidden in an all-empty result.
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+
+  run bash -c "PROTECTED_BRANCHES='^$' '$repo_root/test/helpers/run-in-repo.sh' '$work_dir' --no-force-delete-gone --silent"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"Deleted merged branches"* ]]
+  [[ "$output" != *"Untracked branches"* ]]
+  [[ "$output" != *"Remote-gone branches"* ]]
+  [[ "$output" != *"Tracked branches"* ]]
+  [[ "$output" != *"Protected branches"* ]]
 }
 
 @test "integration: config true enables force delete in auto mode" {
@@ -722,31 +796,6 @@ create_local_only_branch() {
   [[ "$output" == *"Remote-gone mode: deletion disabled (report only)"* ]]
 }
 
-@test "integration: running from repo subdirectory keeps classification behavior correct" {
-  # This is a broader subdirectory case that includes tracked/local-only/gone classes together. Running from
-  # nested paths should not change classification results.
-  local dirs
-  local work_dir
-
-  dirs="$(create_repo_with_origin)"
-  work_dir="${dirs##*|}"
-  mkdir -p "$work_dir/sub/dir"
-
-  create_tracked_branch "$work_dir" "feature/subdir-tracked"
-  create_local_only_branch "$work_dir" "feature/subdir-local-only"
-  create_gone_branch "$work_dir" "feature/subdir-gone"
-
-  run bash -c "cd '$work_dir/sub/dir' && '$repo_root/clean_git_branches.sh' --no-force-delete-gone --silent"
-
-  [ "$status" -eq 0 ]
-  [[ "$output" == *"Tracked branches"* ]]
-  [[ "$output" == *"feature/subdir-tracked"* ]]
-  [[ "$output" == *"Untracked branches"* ]]
-  [[ "$output" == *"feature/subdir-local-only"* ]]
-  [[ "$output" == *"Remote-gone branches (deletion disabled)"* ]]
-  [[ "$output" == *"feature/subdir-gone"* ]]
-}
-
 @test "integration: branch vv failure exits non-zero with predictable error output" {
   # The script asks Git for a detailed branch list using `git branch -vv`. That list tells us which branches
   # are connected to a remote branch and which ones are no longer connected because the remote branch was
@@ -826,55 +875,6 @@ EOF
   run git -C "$work_dir" branch --list feature/rev-parse-fallback-gone
   [ "$status" -eq 0 ]
   [[ "$output" == *"feature/rev-parse-fallback-gone"* ]]
-}
-
-@test "integration: dirty worktree does not break classification and reporting flow" {
-  # This is a reporting-focused dirty-worktree scenario. We verify output sections remain correct and that the
-  # original uncommitted file change is still present after the run.
-  local dirs
-  local work_dir
-
-  dirs="$(create_repo_with_origin)"
-  work_dir="${dirs##*|}"
-
-  create_tracked_branch "$work_dir" "feature/dirty-tracked"
-  create_local_only_branch "$work_dir" "feature/dirty-local-only"
-  create_gone_branch "$work_dir" "feature/dirty-gone"
-  echo "dirty change" >> "$work_dir/README.md"
-
-  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --no-force-delete-gone --silent
-
-  [ "$status" -eq 0 ]
-  [[ "$output" == *"Tracked branches"* ]]
-  [[ "$output" == *"feature/dirty-tracked"* ]]
-  [[ "$output" == *"Untracked branches"* ]]
-  [[ "$output" == *"feature/dirty-local-only"* ]]
-  [[ "$output" == *"Remote-gone branches (deletion disabled)"* ]]
-  [[ "$output" == *"feature/dirty-gone"* ]]
-
-  run git -C "$work_dir" status --short
-  [ "$status" -eq 0 ]
-  [[ "$output" == *"README.md"* ]]
-}
-
-@test "integration: section headers render only when their sections have content" {
-  # This test keeps output readable and trustworthy. If a section has no items, we do not want to print an
-  # empty header because that suggests some action or category exists when it does not. We disable protected
-  # matching and assert all section headers stay hidden in an all-empty result.
-  local dirs
-  local work_dir
-
-  dirs="$(create_repo_with_origin)"
-  work_dir="${dirs##*|}"
-
-  run bash -c "PROTECTED_BRANCHES='^$' '$repo_root/test/helpers/run-in-repo.sh' '$work_dir' --no-force-delete-gone --silent"
-
-  [ "$status" -eq 0 ]
-  [[ "$output" != *"Deleted merged branches"* ]]
-  [[ "$output" != *"Untracked branches"* ]]
-  [[ "$output" != *"Remote-gone branches"* ]]
-  [[ "$output" != *"Tracked branches"* ]]
-  [[ "$output" != *"Protected branches"* ]]
 }
 
 @test "integration: large branch set executes reliably with mixed branch classes" {

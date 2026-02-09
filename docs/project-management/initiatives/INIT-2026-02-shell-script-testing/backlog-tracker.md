@@ -91,6 +91,9 @@
 53. Replaced CLI diagnostics flag `--diagnose` with `--verbose` and upgraded diagnostics output to structured section + key/value formatting.
 54. Updated integration coverage to assert formatted verbose diagnostics for repository state and mode-selection output.
 55. Verified full suite passes via `test/run-tests.sh` (37 tests).
+56. Completed integration-test maintainability slice `INT-039` (`FEAT-007`) on branch `feat/INIT-2026-02-shell-script-testing/FEAT-007-integration-test-ordering`.
+57. Reordered `test/clean_git_branches.integration.bats` so related scenarios are grouped in a clearer top-to-bottom progression (cleanup modes, confirmation/protection, classification/naming, execution context, config/diagnostics, failure and stress).
+58. Verified regression safety via targeted integration run: `bats test/clean_git_branches.integration.bats` (32 tests passing).
 
 ## Current Focus
 
