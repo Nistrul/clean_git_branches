@@ -30,7 +30,7 @@
 | FEAT-004 | CLI contract and diagnostics | Ensure flag behavior, help output, and diagnostics are stable and testable. |
 | FEAT-005 | Hardening and edge-path reliability | Ensure rare and failure-path behavior stays deterministic and safe. |
 | FEAT-006 | PR handoff progress reporting | Ensure handoff includes initiative completion percentage and remaining feature counts after PR creation. |
-| FEAT-007 | Integration test suite maintainability | Keep integration tests ordered by related behavior so intent and coverage are easier to review. |
+| FEAT-007 | Integration test suite coverage and maintainability | Keep integration tests logically ordered and validate coverage completeness before closing integration-test hardening. |
 
 ## Backlog
 
@@ -75,11 +75,12 @@
 | INT-037 | FEAT-006 | After PR creation, report initiative completeness %, completed vs remaining features, total initiatives, and next initiative before handoff | P1 | S | done |
 | INT-038 | FEAT-005 | Add intent comments for non-obvious advanced integration tests to document failure modes | P2 | S | done |
 | INT-039 | FEAT-007 | Reorder integration tests so related scenarios are grouped and the file has a logical progression | P2 | S | done |
+| INT-040 | FEAT-007 | Validate integration-test coverage map and capture/add missing high-risk scenarios before closing FEAT-007 | P1 | M | in_progress |
 
 ## Suggested Execution Order
 
-1. All currently defined backlog scenarios are complete.
+1. Execute `INT-040` to validate coverage and add any missing high-risk integration scenarios.
 
 ## Sprintable Next Slice
 
-1. No additional scenario backlog slices are currently defined.
+1. Continue `INT-040` to complete FEAT-007 coverage validation and any required follow-up test additions.
