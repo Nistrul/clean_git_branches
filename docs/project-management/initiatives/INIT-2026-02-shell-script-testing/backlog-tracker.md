@@ -91,7 +91,12 @@
 53. Replaced CLI diagnostics flag `--diagnose` with `--verbose` and upgraded diagnostics output to structured section + key/value formatting.
 54. Updated integration coverage to assert formatted verbose diagnostics for repository state and mode-selection output.
 55. Verified full suite passes via `test/run-tests.sh` (37 tests).
+56. Completed integration-test maintainability slice `INT-039` (`FEAT-007`) on branch `feat/INIT-2026-02-shell-script-testing/FEAT-007-integration-test-ordering`.
+57. Reordered `test/clean_git_branches.integration.bats` so related scenarios are grouped in a clearer top-to-bottom progression (cleanup modes, confirmation/protection, classification/naming, execution context, config/diagnostics, failure and stress).
+58. Verified regression safety via targeted integration run: `bats test/clean_git_branches.integration.bats` (32 tests passing).
+59. Rescoped `FEAT-007` from ordering-only to ongoing coverage-and-maintainability scope so the feature stays open for coverage validation follow-up work.
+60. Added `INT-040` under `FEAT-007` as `in_progress` to validate coverage completeness and add/capture missing high-risk integration scenarios before closing the feature.
 
 ## Current Focus
 
-1. Plan and execute the remaining initiative milestone: add CI entrypoint for automated test execution.
+1. Complete `INT-040` coverage validation work for `FEAT-007`, then proceed to the remaining initiative milestone: add CI entrypoint for automated test execution.

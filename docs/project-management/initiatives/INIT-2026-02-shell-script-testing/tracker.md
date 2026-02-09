@@ -2,8 +2,8 @@
 
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Status: In Progress
-- Current Feature Focus: Backlog scenario execution complete; next milestone is CI test entrypoint.
-- Last updated: 2026-02-08
+- Current Feature Focus: `FEAT-007` coverage validation is in progress after test-ordering cleanup; CI entrypoint remains next milestone after coverage closure.
+- Last updated: 2026-02-09
 
 ## Completion Legend
 
@@ -21,7 +21,8 @@
 6. `[x]` Add first mocked success-path test.
 7. `[x]` Add mocked failure-path tests.
 8. `[x]` Add real Git integration tests.
-9. `[ ]` Add CI entrypoint for tests.
+9. `[~]` Validate integration-test coverage and close remaining `FEAT-007` slices.
+10. `[ ]` Add CI entrypoint for tests.
 
 ## Working Notes
 
@@ -34,4 +35,5 @@
 
 ## Next Actions
 
-1. Add CI entrypoint for automated test execution.
+1. Complete `FEAT-007` coverage validation (`INT-040`) and capture/add any missing high-risk integration scenarios.
+2. Add CI entrypoint for automated test execution.
