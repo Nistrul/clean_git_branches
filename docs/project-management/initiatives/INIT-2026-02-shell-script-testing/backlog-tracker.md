@@ -18,6 +18,14 @@
 1. Completed FEAT-004 follow-up polish on `feat/INIT-2026-02-shell-script-testing/FEAT-004-int-036-verbose-diagnostics`.
 2. Improved report readability in verbose mode by inserting a single separator newline before the first printed report section.
 3. Verified regression safety via full suite run: `test/run-tests.sh` (37 tests passing).
+4. Completed documentation hardening slice `INT-038` (`FEAT-005`) for non-obvious advanced integration tests.
+5. Added concise `Why` and regression-risk comments in integration tests to explain scenario intent and anticipated failure modes.
+6. Verified regression safety via full suite run: `test/run-tests.sh` (37 tests passing).
+7. Refined `INT-038` comment style based on review feedback by removing `Regression risk` lines and adding focused Git feature notes (for example `git branch -vv`, `fetch --prune`, detached HEAD, `rev-parse --show-toplevel`).
+8. Expanded the pre-prune/post-prune timing comment into a more explicit plain-language paragraph to explain why the same branch is expected to appear tracked before prune and remote-gone after prune.
+9. Expanded additional moderate/high-complexity integration-test comments into natural-language paragraphs so behavior and Git concepts remain understandable without deep Git background.
+10. Added concise plain-language intent comments to every remaining test in both Bats suites so each scenario is understandable at a glance.
+11. Simplified the two remaining hard-to-parse comments (`git branch -vv` failure and repo-top-folder fallback) to remove jargon and use direct plain-language phrasing.
 
 ### 2026-02-07
 

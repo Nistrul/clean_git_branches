@@ -72,6 +72,7 @@
 | INT-035 | FEAT-003 | Section headers only render when corresponding section has content | P2 | S | done |
 | INT-036 | FEAT-004 | Replace `--diagnose` with `--verbose` and present richer formatted diagnostics | P2 | M | done |
 | INT-037 | FEAT-006 | After PR creation, report initiative completeness %, completed vs remaining features, total initiatives, and next initiative before handoff | P1 | S | done |
+| INT-038 | FEAT-005 | Add intent comments for non-obvious advanced integration tests to document failure modes | P2 | S | done |
 
 ## Suggested Execution Order
 

@@ -67,6 +67,8 @@ create_local_only_branch() {
 }
 
 @test "integration: deletes merged branches in real repository" {
+  # This is the baseline merged-branch cleanup behavior in a real Git repo (not mocks). We create a feature
+  # branch, merge it into main, run the script, and then confirm the merged branch is actually deleted.
   local dirs
   local origin_dir
   local work_dir
@@ -94,6 +96,9 @@ create_local_only_branch() {
 }
 
 @test "integration: force deletes remote-gone branches with local origin" {
+  # Here we verify the destructive "gone branch cleanup" path when force-delete is enabled. The branch tracks
+  # origin, then we delete it on the remote so local Git marks it as gone; after running the script, it should
+  # be removed locally.
   local dirs
   local origin_dir
   local work_dir
@@ -121,6 +126,11 @@ create_local_only_branch() {
 }
 
 @test "integration: remote delete before local prune remains deterministic across pre and post prune runs" {
+  # We delete the branch on the remote first, but we intentionally do not prune local tracking data yet.
+  # On the first run, Git can still make this branch look like a normal tracked branch because local metadata
+  # has not caught up. After `git fetch --prune`, Git removes the stale tracking reference, and the same branch
+  # now appears as "gone". This test proves that both runs are correct and predictable for their moment in time:
+  # before prune we classify it as tracked, and after prune we classify it as remote-gone.
   local dirs
   local work_dir
 
@@ -147,6 +157,8 @@ create_local_only_branch() {
 }
 
 @test "integration: dry run with force delete previews gone branches and does not delete" {
+  # Dry-run mode should show what would be deleted without changing branch state. This test confirms we get the
+  # preview message and that the branch still exists afterward.
   local dirs
   local work_dir
 
@@ -166,6 +178,8 @@ create_local_only_branch() {
 }
 
 @test "integration: no-force-delete-gone reports gone branches without deleting" {
+  # This checks report-only mode for gone branches. We still want visibility into stale branches, but no local
+  # deletion should happen when force-delete is off.
   local dirs
   local work_dir
 
@@ -185,6 +199,10 @@ create_local_only_branch() {
 }
 
 @test "integration: non-interactive force delete requires confirmation without silent flag" {
+  # This test simulates a non-interactive environment by closing stdin (`</dev/null`), which is what often
+  # happens in CI jobs and scripted automation. In that situation, there is no safe way for a user to type
+  # the required confirmation word, so the script must refuse to force-delete and exit with a clear message.
+  # We then verify the branch still exists, proving no destructive action happened.
   local dirs
   local work_dir
 
@@ -204,6 +222,10 @@ create_local_only_branch() {
 }
 
 @test "integration: interactive confirm accepts DELETE and deletes gone branches" {
+  # This test covers the "intentional destructive action" path. We simulate a user typing `DELETE`, which is
+  # our hard-confirm token, and force TTY behavior so the prompt path is exercised during tests. The key idea
+  # is that only explicit confirmation should unlock deletion. If this input is accepted, the gone branch
+  # should actually be removed from local branches.
   local dirs
   local work_dir
 
@@ -224,6 +246,9 @@ create_local_only_branch() {
 }
 
 @test "integration: interactive confirm with empty input skips deletion" {
+  # This is the safety counterpart to the previous test. Here the user just presses Enter (empty input), and
+  # the expected behavior is "do nothing destructive." We assert the skip message appears and that the branch
+  # still exists, so a distracted or unsure user gets a safe default outcome.
   local dirs
   local work_dir
 
@@ -243,6 +268,8 @@ create_local_only_branch() {
 }
 
 @test "integration: protected gone branch is never force deleted" {
+  # Even with force-delete enabled, protected branches must never be removed. We use `dev` to prove protection
+  # rules override gone-branch deletion candidates.
   local dirs
   local work_dir
 
@@ -263,6 +290,10 @@ create_local_only_branch() {
 }
 
 @test "integration: default protected branches are preserved during merged and gone cleanup" {
+  # This scenario intentionally puts `dev` in multiple "would normally delete" buckets at once: it is merged
+  # into main and also remote-gone after remote deletion plus prune. The purpose is to prove protection rules
+  # win over cleanup candidates. Even when a branch looks deletable from multiple angles, protected names must
+  # be preserved and reported as protected, not deleted.
   local dirs
   local work_dir
 
@@ -296,6 +327,8 @@ create_local_only_branch() {
 }
 
 @test "integration: custom protected branch names are preserved when gone" {
+  # This verifies that custom protection rules are honored, not just built-in defaults. We mark `release` as
+  # protected and confirm it is reported but not deleted when remote-gone.
   local dirs
   local work_dir
 
@@ -318,6 +351,10 @@ create_local_only_branch() {
 }
 
 @test "integration: mixed tracked untracked gone and protected branches are classified correctly" {
+  # This is a full mixed-state classification test. In one repository snapshot, we create a normal tracked
+  # branch, a local-only branch, a remote-gone branch, and a protected branch. The goal is to confirm each
+  # branch lands in exactly the right output section. This makes it easier to trust that the script is reading
+  # branch metadata correctly when real repos contain a mixture of branch states.
   local dirs
   local work_dir
 
@@ -343,6 +380,8 @@ create_local_only_branch() {
 }
 
 @test "integration: no merged branches does not print merged deletion section" {
+  # When nothing is merged, we should avoid noisy output that suggests merged cleanup happened. This keeps the
+  # report honest and easier to scan.
   local dirs
   local work_dir
 
@@ -359,6 +398,8 @@ create_local_only_branch() {
 }
 
 @test "integration: branch names with slashes are classified correctly" {
+  # Branch names often include path-style slashes (`feature/a/b`). This test confirms those names are parsed
+  # correctly across tracked, local-only, and gone classifications.
   local dirs
   local work_dir
 
@@ -381,6 +422,10 @@ create_local_only_branch() {
 }
 
 @test "integration: branch names with spaces are unsupported by git ref format" {
+  # This test documents a Git rule that can be surprising if you only think at script level: branch names
+  # cannot contain spaces. `git branch "feature/space name"` fails before our script even gets a chance to
+  # classify anything. We keep a valid control case in the same test to show the script still behaves normally
+  # once branch names obey Git ref-format rules.
   local dirs
   local work_dir
 
@@ -403,6 +448,8 @@ create_local_only_branch() {
 }
 
 @test "integration: branch names with dots dashes and underscores are handled correctly" {
+  # This covers common punctuation-heavy branch names to ensure parsing and deletion logic do not accidentally
+  # break on separators like `.`, `-`, or `_`.
   local dirs
   local work_dir
 
@@ -429,6 +476,10 @@ create_local_only_branch() {
 }
 
 @test "integration: unicode branch names are handled correctly" {
+  # This test protects UTF-8 handling across the full pipeline. The script uses standard shell tools for
+  # parsing and filtering branch data, and those tools can behave badly if quoting or encoding assumptions are
+  # wrong. By creating Unicode tracked, local-only, and gone branches, we verify names are preserved exactly
+  # and that deletion/classification still works with non-ASCII branch names.
   local dirs
   local work_dir
 
@@ -455,6 +506,10 @@ create_local_only_branch() {
 }
 
 @test "integration: detached HEAD does not crash and still reports branch sections safely" {
+  # In detached HEAD, Git is pointing directly at a commit instead of an active branch, so commands like
+  # `git branch --show-current` return an empty value. That can easily break scripts that assume a current
+  # branch always exists. This test verifies our script still runs safely and continues to classify/report
+  # other branches correctly even without a normal checked-out branch context.
   local dirs
   local work_dir
 
@@ -474,6 +529,10 @@ create_local_only_branch() {
 }
 
 @test "integration: running from subdirectory in repo keeps behavior correct" {
+  # Users often run utilities from deep inside a repository, not from repo root. This test starts in a nested
+  # directory and verifies behavior stays identical. Conceptually, the script should discover the repository
+  # root (typically via `git rev-parse --show-toplevel`) and operate on repository state, not on the current
+  # shell folder.
   local dirs
   local work_dir
 
@@ -492,6 +551,8 @@ create_local_only_branch() {
 }
 
 @test "integration: dirty worktree does not break cleanup and classification flow" {
+  # Users often run cleanup with uncommitted changes present. This test confirms branch classification/deletion
+  # still works and the script does not require a clean working tree.
   local dirs
   local work_dir
 
@@ -526,6 +587,8 @@ create_local_only_branch() {
 }
 
 @test "integration: config true enables force delete in auto mode" {
+  # In auto mode, repo config can choose behavior. This test checks that setting
+  # `FORCE_DELETE_GONE_BRANCHES=true` enables deletion even without CLI override flags.
   local dirs
   local work_dir
 
@@ -546,6 +609,8 @@ create_local_only_branch() {
 }
 
 @test "integration: cli no-force-delete-gone overrides config true" {
+  # CLI flags should win over config for predictability. Here config says "delete", but explicit CLI
+  # `--no-force-delete-gone` must switch behavior back to report-only.
   local dirs
   local work_dir
 
@@ -566,6 +631,8 @@ create_local_only_branch() {
 }
 
 @test "integration: cli force-delete-gone overrides config false" {
+  # This is the opposite precedence case: config says "do not delete", but explicit CLI
+  # `--force-delete-gone` must take priority and perform deletion.
   local dirs
   local work_dir
 
@@ -586,6 +653,9 @@ create_local_only_branch() {
 }
 
 @test "integration: config parsing tolerates whitespace and case for true-like values" {
+  # Real config files are hand-edited, so values may have extra spaces and mixed case (for example ` YeS `).
+  # This test confirms the parser is intentionally tolerant and still interprets those forms as enabled.
+  # Without this, users could think force-delete is on while the script silently treats it as off.
   local dirs
   local work_dir
 
@@ -606,6 +676,9 @@ create_local_only_branch() {
 }
 
 @test "integration: malformed config value falls back to safe default behavior" {
+  # This is the invalid-config safety check. If the setting is not a recognized boolean, the script should
+  # choose the safer behavior and only report remote-gone branches instead of deleting them. The assertions
+  # verify both: no deletion banner and the branch still present locally.
   local dirs
   local work_dir
 
@@ -627,6 +700,8 @@ create_local_only_branch() {
 }
 
 @test "integration: verbose flag emits formatted diagnostics for repository state and mode selection" {
+  # Verbose mode is a troubleshooting aid. This test verifies the diagnostic sections and key lines remain
+  # stable so users can trust the output when debugging behavior.
   local dirs
   local work_dir
 
@@ -648,6 +723,8 @@ create_local_only_branch() {
 }
 
 @test "integration: running from repo subdirectory keeps classification behavior correct" {
+  # This is a broader subdirectory case that includes tracked/local-only/gone classes together. Running from
+  # nested paths should not change classification results.
   local dirs
   local work_dir
 
@@ -671,6 +748,10 @@ create_local_only_branch() {
 }
 
 @test "integration: branch vv failure exits non-zero with predictable error output" {
+  # The script asks Git for a detailed branch list using `git branch -vv`. That list tells us which branches
+  # are connected to a remote branch and which ones are no longer connected because the remote branch was
+  # deleted. In this test, we force that command to fail on purpose. We expect the script to stop immediately
+  # with a clear error, instead of continuing with half-missing data and printing confusing results.
   local dirs
   local work_dir
   local real_git
@@ -702,6 +783,10 @@ EOF
 }
 
 @test "integration: rev-parse show-toplevel failure falls back safely to current directory" {
+  # The script normally asks Git for the repository "top folder" path using
+  # `git rev-parse --show-toplevel`. We run from a nested folder and make that command fail once on purpose.
+  # The important behavior here is safety: if the script cannot find the top folder in that moment, it should
+  # still run in a safe, non-destructive way and avoid deleting branches unexpectedly.
   local dirs
   local work_dir
   local real_git
@@ -744,6 +829,8 @@ EOF
 }
 
 @test "integration: dirty worktree does not break classification and reporting flow" {
+  # This is a reporting-focused dirty-worktree scenario. We verify output sections remain correct and that the
+  # original uncommitted file change is still present after the run.
   local dirs
   local work_dir
 
@@ -771,6 +858,9 @@ EOF
 }
 
 @test "integration: section headers render only when their sections have content" {
+  # This test keeps output readable and trustworthy. If a section has no items, we do not want to print an
+  # empty header because that suggests some action or category exists when it does not. We disable protected
+  # matching and assert all section headers stay hidden in an all-empty result.
   local dirs
   local work_dir
 
@@ -788,6 +878,10 @@ EOF
 }
 
 @test "integration: large branch set executes reliably with mixed branch classes" {
+  # This is a stress-style reliability check. We create many tracked, local-only, and remote-gone branches
+  # and run the cleanup flow once. The goal is to prove behavior does not degrade as branch counts grow:
+  # gone branches are all removed, tracked/local-only branches remain, and classification output still includes
+  # representative entries from each class.
   local dirs
   local work_dir
   local i
