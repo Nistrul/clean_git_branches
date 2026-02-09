@@ -2,7 +2,7 @@
 
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Status: In Progress
-- Current Feature Focus: `FEAT-007` coverage validation is in progress after test-ordering cleanup; CI entrypoint remains next milestone after coverage closure.
+- Current Feature Focus: `FEAT-007` runtime and maintainability reduction is in progress after coverage-contract closure; CI entrypoint remains next milestone after FEAT-007 closure.
 - Last updated: 2026-02-09
 
 ## Completion Legend
@@ -35,6 +35,5 @@
 
 ## Next Actions
 
-1. Complete `FEAT-007` coverage validation (`INT-040`) and add the non-interactive dry-run contract test (`INT-041`).
-2. Reduce integration runtime by shifting equivalent assertions to mocked tests (`INT-044`) and consolidating overlap (`INT-042`, `INT-043`).
-3. Add CI entrypoint for automated test execution.
+1. Reduce integration runtime by shifting equivalent assertions to mocked tests (`INT-044`) and consolidating overlap (`INT-042`, `INT-043`).
+2. Add CI entrypoint for automated test execution.

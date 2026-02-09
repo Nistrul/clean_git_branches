@@ -100,9 +100,13 @@
 62. Added backlog item `INT-041` for uncovered non-interactive `--dry-run --force-delete-gone` behavior contract validation.
 63. Added backlog items `INT-042` and `INT-043` to consolidate overlapping subdirectory and dirty-worktree integration tests.
 64. Added backlog item `INT-044` to migrate integration assertions that are equally effective in mocked tests so the integration suite stays focused on stateful/destructive behaviors.
+65. Completed `INT-041` by adding a dedicated integration contract test for non-interactive `--dry-run --force-delete-gone` behavior without `--silent`.
+66. Updated force-delete confirmation flow so dry-run previews are allowed in non-interactive environments and no longer fail with a confirmation error.
+67. Completed `INT-040` coverage-contract closure by validating the gap was captured and exercised via the new high-risk dry-run scenario.
+68. Verified regression safety via full suite run: `test/run-tests.sh` (38 tests passing).
 
 ## Current Focus
 
-1. Complete `INT-040`/`INT-041` coverage-contract work for `FEAT-007`.
-2. Execute `INT-044` to shift equivalent assertions into mocked tests and reduce runtime.
-3. Consolidate duplicate integration scenarios via `INT-042` and `INT-043`, then proceed to the remaining initiative milestone: add CI entrypoint for automated test execution.
+1. Execute `INT-044` to shift equivalent assertions into mocked tests and reduce runtime.
+2. Consolidate duplicate integration scenarios via `INT-042` and `INT-043`.
+3. Proceed to the remaining initiative milestone: add CI entrypoint for automated test execution.

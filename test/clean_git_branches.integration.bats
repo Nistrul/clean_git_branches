@@ -185,6 +185,29 @@ create_local_only_branch() {
   [[ "$output" == *"feature/dry-run-gone"* ]]
 }
 
+@test "integration: non-interactive dry run force delete previews candidates without confirmation failure" {
+  # Dry run is non-destructive, so it should still produce a preview when stdin is not interactive.
+  # This protects CI/scripted usage from failing just because no TTY is attached.
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+  create_gone_branch "$work_dir" "feature/non-interactive-dry-run"
+
+  run bash -c "'$repo_root/test/helpers/run-in-repo.sh' '$work_dir' --dry-run --force-delete-gone </dev/null"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Would delete remote-gone branches (dry run)"* ]]
+  [[ "$output" == *"feature/non-interactive-dry-run"* ]]
+  [[ "$output" != *"Force deletion requires confirmation"* ]]
+  [[ "$output" != *"Skipped remote-gone force deletion"* ]]
+
+  run git -C "$work_dir" branch --list feature/non-interactive-dry-run
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"feature/non-interactive-dry-run"* ]]
+}
+
 @test "integration: remote delete before local prune remains deterministic across pre and post prune runs" {
   # We delete the branch on the remote first, but we intentionally do not prune local tracking data yet.
   # On the first run, Git can still make this branch look like a normal tracked branch because local metadata
