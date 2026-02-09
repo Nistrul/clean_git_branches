@@ -25,6 +25,7 @@
 8. Expanded the pre-prune/post-prune timing comment into a more explicit plain-language paragraph to explain why the same branch is expected to appear tracked before prune and remote-gone after prune.
 9. Expanded additional moderate/high-complexity integration-test comments into natural-language paragraphs so behavior and Git concepts remain understandable without deep Git background.
 10. Added concise plain-language intent comments to every remaining test in both Bats suites so each scenario is understandable at a glance.
+11. Simplified the two remaining hard-to-parse comments (`git branch -vv` failure and repo-top-folder fallback) to remove jargon and use direct plain-language phrasing.
 
 ### 2026-02-07
 

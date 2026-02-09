@@ -748,10 +748,10 @@ create_local_only_branch() {
 }
 
 @test "integration: branch vv failure exits non-zero with predictable error output" {
-  # `git branch -vv` is a key data source for classification because it includes upstream tracking status and
-  # labels deleted upstreams as `gone`. We inject a fake failure for exactly that command to ensure startup
-  # fails in a controlled way instead of continuing with incomplete branch data. This protects against confusing
-  # output when a core Git query is unavailable.
+  # The script asks Git for a detailed branch list using `git branch -vv`. That list tells us which branches
+  # are connected to a remote branch and which ones are no longer connected because the remote branch was
+  # deleted. In this test, we force that command to fail on purpose. We expect the script to stop immediately
+  # with a clear error, instead of continuing with half-missing data and printing confusing results.
   local dirs
   local work_dir
   local real_git
@@ -783,10 +783,10 @@ EOF
 }
 
 @test "integration: rev-parse show-toplevel failure falls back safely to current directory" {
-  # The script normally asks Git for repo root using `git rev-parse --show-toplevel`. We simulate a one-time
-  # failure of that command while running from a subdirectory to make sure fallback behavior remains safe.
-  # In plain terms: if root discovery is temporarily broken, we should not accidentally switch into destructive
-  # mode; we should still classify branches safely and avoid unintended deletion.
+  # The script normally asks Git for the repository "top folder" path using
+  # `git rev-parse --show-toplevel`. We run from a nested folder and make that command fail once on purpose.
+  # The important behavior here is safety: if the script cannot find the top folder in that moment, it should
+  # still run in a safe, non-destructive way and avoid deleting branches unexpectedly.
   local dirs
   local work_dir
   local real_git
