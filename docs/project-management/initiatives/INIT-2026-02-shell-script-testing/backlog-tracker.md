@@ -18,6 +18,9 @@
 1. Completed FEAT-004 follow-up polish on `feat/INIT-2026-02-shell-script-testing/FEAT-004-int-036-verbose-diagnostics`.
 2. Improved report readability in verbose mode by inserting a single separator newline before the first printed report section.
 3. Verified regression safety via full suite run: `test/run-tests.sh` (37 tests passing).
+4. Completed documentation hardening slice `INT-038` (`FEAT-005`) for non-obvious advanced integration tests.
+5. Added concise `Why` and regression-risk comments in integration tests to explain scenario intent and anticipated failure modes.
+6. Verified regression safety via full suite run: `test/run-tests.sh` (37 tests passing).
 
 ### 2026-02-07
 
