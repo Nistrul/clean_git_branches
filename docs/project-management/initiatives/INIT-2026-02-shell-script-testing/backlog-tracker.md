@@ -96,7 +96,13 @@
 58. Verified regression safety via targeted integration run: `bats test/clean_git_branches.integration.bats` (32 tests passing).
 59. Rescoped `FEAT-007` from ordering-only to ongoing coverage-and-maintainability scope so the feature stays open for coverage validation follow-up work.
 60. Added `INT-040` under `FEAT-007` as `in_progress` to validate coverage completeness and add/capture missing high-risk integration scenarios before closing the feature.
+61. Completed a coverage-quality review pass focused on overlap and high-risk gaps in `test/clean_git_branches.integration.bats`.
+62. Added backlog item `INT-041` for uncovered non-interactive `--dry-run --force-delete-gone` behavior contract validation.
+63. Added backlog items `INT-042` and `INT-043` to consolidate overlapping subdirectory and dirty-worktree integration tests.
+64. Added backlog item `INT-044` to migrate integration assertions that are equally effective in mocked tests so the integration suite stays focused on stateful/destructive behaviors.
 
 ## Current Focus
 
-1. Complete `INT-040` coverage validation work for `FEAT-007`, then proceed to the remaining initiative milestone: add CI entrypoint for automated test execution.
+1. Complete `INT-040`/`INT-041` coverage-contract work for `FEAT-007`.
+2. Execute `INT-044` to shift equivalent assertions into mocked tests and reduce runtime.
+3. Consolidate duplicate integration scenarios via `INT-042` and `INT-043`, then proceed to the remaining initiative milestone: add CI entrypoint for automated test execution.
