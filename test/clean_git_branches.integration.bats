@@ -122,7 +122,7 @@ create_local_only_branch() {
 
 @test "integration: remote delete before local prune remains deterministic across pre and post prune runs" {
   # Why: a remote delete is not "gone" locally until fetch/prune updates tracking refs.
-  # Regression risk: the same branch may flip classes between runs if we assume immediate prune state.
+  # Git note: `git fetch --prune` removes stale local remote-tracking refs for deleted remote branches.
   local dirs
   local work_dir
 
@@ -188,7 +188,6 @@ create_local_only_branch() {
 
 @test "integration: non-interactive force delete requires confirmation without silent flag" {
   # Why: destructive deletes must fail closed in non-interactive contexts (CI, redirected stdin).
-  # Regression risk: accidental branch deletion without an explicit opt-in signal.
   local dirs
   local work_dir
 
@@ -209,7 +208,6 @@ create_local_only_branch() {
 
 @test "integration: interactive confirm accepts DELETE and deletes gone branches" {
   # Why: DELETE is an intentional hard-confirm token; only this should permit deletion.
-  # Regression risk: a loose prompt parser could accept unintended inputs and delete branches.
   local dirs
   local work_dir
 
@@ -231,7 +229,6 @@ create_local_only_branch() {
 
 @test "integration: interactive confirm with empty input skips deletion" {
   # Why: pressing Enter should be the safe default path.
-  # Regression risk: empty input being treated as confirmation.
   local dirs
   local work_dir
 
@@ -272,7 +269,6 @@ create_local_only_branch() {
 
 @test "integration: default protected branches are preserved during merged and gone cleanup" {
   # Why: protected names can appear in merged and gone sets simultaneously.
-  # Regression risk: classification precedence could still delete protected branches.
   local dirs
   local work_dir
 
@@ -329,7 +325,6 @@ create_local_only_branch() {
 
 @test "integration: mixed tracked untracked gone and protected branches are classified correctly" {
   # Why: this exercises class precedence when all branch classes coexist in one run.
-  # Regression risk: the same branch leaking into multiple sections or wrong deletion behavior.
   local dirs
   local work_dir
 
@@ -394,7 +389,7 @@ create_local_only_branch() {
 
 @test "integration: branch names with spaces are unsupported by git ref format" {
   # Why: this is a guardrail for a Git-level constraint, not script behavior.
-  # Regression risk: future ref-parsing changes could misattribute this failure to our script.
+  # Git note: Git rejects refs with spaces; `git branch "feature/space name"` fails before script logic runs.
   local dirs
   local work_dir
 
@@ -444,7 +439,6 @@ create_local_only_branch() {
 
 @test "integration: unicode branch names are handled correctly" {
   # Why: branch parsing/deletion must remain UTF-8-safe through grep/awk/xargs pipelines.
-  # Regression risk: quoting/encoding regressions can corrupt names or skip deletion candidates.
   local dirs
   local work_dir
 
@@ -472,7 +466,7 @@ create_local_only_branch() {
 
 @test "integration: detached HEAD does not crash and still reports branch sections safely" {
   # Why: detached HEAD removes a normal branch context and can break branch-derived logic.
-  # Regression risk: empty/current-branch assumptions causing crashes or incorrect sections.
+  # Git note: in detached HEAD, `git branch --show-current` is empty because HEAD points to a commit, not a branch.
   local dirs
   local work_dir
 
@@ -493,7 +487,7 @@ create_local_only_branch() {
 
 @test "integration: running from subdirectory in repo keeps behavior correct" {
   # Why: execution often starts below repo root in real usage.
-  # Regression risk: path resolution mistakes can break config loading or branch discovery.
+  # Git note: scripts usually use `git rev-parse --show-toplevel` to resolve repo root from nested directories.
   local dirs
   local work_dir
 
@@ -607,7 +601,6 @@ create_local_only_branch() {
 
 @test "integration: config parsing tolerates whitespace and case for true-like values" {
   # Why: hand-edited config often includes inconsistent spacing/case.
-  # Regression risk: strict parsing unexpectedly disables intended force-delete behavior.
   local dirs
   local work_dir
 
@@ -629,7 +622,6 @@ create_local_only_branch() {
 
 @test "integration: malformed config value falls back to safe default behavior" {
   # Why: unknown config values should degrade to report-only mode.
-  # Regression risk: invalid config accidentally enabling destructive behavior.
   local dirs
   local work_dir
 
@@ -696,7 +688,7 @@ create_local_only_branch() {
 
 @test "integration: branch vv failure exits non-zero with predictable error output" {
   # Why: `git branch -vv` is foundational for classification and must fail deterministically.
-  # Regression risk: partial output/continued execution hiding real repository state failures.
+  # Git note: `git branch -vv` includes tracking/upstream state and marks deleted upstreams as `: gone]`.
   local dirs
   local work_dir
   local real_git
@@ -729,7 +721,7 @@ EOF
 
 @test "integration: rev-parse show-toplevel failure falls back safely to current directory" {
   # Why: startup path discovery can fail transiently; fallback must remain safe.
-  # Regression risk: wrong directory assumptions applying force-delete behavior unexpectedly.
+  # Git note: `git rev-parse --show-toplevel` returns the repository root absolute path.
   local dirs
   local work_dir
   local real_git
@@ -800,7 +792,6 @@ EOF
 
 @test "integration: section headers render only when their sections have content" {
   # Why: output is consumed by humans and tests; empty sections add noise and parsing ambiguity.
-  # Regression risk: unconditional headers signaling actions that did not occur.
   local dirs
   local work_dir
 
@@ -819,7 +810,6 @@ EOF
 
 @test "integration: large branch set executes reliably with mixed branch classes" {
   # Why: stress-scale runs can expose order, truncation, or xargs/loop edge issues.
-  # Regression risk: partial deletion/classification when candidate counts grow.
   local dirs
   local work_dir
   local i

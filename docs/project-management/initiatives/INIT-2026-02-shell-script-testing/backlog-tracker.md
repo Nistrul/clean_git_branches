@@ -21,6 +21,7 @@
 4. Completed documentation hardening slice `INT-038` (`FEAT-005`) for non-obvious advanced integration tests.
 5. Added concise `Why` and regression-risk comments in integration tests to explain scenario intent and anticipated failure modes.
 6. Verified regression safety via full suite run: `test/run-tests.sh` (37 tests passing).
+7. Refined `INT-038` comment style based on review feedback by removing `Regression risk` lines and adding focused Git feature notes (for example `git branch -vv`, `fetch --prune`, detached HEAD, `rev-parse --show-toplevel`).
 
 ### 2026-02-07
 
