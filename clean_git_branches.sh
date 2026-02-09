@@ -356,6 +356,7 @@ function clean_git_branches() {
   local gone_candidates
   local gone_candidate_count
   local show_remote_gone_report=1
+  local printed_report_section=0
 
   echo
 
@@ -382,6 +383,10 @@ function clean_git_branches() {
 
   deleted_merged=$(_clean_git_branches_delete_merged)
   if [ -n "$deleted_merged" ]; then
+    if [ "$VERBOSE" -eq 1 ] && [ "$printed_report_section" -eq 0 ]; then
+      echo
+      printed_report_section=1
+    fi
     echo -e "\033[1;94mDeleted merged branches\033[0m"
     echo "─────────────────────"
     echo "$deleted_merged"
@@ -390,6 +395,10 @@ function clean_git_branches() {
 
   untracked=$(_clean_git_branches_show_untracked)
   if [ -n "$untracked" ]; then
+    if [ "$VERBOSE" -eq 1 ] && [ "$printed_report_section" -eq 0 ]; then
+      echo
+      printed_report_section=1
+    fi
     echo -e "\033[1;93mUntracked branches\033[0m"
     echo "───────────────────"
     echo "$untracked"
@@ -414,6 +423,10 @@ function clean_git_branches() {
     if _clean_git_branches_confirm_force_delete "$gone_candidate_count" "$gone_candidates"; then
       deleted_gone=$(_clean_git_branches_delete_gone "$gone_candidates")
       if [ -n "$deleted_gone" ]; then
+        if [ "$VERBOSE" -eq 1 ] && [ "$printed_report_section" -eq 0 ]; then
+          echo
+          printed_report_section=1
+        fi
         if [ "$DRY_RUN" -eq 1 ]; then
           echo -e "\033[1;93mWould delete remote-gone branches (dry run)\033[0m"
           echo "──────────────────────────────────────────"
@@ -442,6 +455,10 @@ function clean_git_branches() {
 
   deleted=$(_clean_git_branches_show_deleted)
   if [ "$show_remote_gone_report" -eq 1 ] && [ -n "$deleted" ]; then
+    if [ "$VERBOSE" -eq 1 ] && [ "$printed_report_section" -eq 0 ]; then
+      echo
+      printed_report_section=1
+    fi
     if [ "$DELETE_GONE_EFFECTIVE" -eq 1 ]; then
       if [ "$DRY_RUN" -eq 1 ]; then
         echo -e "\033[1;91mRemote-gone branches (dry run, not deleted)\033[0m"
@@ -460,6 +477,10 @@ function clean_git_branches() {
 
   tracked=$(_clean_git_branches_show_tracked)
   if [ -n "$tracked" ]; then
+    if [ "$VERBOSE" -eq 1 ] && [ "$printed_report_section" -eq 0 ]; then
+      echo
+      printed_report_section=1
+    fi
     echo -e "\033[1;92mTracked branches\033[0m"
     echo "───────────────"
     echo "$tracked"
@@ -469,6 +490,10 @@ function clean_git_branches() {
 
   protected=$(_clean_git_branches_show_protected)
   if [ -n "$protected" ]; then
+    if [ "$VERBOSE" -eq 1 ] && [ "$printed_report_section" -eq 0 ]; then
+      echo
+      printed_report_section=1
+    fi
     echo -e "\033[1;95mProtected branches\033[0m"
     echo "─────────────────"
     echo "$protected"
