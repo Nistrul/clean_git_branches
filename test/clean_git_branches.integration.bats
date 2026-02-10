@@ -107,7 +107,7 @@ create_non_equivalent_branch() {
   [[ "$output" == *"Execution mode: dry-run (preview only)"* ]]
   [[ "$output" == *"Merged branches"* ]]
   [[ "$output" == *"feature/merged-dry-run"* ]]
-  [[ "$output" == *"would delete with git branch -d (use --apply)"* ]]
+  [[ "$output" == *"preview only (use --apply to delete)"* ]]
 
   run git -C "$work_dir" branch --list feature/merged-dry-run
   [ "$status" -eq 0 ]
@@ -140,7 +140,8 @@ create_non_equivalent_branch() {
 
   [ "$status" -eq 0 ]
   [[ "$output" == *"Non-equivalent branches"* ]]
-  [[ "$output" == *"feature/non-equivalent - keep: contains unique commits"* ]]
+  [[ "$output" == *"- keep: contains unique commits"* ]]
+  [[ "$output" == *"feature/non-equivalent"* ]]
 
   run git -C "$work_dir" branch --list feature/non-equivalent
   [ "$status" -eq 0 ]
@@ -156,7 +157,8 @@ create_non_equivalent_branch() {
   run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --apply --delete-equivalent --equivalence cherry
 
   [ "$status" -eq 0 ]
-  [[ "$output" == *"feature/equivalent-safe-fail - patch-equivalent via cherry; delete with git branch -d"* ]]
+  [[ "$output" == *"patch-equivalent to main via cherry; candidates are deleted with git branch -d"* ]]
+  [[ "$output" == *"feature/equivalent-safe-fail"* ]]
   [[ "$output" == *"Could not safely delete equivalent branch: feature/equivalent-safe-fail"* ]]
 
   run git -C "$work_dir" branch --list feature/equivalent-safe-fail
@@ -205,7 +207,8 @@ create_non_equivalent_branch() {
   run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --apply --delete-equivalent --force-delete-equivalent
 
   [ "$status" -eq 0 ]
-  [[ "$output" == *"feature/equivalent-ahead-unpushed - patch-equivalent via cherry; keep: has unpushed commits; ahead of upstream"* ]]
+  [[ "$output" == *"feature/equivalent-ahead-unpushed"* ]]
+  [[ "$output" == *"feature/equivalent-ahead-unpushed - skipped: has unpushed commits; ahead of upstream"* ]]
   [[ "$output" != *"Deleted equivalent branch: feature/equivalent-ahead-unpushed"* ]]
   [[ "$output" != *"Deleted equivalent branch with force: feature/equivalent-ahead-unpushed"* ]]
 

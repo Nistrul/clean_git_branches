@@ -93,6 +93,41 @@ function _clean_git_branches_verbose() {
   fi
 }
 
+function _clean_git_branches_repeat_char() {
+  local count="$1"
+  local char="$2"
+  local output=""
+
+  while [ "$count" -gt 0 ]; do
+    output="${output}${char}"
+    count=$((count - 1))
+  done
+
+  printf "%s" "$output"
+}
+
+function _clean_git_branches_header_color() {
+  local title="$1"
+
+  case "$title" in
+    "Merged branches")
+      printf "1;94"
+      ;;
+    "Equivalent branches")
+      printf "1;96"
+      ;;
+    "Non-equivalent branches")
+      printf "1;92"
+      ;;
+    "Safety exclusions")
+      printf "1;93"
+      ;;
+    *)
+      printf "1;97"
+      ;;
+  esac
+}
+
 function _clean_git_branches_require_git_repo() {
   if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     echo "Not inside a Git repository." >&2
@@ -309,10 +344,19 @@ function _clean_git_branches_confirm_category() {
 
 function _clean_git_branches_print_section() {
   local title="$1"
-  local lines="$2"
+  local note="$2"
+  local lines="$3"
+  local underline
+  local color
 
-  echo "$title"
-  echo "────────────────────────────────"
+  underline=$(_clean_git_branches_repeat_char "${#title}" "─")
+  color=$(_clean_git_branches_header_color "$title")
+
+  printf "\033[%sm%s\033[0m\n" "$color" "$title"
+  printf "\033[%sm%s\033[0m\n" "$color" "$underline"
+  if [ -n "$note" ]; then
+    echo "- $note"
+  fi
   if [ -n "$lines" ]; then
     echo "$lines"
   else
@@ -338,9 +382,11 @@ function clean_git_branches() {
   local redundant_type
   local upstream
   local safety_reasons
-  local action
+  local exclusion_reason
   local delete_output
   local safe_delete_failed
+  local merged_note
+  local equivalent_note
 
   if ! _clean_git_branches_require_git_repo; then
     return 1
@@ -409,40 +455,39 @@ function clean_git_branches() {
     case "$redundant_type" in
       merged)
         if [ -n "$safety_reasons" ]; then
-          action="keep: $safety_reasons"
+          exclusion_reason="$safety_reasons"
         elif [ "$APPLY" -eq 1 ]; then
-          action="delete with git branch -d"
           merged_delete_list="${merged_delete_list}${branch}"$'\n'
           merged_delete_count=$((merged_delete_count + 1))
-        else
-          action="would delete with git branch -d (use --apply)"
         fi
 
-        merged_lines="${merged_lines}  $branch - merged into $BASE_REF; $action"$'\n'
+        merged_lines="${merged_lines}  $branch"$'\n'
         ;;
       equivalent)
         if [ "$DELETE_EQUIVALENT" -ne 1 ]; then
-          action="keep: equivalent deletion disabled (use --delete-equivalent)"
+          :
         elif [ -n "$safety_reasons" ]; then
-          action="keep: $safety_reasons"
+          exclusion_reason="$safety_reasons"
         elif [ "$APPLY" -eq 1 ]; then
-          action="delete with git branch -d"
           equivalent_delete_list="${equivalent_delete_list}${branch}"$'\n'
           equivalent_delete_count=$((equivalent_delete_count + 1))
-        else
-          action="would delete with git branch -d (use --apply)"
         fi
 
-        equivalent_lines="${equivalent_lines}  $branch - patch-equivalent via $EQUIVALENCE_METHOD; $action"$'\n'
+        equivalent_lines="${equivalent_lines}  $branch"$'\n'
         ;;
       non-equivalent)
-        non_equivalent_lines="${non_equivalent_lines}  $branch - keep: contains unique commits"$'\n'
+        non_equivalent_lines="${non_equivalent_lines}  $branch"$'\n'
         ;;
     esac
+
+    if [ -n "$exclusion_reason" ]; then
+      excluded_lines="${excluded_lines}  $branch - skipped: $exclusion_reason"$'\n'
+    fi
 
     if [ "$VERBOSE" -eq 1 ]; then
       _clean_git_branches_verbose "branch=$branch type=$redundant_type upstream=${upstream:-<none>} safety=${safety_reasons:-none}"
     fi
+    exclusion_reason=""
   done <<< "$branches"
 
   echo
@@ -454,10 +499,25 @@ function clean_git_branches() {
   echo "Base ref: $BASE_REF"
   echo
 
-  _clean_git_branches_print_section "Merged branches" "${merged_lines%$'\n'}"
-  _clean_git_branches_print_section "Equivalent branches" "${equivalent_lines%$'\n'}"
-  _clean_git_branches_print_section "Non-equivalent branches" "${non_equivalent_lines%$'\n'}"
-  _clean_git_branches_print_section "Safety exclusions" "${excluded_lines%$'\n'}"
+  if [ "$APPLY" -eq 1 ]; then
+    merged_note="fully merged into $BASE_REF; candidates are deleted with git branch -d"
+  else
+    merged_note="fully merged into $BASE_REF; preview only (use --apply to delete)"
+  fi
+  _clean_git_branches_print_section "Merged branches" "$merged_note" "${merged_lines%$'\n'}"
+
+  equivalent_note="patch-equivalent to $BASE_REF via $EQUIVALENCE_METHOD; default keep (use --delete-equivalent to include deletion)"
+  if [ "$DELETE_EQUIVALENT" -eq 1 ]; then
+    if [ "$APPLY" -eq 1 ]; then
+      equivalent_note="patch-equivalent to $BASE_REF via $EQUIVALENCE_METHOD; candidates are deleted with git branch -d"
+    else
+      equivalent_note="patch-equivalent to $BASE_REF via $EQUIVALENCE_METHOD; preview only (use --apply to delete)"
+    fi
+  fi
+  _clean_git_branches_print_section "Equivalent branches" "$equivalent_note" "${equivalent_lines%$'\n'}"
+
+  _clean_git_branches_print_section "Non-equivalent branches" "keep: contains unique commits" "${non_equivalent_lines%$'\n'}"
+  _clean_git_branches_print_section "Safety exclusions" "hard safety rules (never deleted)" "${excluded_lines%$'\n'}"
 
   if [ "$APPLY" -ne 1 ]; then
     return 0
