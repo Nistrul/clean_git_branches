@@ -35,6 +35,7 @@ FORCE_DELETE_EQUIVALENT=0
 PRUNE=0
 VERBOSE=0
 ASSUME_TTY_FOR_TESTS="${CLEAN_GIT_BRANCHES_ASSUME_TTY:-0}"
+VERBOSE_LINES=""
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -89,7 +90,7 @@ done
 
 function _clean_git_branches_verbose() {
   if [ "$VERBOSE" -eq 1 ]; then
-    echo "[verbose] $*" >&2
+    VERBOSE_LINES="${VERBOSE_LINES}$*"$'\n'
   fi
 }
 
@@ -121,6 +122,9 @@ function _clean_git_branches_header_color() {
       ;;
     "Safety exclusions")
       printf "1;93"
+      ;;
+    "Header")
+      printf "1;95"
       ;;
     *)
       printf "1;97"
@@ -389,6 +393,7 @@ function clean_git_branches() {
   local safe_delete_failed
   local merged_note
   local equivalent_note
+  local header_lines
 
   if ! _clean_git_branches_require_git_repo; then
     return 1
@@ -492,14 +497,18 @@ function clean_git_branches() {
     exclusion_reason=""
   done <<< "$branches"
 
-  echo
+  header_lines=""
   if [ "$APPLY" -eq 1 ]; then
-    echo "Execution mode: apply"
+    header_lines="${header_lines}Execution mode: apply"$'\n'
   else
-    echo "Execution mode: dry-run (preview only)"
+    header_lines="${header_lines}Execution mode: dry-run (preview only)"$'\n'
   fi
-  echo "Base ref: $BASE_REF"
-  echo
+  header_lines="${header_lines}Base ref: $BASE_REF"$'\n'
+  if [ "$VERBOSE" -eq 1 ] && [ -n "${VERBOSE_LINES%$'\n'}" ]; then
+    header_lines="${header_lines}${VERBOSE_LINES%$'\n'}"$'\n'
+  fi
+
+  _clean_git_branches_print_section "Header" "" "${header_lines%$'\n'}"
 
   if [ "$APPLY" -eq 1 ]; then
     merged_note="fully merged into $BASE_REF; candidates are deleted with git branch -d"
@@ -563,7 +572,6 @@ function clean_git_branches() {
       echo "Deleted merged branch: $branch"
     else
       echo "Could not delete merged branch: $branch"
-      _clean_git_branches_verbose "$delete_output"
     fi
   done <<< "$merged_delete_list"
 
@@ -577,14 +585,12 @@ function clean_git_branches() {
     fi
 
     safe_delete_failed=1
-    _clean_git_branches_verbose "$delete_output"
 
     if [ "$safe_delete_failed" -eq 1 ] && [ "$FORCE_DELETE_EQUIVALENT" -eq 1 ]; then
       if delete_output=$(git branch -D "$branch" 2>&1); then
         echo "Deleted equivalent branch with force: $branch"
       else
         echo "Could not delete equivalent branch: $branch"
-        _clean_git_branches_verbose "$delete_output"
       fi
     else
       echo "Could not safely delete equivalent branch: $branch"
