@@ -126,6 +126,12 @@ function _clean_git_branches_header_color() {
     "Run summary")
       printf "1;95"
       ;;
+    "Execution results")
+      printf "1;94"
+      ;;
+    "Deletion failures")
+      printf "1;91"
+      ;;
     *)
       printf "1;97"
       ;;
@@ -394,6 +400,13 @@ function clean_git_branches() {
   local merged_note
   local equivalent_note
   local header_lines
+  local execution_lines
+  local failure_lines
+  local merged_deleted_count=0
+  local equivalent_deleted_count=0
+  local equivalent_force_deleted_count=0
+  local merged_skipped=0
+  local equivalent_skipped=0
 
   if ! _clean_git_branches_require_git_repo; then
     return 1
@@ -546,7 +559,7 @@ function clean_git_branches() {
   if ! _clean_git_branches_confirm_category "merged" "$merged_delete_count"; then
     case "$?" in
       1)
-        echo "Skipped merged deletions."
+        merged_skipped=1
         merged_delete_list=""
         ;;
       2)
@@ -558,7 +571,7 @@ function clean_git_branches() {
   if ! _clean_git_branches_confirm_category "equivalent" "$equivalent_delete_count"; then
     case "$?" in
       1)
-        echo "Skipped equivalent deletions."
+        equivalent_skipped=1
         equivalent_delete_list=""
         ;;
       2)
@@ -570,9 +583,9 @@ function clean_git_branches() {
   while IFS= read -r branch; do
     [ -z "$branch" ] && continue
     if delete_output=$(git branch -d "$branch" 2>&1); then
-      echo "Deleted merged branch: $branch"
+      merged_deleted_count=$((merged_deleted_count + 1))
     else
-      echo "Could not delete merged branch: $branch"
+      failure_lines="${failure_lines}merged: $branch"$'\n'
     fi
   done <<< "$merged_delete_list"
 
@@ -581,7 +594,7 @@ function clean_git_branches() {
 
     safe_delete_failed=0
     if delete_output=$(git branch -d "$branch" 2>&1); then
-      echo "Deleted equivalent branch: $branch"
+      equivalent_deleted_count=$((equivalent_deleted_count + 1))
       continue
     fi
 
@@ -589,14 +602,32 @@ function clean_git_branches() {
 
     if [ "$safe_delete_failed" -eq 1 ] && [ "$FORCE_DELETE_EQUIVALENT" -eq 1 ]; then
       if delete_output=$(git branch -D "$branch" 2>&1); then
-        echo "Deleted equivalent branch with force: $branch"
+        equivalent_force_deleted_count=$((equivalent_force_deleted_count + 1))
       else
-        echo "Could not delete equivalent branch: $branch"
+        failure_lines="${failure_lines}equivalent: $branch"$'\n'
       fi
     else
-      echo "Could not safely delete equivalent branch: $branch"
+      failure_lines="${failure_lines}equivalent (safe-delete failed): $branch"$'\n'
     fi
   done <<< "$equivalent_delete_list"
+
+  execution_lines=""
+  execution_lines="${execution_lines}Merged deleted: $merged_deleted_count"$'\n'
+  execution_lines="${execution_lines}Equivalent deleted (safe): $equivalent_deleted_count"$'\n'
+  if [ "$equivalent_force_deleted_count" -gt 0 ]; then
+    execution_lines="${execution_lines}Equivalent deleted (force): $equivalent_force_deleted_count"$'\n'
+  fi
+  if [ "$merged_skipped" -eq 1 ]; then
+    execution_lines="${execution_lines}Merged deletions skipped by confirmation"$'\n'
+  fi
+  if [ "$equivalent_skipped" -eq 1 ]; then
+    execution_lines="${execution_lines}Equivalent deletions skipped by confirmation"$'\n'
+  fi
+
+  _clean_git_branches_print_section "Execution results" "" "${execution_lines%$'\n'}"
+  if [ -n "${failure_lines%$'\n'}" ]; then
+    _clean_git_branches_print_section "Deletion failures" "manual review required" "${failure_lines%$'\n'}"
+  fi
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

@@ -151,7 +151,8 @@ EOF_SHIM
   run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --apply
 
   [ "$status" -eq 0 ]
-  [[ "$output" == *"Deleted merged branch: feature/merged-apply"* ]]
+  [[ "$output" == *"Execution results"* ]]
+  [[ "$output" == *"Merged deleted: 1"* ]]
 
   run git -C "$work_dir" branch --list feature/merged-apply
   [ "$status" -eq 0 ]
@@ -187,7 +188,8 @@ EOF_SHIM
   [ "$status" -eq 0 ]
   [[ "$output" == *"patch-equivalent to main via cherry; candidates are deleted with git branch -d"* ]]
   [[ "$output" == *"feature/equivalent-safe-fail"* ]]
-  [[ "$output" == *"Could not safely delete equivalent branch: feature/equivalent-safe-fail"* ]]
+  [[ "$output" == *"Deletion failures"* ]]
+  [[ "$output" == *"equivalent (safe-delete failed): feature/equivalent-safe-fail"* ]]
 
   run git -C "$work_dir" branch --list feature/equivalent-safe-fail
   [ "$status" -eq 0 ]
@@ -203,7 +205,8 @@ EOF_SHIM
   run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --apply --delete-equivalent --equivalence cherry --force-delete-equivalent
 
   [ "$status" -eq 0 ]
-  [[ "$output" == *"Deleted equivalent branch with force: feature/equivalent-cherry-force"* ]]
+  [[ "$output" == *"Execution results"* ]]
+  [[ "$output" == *"Equivalent deleted (force): 1"* ]]
 
   run git -C "$work_dir" branch --list feature/equivalent-cherry-force
   [ "$status" -eq 0 ]
@@ -219,7 +222,8 @@ EOF_SHIM
   run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --apply --delete-equivalent --equivalence patch-id --force-delete-equivalent
 
   [ "$status" -eq 0 ]
-  [[ "$output" == *"Deleted equivalent branch with force: feature/equivalent-patch-id"* ]]
+  [[ "$output" == *"Execution results"* ]]
+  [[ "$output" == *"Equivalent deleted (force): 1"* ]]
 
   run git -C "$work_dir" branch --list feature/equivalent-patch-id
   [ "$status" -eq 0 ]
@@ -237,8 +241,8 @@ EOF_SHIM
   [ "$status" -eq 0 ]
   [[ "$output" == *"feature/equivalent-ahead-unpushed"* ]]
   [[ "$output" == *"feature/equivalent-ahead-unpushed - skipped: has unpushed commits; ahead of upstream"* ]]
-  [[ "$output" != *"Deleted equivalent branch: feature/equivalent-ahead-unpushed"* ]]
-  [[ "$output" != *"Deleted equivalent branch with force: feature/equivalent-ahead-unpushed"* ]]
+  [[ "$output" == *"Equivalent deleted (safe): 0"* ]]
+  [[ "$output" != *"Equivalent deleted (force): 1"* ]]
 
   run git -C "$work_dir" branch --list feature/equivalent-ahead-unpushed
   [ "$status" -eq 0 ]
@@ -257,8 +261,8 @@ EOF_SHIM
   [ "$status" -eq 0 ]
   [[ "$output" == *"Delete merged (1 branch(es))? [y/N]:"* ]]
   [[ "$output" == *"Delete equivalent (1 branch(es))? [y/N]:"* ]]
-  [[ "$output" == *"Skipped merged deletions."* ]]
-  [[ "$output" == *"Deleted equivalent branch with force: feature/equivalent-confirm"* ]]
+  [[ "$output" == *"Merged deletions skipped by confirmation"* ]]
+  [[ "$output" == *"Equivalent deleted (force): 1"* ]]
 
   run git -C "$work_dir" branch --list feature/merged-confirm
   [ "$status" -eq 0 ]
