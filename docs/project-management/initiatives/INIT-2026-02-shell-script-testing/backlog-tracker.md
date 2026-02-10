@@ -3,7 +3,7 @@
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Scope: Execution tracking for `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/backlog.md`
 - Status: In Progress
-- Last updated: 2026-02-09
+- Last updated: 2026-02-10
 
 ## Tracking Rules
 
@@ -12,6 +12,13 @@
 3. Keep entries chronological and concise.
 
 ## Execution Log
+
+### 2026-02-10
+
+1. Completed `INT-044` (`FEAT-007`) by moving config precedence/parsing and verbose diagnostic contract assertions from integration coverage into mocked coverage (`test/clean_git_branches.bats`).
+2. Added mocked harness support for run-directory execution via `SCENARIO_RUN_DIR` so config-file assertions can execute outside the repository root while still using mock Git behavior.
+3. Removed overlapping integration tests for config precedence/parsing and verbose diagnostics from `test/clean_git_branches.integration.bats` to keep integration coverage focused on stateful/destructive behavior.
+4. Verified migrated coverage and regression safety via `bats test/clean_git_branches.bats`, `bats test/clean_git_branches.integration.bats`, and `test/run-tests.sh` (38 tests passing).
 
 ### 2026-02-09
 
@@ -107,6 +114,5 @@
 
 ## Current Focus
 
-1. Execute `INT-044` to shift equivalent assertions into mocked tests and reduce runtime.
-2. Consolidate duplicate integration scenarios via `INT-042` and `INT-043`.
+1. Consolidate duplicate integration scenarios via `INT-042` and `INT-043`.
 3. Proceed to the remaining initiative milestone: add CI entrypoint for automated test execution.
