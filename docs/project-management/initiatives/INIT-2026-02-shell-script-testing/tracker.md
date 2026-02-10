@@ -2,7 +2,7 @@
 
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Status: In Progress
-- Current Feature Focus: `FEAT-003` patch-equivalent diverged-branch classification investigation (`INT-046`) remains next; `FEAT-004` output-system planning (`INT-047`, `INT-048`) and immediate `.DS_Store` hygiene (`INT-049`) are queued immediately after.
+- Current Feature Focus: `FEAT-003` patch-equivalent diverged-branch classification investigation (`INT-046`) remains next; `FEAT-004` output-system planning (`INT-047`, `INT-048`) is queued after `INT-046`. `.DS_Store` hygiene (`INT-049`) is complete.
 - Last updated: 2026-02-10
 
 ## Completion Legend
@@ -38,6 +38,5 @@
 1. Execute `INT-046` to validate classification policy for diverged branches whose commits are already integrated into `main` by patch-equivalence, using test-first simulated states (prototype optional if needed to prove semantics).
 2. Execute `INT-047` to define a UI/UX-guided color system plan for CLI output semantics and accessibility constraints.
 3. Execute `INT-048` to plan render-module extraction that keeps current indentation layout but moves section rendering out of business logic.
-4. Execute `INT-049` immediately after `INT-048` to enforce `.DS_Store` hygiene (tracked-file verification plus ignore policy updates).
-5. Consolidate overlapping integration scenarios (`INT-042`, `INT-043`) after the planning/hygiene slices.
-6. Add CI entrypoint for automated test execution.
+4. Consolidate overlapping integration scenarios (`INT-042`, `INT-043`) after the planning slices.
+5. Add CI entrypoint for automated test execution.
