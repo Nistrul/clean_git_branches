@@ -35,6 +35,8 @@
 16. Completed `INT-049` by adding repository-level `.gitignore` coverage for `.DS_Store` and `**/.DS_Store`.
 17. Confirmed no `.DS_Store` files are tracked in the repository.
 18. Narrowed `INT-049` scope to repository ignore policy only (`.gitignore`) and removed extra README/test-runner hardening additions.
+19. Completed process refinement slice `INT-050` (`FEAT-006`) to avoid redundant post-PR sync test reruns when rebase is a no-op and relevant tests already passed on the current HEAD.
+20. Updated `AGENTS.md` and `docs/project-management/agent-prompting-research.md` so post-PR sync reruns relevant tests only when rebase changes content or the current HEAD has not yet been test-validated.
 
 ### 2026-02-09
 

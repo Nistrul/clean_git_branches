@@ -1,6 +1,6 @@
 # Agent Prompting Research: Workflow Reliability
 
-- Last updated: 2026-02-08
+- Last updated: 2026-02-10
 - Purpose: Document prompt patterns that reduce workflow misses (branching, PR sequencing, and handoff checks).
 
 ## Problem
@@ -29,7 +29,7 @@ Agents can skip workflow steps when instructions are implied instead of explicit
 3. Close-out checklist before handoff:
    - update trackers for delivered/deferred scope
    - create or update PR
-   - sync latest `main` into feature branch (prefer rebase), rerun relevant tests, push
+   - sync latest `main` into feature branch (prefer rebase), rerun relevant tests only when rebase changes branch content or tests have not been run on the current HEAD, then push
 4. Default post-PR reporting in handoff:
    - initiative completion percentage
    - features complete vs remaining
