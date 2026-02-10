@@ -62,11 +62,13 @@ Refresh remote state before analysis:
 clean_git_branches --prune
 ```
 
-Verbose diagnostics:
+Verbose diagnostics (shown in the `Run summary` section):
 
 ```bash
 clean_git_branches --verbose
 ```
+
+This includes run-level diagnostics (for example mode/base/prune details), without extra per-branch verbose lines.
 
 ## CLI Flags
 
