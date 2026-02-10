@@ -346,6 +346,7 @@ function _clean_git_branches_print_section() {
   local title="$1"
   local note="$2"
   local lines="$3"
+  local line
   local underline
   local color
 
@@ -355,12 +356,15 @@ function _clean_git_branches_print_section() {
   printf "\033[%sm%s\033[0m\n" "$color" "$title"
   printf "\033[%sm%s\033[0m\n" "$color" "$underline"
   if [ -n "$note" ]; then
-    echo "- $note"
+    printf "\033[2;37mNote:\033[0m \033[3;37m%s\033[0m\n" "$note"
   fi
   if [ -n "$lines" ]; then
-    echo "$lines"
+    while IFS= read -r line; do
+      [ -z "$line" ] && continue
+      echo "- $line"
+    done <<< "$lines"
   else
-    echo "  (none)"
+    echo "- (none)"
   fi
   echo
 }
@@ -420,12 +424,12 @@ function clean_git_branches() {
     [ -z "$branch" ] && continue
 
     if [ "$branch" = "$current_branch" ]; then
-      excluded_lines="${excluded_lines}  $branch - skipped: current checked-out branch"$'\n'
+      excluded_lines="${excluded_lines}${branch} - skipped: current checked-out branch"$'\n'
       continue
     fi
 
     if _clean_git_branches_is_protected "$branch"; then
-      excluded_lines="${excluded_lines}  $branch - skipped: protected branch"$'\n'
+      excluded_lines="${excluded_lines}${branch} - skipped: protected branch"$'\n'
       continue
     fi
 
@@ -461,7 +465,7 @@ function clean_git_branches() {
           merged_delete_count=$((merged_delete_count + 1))
         fi
 
-        merged_lines="${merged_lines}  $branch"$'\n'
+        merged_lines="${merged_lines}${branch}"$'\n'
         ;;
       equivalent)
         if [ "$DELETE_EQUIVALENT" -ne 1 ]; then
@@ -473,15 +477,15 @@ function clean_git_branches() {
           equivalent_delete_count=$((equivalent_delete_count + 1))
         fi
 
-        equivalent_lines="${equivalent_lines}  $branch"$'\n'
+        equivalent_lines="${equivalent_lines}${branch}"$'\n'
         ;;
       non-equivalent)
-        non_equivalent_lines="${non_equivalent_lines}  $branch"$'\n'
+        non_equivalent_lines="${non_equivalent_lines}${branch}"$'\n'
         ;;
     esac
 
     if [ -n "$exclusion_reason" ]; then
-      excluded_lines="${excluded_lines}  $branch - skipped: $exclusion_reason"$'\n'
+      excluded_lines="${excluded_lines}${branch} - skipped: $exclusion_reason"$'\n'
     fi
 
     if [ "$VERBOSE" -eq 1 ]; then
