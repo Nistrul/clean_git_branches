@@ -412,11 +412,11 @@ function clean_git_branches() {
   base_branch=$(_clean_git_branches_detect_base_branch "$remote_name")
   BASE_REF=$(_clean_git_branches_resolve_base_ref "$remote_name" "$base_branch")
 
-  _clean_git_branches_verbose "Current branch: ${current_branch:-<detached>}"
   _clean_git_branches_verbose "Remote: ${remote_name:-<none>}"
   _clean_git_branches_verbose "Base branch: ${base_branch:-<none>}"
-  _clean_git_branches_verbose "Base ref: ${BASE_REF:-<none>}"
-  _clean_git_branches_verbose "Mode: $([ "$APPLY" -eq 1 ] && echo apply || echo dry-run)"
+  if [ "$BASE_REF" != "$base_branch" ]; then
+    _clean_git_branches_verbose "Base ref: ${BASE_REF:-<none>}"
+  fi
   _clean_git_branches_verbose "Delete equivalent: $DELETE_EQUIVALENT"
   _clean_git_branches_verbose "Equivalence method: $EQUIVALENCE_METHOD"
   _clean_git_branches_verbose "Force delete equivalent: $FORCE_DELETE_EQUIVALENT"
@@ -500,7 +500,11 @@ function clean_git_branches() {
   else
     header_lines="${header_lines}Execution mode: dry-run (preview only)"$'\n'
   fi
-  header_lines="${header_lines}Base ref: $BASE_REF"$'\n'
+  header_lines="${header_lines}Current branch: ${current_branch:-<detached>}"$'\n'
+  header_lines="${header_lines}Base branch: ${base_branch:-<none>}"$'\n'
+  if [ "$BASE_REF" != "$base_branch" ]; then
+    header_lines="${header_lines}Base ref: $BASE_REF"$'\n'
+  fi
   if [ "$VERBOSE" -eq 1 ] && [ -n "${VERBOSE_LINES%$'\n'}" ]; then
     header_lines="${header_lines}${VERBOSE_LINES%$'\n'}"$'\n'
   fi

@@ -105,6 +105,7 @@ create_non_equivalent_branch() {
 
   [ "$status" -eq 0 ]
   [[ "$output" == *"Execution mode: dry-run (preview only)"* ]]
+  [[ "$output" == *"Current branch: main"* ]]
   [[ "$output" == *"Merged branches"* ]]
   [[ "$output" == *"feature/merged-dry-run"* ]]
   [[ "$output" == *"preview only (use --apply to delete)"* ]]
@@ -112,6 +113,33 @@ create_non_equivalent_branch() {
   run git -C "$work_dir" branch --list feature/merged-dry-run
   [ "$status" -eq 0 ]
   [[ "$output" == *"feature/merged-dry-run"* ]]
+}
+
+@test "integration: remote detection falls back when upstream resolves to literal token" {
+  local work_dir
+  local shim_dir
+  local real_git
+
+  work_dir="$(create_repo_with_origin)"
+  shim_dir="$TEST_TMPDIR/git-shim"
+  mkdir -p "$shim_dir"
+  real_git="$(command -v git)"
+
+  cat > "$shim_dir/git" <<EOF_SHIM
+#!/usr/bin/env bash
+if [ "\$1" = "rev-parse" ] && [ "\${2:-}" = "--abbrev-ref" ] && [ "\${3:-}" = "--symbolic-full-name" ] && [ "\${4:-}" = "@{upstream}" ]; then
+  echo "@{upstream}"
+  exit 0
+fi
+exec "$real_git" "\$@"
+EOF_SHIM
+  chmod +x "$shim_dir/git"
+
+  run env PATH="$shim_dir:$PATH" "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --verbose
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Remote: origin"* ]]
+  [[ "$output" != *"Remote: @{upstream}"* ]]
 }
 
 @test "integration: apply deletes merged branches" {
