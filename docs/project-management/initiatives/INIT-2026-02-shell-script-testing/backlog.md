@@ -81,7 +81,7 @@
 | INT-043 | FEAT-007 | Consolidate overlapping dirty-worktree integration scenarios into one broader cleanup-plus-reporting test to reduce runtime and maintenance overhead | P2 | S | todo |
 | INT-044 | FEAT-007 | Move integration assertions that are equally effective in mocked tests to `test/clean_git_branches.bats` and keep only stateful/destructive checks in integration suite | P1 | M | done |
 | INT-045 | FEAT-007 | Add persistent mocked/integration/full-suite timing metrics to `test/run-tests.sh` and capture before-vs-after runtime comparison for `INT-044` | P2 | S | done |
-| INT-046 | FEAT-003 | Investigate diverged branches whose commits are already integrated in `main` (patch-equivalent) and define safe classification/deletion policy via test-first scenarios (optionally prototype-first) before implementation | P1 | M | todo |
+| INT-046 | FEAT-003 | Investigate diverged branches whose commits are already integrated in `main` (patch-equivalent) and define safe classification/deletion policy via test-first scenarios (optionally prototype-first) before implementation | P1 | M | done |
 | INT-047 | FEAT-004 | Define CLI output color system plan (roles/tokens, semantic meanings, contrast/accessibility constraints, TTY/no-color behavior) using UI/UX review guidance and document deferred visual critique checkpoint | P1 | M | todo |
 | INT-048 | FEAT-004 | Plan and prototype-safe design for a render module so all output sections flow through consistent rendering APIs, preserving current indentation/layout while removing layout concerns from business logic | P1 | M | todo |
 | INT-049 | FEAT-005 | Add `.DS_Store` hygiene slice: verify no tracked `.DS_Store` files, add ignore coverage, and document policy so temporary OS files are not committed | P1 | S | done |
@@ -89,11 +89,10 @@
 
 ## Suggested Execution Order
 
-1. Execute `INT-046` first to validate classification policy for patch-equivalent diverged branches before any behavior change that could affect deletion safety.
-2. Execute `INT-047` to define a color token/semantics plan before render abstraction work changes output architecture.
-3. Execute `INT-048` to establish render-module boundaries and migration plan while preserving current layout contract.
-4. Execute `INT-042` and `INT-043` to consolidate duplicate integration coverage.
+1. Execute `INT-047` to define a color token/semantics plan before render abstraction work changes output architecture.
+2. Execute `INT-048` to establish render-module boundaries and migration plan while preserving current layout contract.
+3. Execute `INT-042` and `INT-043` to consolidate duplicate integration coverage.
 
 ## Sprintable Next Slice
 
-1. Execute `INT-046` by simulating patch-equivalent and non-equivalent diverged branch states in integration tests, then decide whether to proceed with a small prototype or direct implementation.
+1. Execute `INT-047` to define CLI output color roles/tokens, accessibility constraints, and TTY/no-color behavior before render-module planning.

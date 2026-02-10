@@ -2,7 +2,7 @@
 
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Status: In Progress
-- Current Feature Focus: `FEAT-003` patch-equivalent diverged-branch classification investigation (`INT-046`) remains next; `FEAT-004` output-system planning (`INT-047`, `INT-048`) is queued after `INT-046`. `.DS_Store` hygiene (`INT-049`) and post-PR rebase no-op rerun refinement (`INT-050`) are complete.
+- Current Feature Focus: `FEAT-003` patch-equivalent diverged-branch classification investigation (`INT-046`) is complete. `FEAT-004` output-system planning (`INT-047`, `INT-048`) is now next. `.DS_Store` hygiene (`INT-049`) and post-PR rebase no-op rerun refinement (`INT-050`) are complete.
 - Last updated: 2026-02-10
 
 ## Completion Legend
@@ -35,8 +35,7 @@
 
 ## Next Actions
 
-1. Execute `INT-046` to validate classification policy for diverged branches whose commits are already integrated into `main` by patch-equivalence, using test-first simulated states (prototype optional if needed to prove semantics).
-2. Execute `INT-047` to define a UI/UX-guided color system plan for CLI output semantics and accessibility constraints.
-3. Execute `INT-048` to plan render-module extraction that keeps current indentation layout but moves section rendering out of business logic.
-4. Consolidate overlapping integration scenarios (`INT-042`, `INT-043`) after the planning slices.
-5. Add CI entrypoint for automated test execution.
+1. Execute `INT-047` to define a UI/UX-guided color system plan for CLI output semantics and accessibility constraints.
+2. Execute `INT-048` to plan render-module extraction that keeps current indentation layout but moves section rendering out of business logic.
+3. Consolidate overlapping integration scenarios (`INT-042`, `INT-043`) after the planning slices.
+4. Add CI entrypoint for automated test execution.

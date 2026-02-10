@@ -37,6 +37,10 @@
 18. Narrowed `INT-049` scope to repository ignore policy only (`.gitignore`) and removed extra README/test-runner hardening additions.
 19. Completed process refinement slice `INT-050` (`FEAT-006`) to avoid redundant post-PR sync test reruns when rebase is a no-op and relevant tests already passed on the current HEAD.
 20. Updated `AGENTS.md` and `docs/project-management/agent-prompting-research.md` so post-PR sync reruns relevant tests only when rebase changes content or the current HEAD has not yet been test-validated.
+21. Completed `INT-046` (`FEAT-003`) with test-first integration coverage for patch-equivalent diverged remote-gone branches plus a non-equivalent control scenario.
+22. Added safe classification policy in `clean_git_branches.sh`: keep ancestor-merged auto-delete behavior unchanged, exclude patch-equivalent diverged gone branches from force-delete candidates, and report them in a dedicated `Patch-equivalent diverged branches (not deleted)` section.
+23. Added deterministic integration helper setup to force true history divergence before cherry-pick so patch-equivalent scenarios cannot collapse into ancestor-merged commits during fast test runs.
+24. Verified regression safety via `bats test/clean_git_branches.integration.bats -f "patch-equivalent"` and `test/run-tests.sh` (40 tests passing total: 11 mocked + 29 integration).
 
 ### 2026-02-09
 
@@ -132,8 +136,7 @@
 
 ## Current Focus
 
-1. Execute `INT-046` to validate and document safe handling for patch-equivalent diverged branches using test-first simulated repository states.
-2. Execute `INT-047` to establish color semantics and accessibility constraints for CLI output before renderer abstraction.
-3. Execute `INT-048` to define render-module boundaries and migration sequencing while preserving current indentation layout.
-4. Consolidate duplicate integration scenarios via `INT-042` and `INT-043`.
-5. Proceed to the remaining initiative milestone: add CI entrypoint for automated test execution.
+1. Execute `INT-047` to establish color semantics and accessibility constraints for CLI output before renderer abstraction.
+2. Execute `INT-048` to define render-module boundaries and migration sequencing while preserving current indentation layout.
+3. Consolidate duplicate integration scenarios via `INT-042` and `INT-043`.
+4. Proceed to the remaining initiative milestone: add CI entrypoint for automated test execution.

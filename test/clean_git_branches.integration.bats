@@ -43,6 +43,27 @@ create_gone_branch() {
   git -C "$work_dir" fetch --prune >/dev/null
 }
 
+create_patch_equivalent_diverged_gone_branch() {
+  local work_dir="$1"
+  local branch_name="${2:-feature/patch-equivalent-diverged-gone}"
+  local branch_file
+
+  branch_file="${branch_name//\//_}.txt"
+  git -C "$work_dir" checkout -b "$branch_name" >/dev/null
+  echo "patch equivalent diverged branch content for $branch_name" > "$work_dir/$branch_file"
+  git -C "$work_dir" add "$branch_file"
+  git -C "$work_dir" commit -m "patch equivalent commit for $branch_name" >/dev/null
+  git -C "$work_dir" push -u origin "$branch_name" >/dev/null
+  git -C "$work_dir" checkout main >/dev/null
+  echo "main divergence anchor for $branch_name" >> "$work_dir/README.md"
+  git -C "$work_dir" add README.md
+  git -C "$work_dir" commit -m "main divergence anchor for $branch_name" >/dev/null
+  git -C "$work_dir" cherry-pick "$branch_name" >/dev/null
+  git -C "$work_dir" push origin main >/dev/null
+  git -C "$work_dir" push origin --delete "$branch_name" >/dev/null
+  git -C "$work_dir" fetch --prune >/dev/null
+}
+
 create_tracked_branch() {
   local work_dir="$1"
   local branch_name="$2"
@@ -162,6 +183,65 @@ create_local_only_branch() {
   run git -C "$work_dir" branch --list feature/gone
   [ "$status" -eq 0 ]
   [ -z "$output" ]
+}
+
+@test "integration: force delete keeps patch-equivalent diverged gone branch but deletes non-equivalent gone branch" {
+  # A branch can be remote-gone without being an ancestor merge into main when its patch was integrated via
+  # cherry-pick/squash-style history rewrite. We classify that as patch-equivalent-diverged and keep it by
+  # default, while still deleting normal remote-gone branches that are not patch-equivalent.
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+
+  create_patch_equivalent_diverged_gone_branch "$work_dir" "feature/patch-equivalent-gone"
+  create_gone_branch "$work_dir" "feature/non-equivalent-gone"
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --force-delete-gone --silent
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Deleted remote-gone branches"* ]]
+  [[ "$output" == *"feature/non-equivalent-gone"* ]]
+  [[ "$output" == *"Patch-equivalent diverged branches (not deleted)"* ]]
+  [[ "$output" == *"feature/patch-equivalent-gone"* ]]
+
+  run git -C "$work_dir" branch --list feature/non-equivalent-gone
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+
+  run git -C "$work_dir" branch --list feature/patch-equivalent-gone
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"feature/patch-equivalent-gone"* ]]
+}
+
+@test "integration: report-only mode separates patch-equivalent diverged gone branches from standard gone list" {
+  # In no-force mode, patch-equivalent diverged branches should still be visible but separated from regular
+  # remote-gone branches so users can choose a safer/manual cleanup policy for rewritten-history scenarios.
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+
+  create_patch_equivalent_diverged_gone_branch "$work_dir" "feature/patch-equivalent-report"
+  create_gone_branch "$work_dir" "feature/non-equivalent-report"
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --no-force-delete-gone --silent
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Remote-gone branches (deletion disabled)"* ]]
+  [[ "$output" == *"feature/non-equivalent-report"* ]]
+  [[ "$output" == *"Patch-equivalent diverged branches (not deleted)"* ]]
+  [[ "$output" == *"feature/patch-equivalent-report"* ]]
+
+  run git -C "$work_dir" branch --list feature/non-equivalent-report
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"feature/non-equivalent-report"* ]]
+
+  run git -C "$work_dir" branch --list feature/patch-equivalent-report
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"feature/patch-equivalent-report"* ]]
 }
 
 @test "integration: dry run with force delete previews gone branches and does not delete" {

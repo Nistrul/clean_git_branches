@@ -182,6 +182,83 @@ function _clean_git_branches_gone_branch_names() {
   git branch -vv | grep -vE '^\*' | grep -E 'gone' | awk '{print $1}' | egrep -v "^($PROTECTED_BRANCHES)$"
 }
 
+function _clean_git_branches_merge_target_branch() {
+  if git show-ref --verify --quiet refs/heads/main; then
+    echo "main"
+    return
+  fi
+
+  if git show-ref --verify --quiet refs/heads/master; then
+    echo "master"
+    return
+  fi
+
+  echo ""
+}
+
+function _clean_git_branches_is_patch_equivalent_diverged() {
+  local branch="$1"
+  local target_branch="$2"
+  local cherry_output
+
+  if [ -z "$branch" ] || [ -z "$target_branch" ]; then
+    return 1
+  fi
+
+  if ! git show-ref --verify --quiet "refs/heads/$branch"; then
+    return 1
+  fi
+
+  if ! git show-ref --verify --quiet "refs/heads/$target_branch"; then
+    return 1
+  fi
+
+  if git merge-base --is-ancestor "$branch" "$target_branch" >/dev/null 2>&1; then
+    return 1
+  fi
+
+  if ! git merge-base "$target_branch" "$branch" >/dev/null 2>&1; then
+    return 1
+  fi
+
+  cherry_output=$(git cherry "$target_branch" "$branch" 2>/dev/null || true)
+  if [ -z "$cherry_output" ]; then
+    return 1
+  fi
+
+  if echo "$cherry_output" | grep -q '^+'; then
+    return 1
+  fi
+
+  if echo "$cherry_output" | grep -q '^-'; then
+    return 0
+  fi
+
+  return 1
+}
+
+function _clean_git_branches_partition_gone_candidates() {
+  local gone_candidates="$1"
+  local target_branch
+  local branch
+  local delete_candidates=""
+  local patch_equivalent_diverged=""
+
+  target_branch=$(_clean_git_branches_merge_target_branch)
+
+  while IFS= read -r branch; do
+    [ -z "$branch" ] && continue
+    if _clean_git_branches_is_patch_equivalent_diverged "$branch" "$target_branch"; then
+      patch_equivalent_diverged="${patch_equivalent_diverged}${branch}"$'\n'
+    else
+      delete_candidates="${delete_candidates}${branch}"$'\n'
+    fi
+  done <<< "$gone_candidates"
+
+  PATCH_EQUIVALENT_DIVERGED_BRANCHES="${patch_equivalent_diverged%$'\n'}"
+  GONE_DELETE_CANDIDATES="${delete_candidates%$'\n'}"
+}
+
 # Delete remote-gone local branches using force delete (-D)
 #
 # Usage: _clean_git_branches_delete_gone
@@ -310,9 +387,15 @@ function _clean_git_branches_show_untracked() {
 # This function lists all deleted branches in the Git repository. Deleted branches are
 # branches that have been deleted from the remote repository but still exist locally.
 function _clean_git_branches_show_deleted() {
-  local deleted
+  local branch
+  local deleted=""
 
-  deleted=$(git branch -vv | grep -vE '^\*' | grep -E 'gone')
+  while IFS= read -r branch; do
+    [ -z "$branch" ] && continue
+    deleted="${deleted}$(git branch -vv | awk -v b="$branch" '$1==b {print; exit}')"$'\n'
+  done <<< "$GONE_DELETE_CANDIDATES"
+  deleted="${deleted%$'\n'}"
+
   _clean_git_branches_verbose_section "Remote-Gone Reporting"
   _clean_git_branches_verbose_kv "Remote-gone local branches" "$(echo "$deleted" | sed '/^$/d' | wc -l | tr -d ' ')"
   if [ -n "$deleted" ]; then
@@ -364,6 +447,7 @@ function clean_git_branches() {
   local gone_candidates
   local gone_candidate_count
   local show_remote_gone_report=1
+  local patch_equivalent_diverged_count
   local printed_report_section=0
 
   echo
@@ -386,8 +470,11 @@ function clean_git_branches() {
     return 1
   fi
   gone_candidates=$(_clean_git_branches_gone_branch_names)
-  gone_candidate_count=$(echo "$gone_candidates" | sed '/^$/d' | wc -l | tr -d ' ')
+  _clean_git_branches_partition_gone_candidates "$gone_candidates"
+  gone_candidate_count=$(echo "$GONE_DELETE_CANDIDATES" | sed '/^$/d' | wc -l | tr -d ' ')
+  patch_equivalent_diverged_count=$(echo "$PATCH_EQUIVALENT_DIVERGED_BRANCHES" | sed '/^$/d' | wc -l | tr -d ' ')
   _clean_git_branches_verbose_kv "Remote-gone deletion candidates" "$gone_candidate_count"
+  _clean_git_branches_verbose_kv "Patch-equivalent diverged gone branches" "$patch_equivalent_diverged_count"
 
   deleted_merged=$(_clean_git_branches_delete_merged)
   if [ -n "$deleted_merged" ]; then
@@ -428,8 +515,8 @@ function clean_git_branches() {
       echo -e "\033[1;91mWARNING: --silent skips the destructive confirmation prompt.\033[0m"
       echo
     fi
-    if _clean_git_branches_confirm_force_delete "$gone_candidate_count" "$gone_candidates"; then
-      deleted_gone=$(_clean_git_branches_delete_gone "$gone_candidates")
+    if _clean_git_branches_confirm_force_delete "$gone_candidate_count" "$GONE_DELETE_CANDIDATES"; then
+      deleted_gone=$(_clean_git_branches_delete_gone "$GONE_DELETE_CANDIDATES")
       if [ -n "$deleted_gone" ]; then
         if [ "$VERBOSE" -eq 1 ] && [ "$printed_report_section" -eq 0 ]; then
           echo
@@ -480,6 +567,26 @@ function clean_git_branches() {
       echo "─────────────────────────────────────────"
     fi
     echo "$deleted"
+    echo
+  fi
+
+  if [ -n "$PATCH_EQUIVALENT_DIVERGED_BRANCHES" ]; then
+    local patch_equivalent_diverged_report
+
+    patch_equivalent_diverged_report=""
+    while IFS= read -r branch; do
+      [ -z "$branch" ] && continue
+      patch_equivalent_diverged_report="${patch_equivalent_diverged_report}$(git branch -vv | awk -v b="$branch" '$1==b {print; exit}')"$'\n'
+    done <<< "$PATCH_EQUIVALENT_DIVERGED_BRANCHES"
+    patch_equivalent_diverged_report="${patch_equivalent_diverged_report%$'\n'}"
+
+    if [ "$VERBOSE" -eq 1 ] && [ "$printed_report_section" -eq 0 ]; then
+      echo
+      printed_report_section=1
+    fi
+    echo -e "\033[1;91mPatch-equivalent diverged branches (not deleted)\033[0m"
+    echo "───────────────────────────────────────────────"
+    echo "$patch_equivalent_diverged_report"
     echo
   fi
 
