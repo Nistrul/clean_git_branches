@@ -356,15 +356,13 @@ function _clean_git_branches_print_section() {
   printf "\033[%sm%s\033[0m\n" "$color" "$title"
   printf "\033[%sm%s\033[0m\n" "$color" "$underline"
   if [ -n "$note" ]; then
-    printf "\033[2;37mNote:\033[0m \033[3;37m%s\033[0m\n" "$note"
+    printf "\033[3;37m%s\033[0m\n" "$note"
   fi
   if [ -n "$lines" ]; then
     while IFS= read -r line; do
       [ -z "$line" ] && continue
       echo "- $line"
     done <<< "$lines"
-  else
-    echo "- (none)"
   fi
   echo
 }
@@ -508,7 +506,9 @@ function clean_git_branches() {
   else
     merged_note="fully merged into $BASE_REF; preview only (use --apply to delete)"
   fi
-  _clean_git_branches_print_section "Merged branches" "$merged_note" "${merged_lines%$'\n'}"
+  if [ -n "${merged_lines%$'\n'}" ]; then
+    _clean_git_branches_print_section "Merged branches" "$merged_note" "${merged_lines%$'\n'}"
+  fi
 
   equivalent_note="patch-equivalent to $BASE_REF via $EQUIVALENCE_METHOD; default keep (use --delete-equivalent to include deletion)"
   if [ "$DELETE_EQUIVALENT" -eq 1 ]; then
@@ -518,10 +518,16 @@ function clean_git_branches() {
       equivalent_note="patch-equivalent to $BASE_REF via $EQUIVALENCE_METHOD; preview only (use --apply to delete)"
     fi
   fi
-  _clean_git_branches_print_section "Equivalent branches" "$equivalent_note" "${equivalent_lines%$'\n'}"
+  if [ -n "${equivalent_lines%$'\n'}" ]; then
+    _clean_git_branches_print_section "Equivalent branches" "$equivalent_note" "${equivalent_lines%$'\n'}"
+  fi
 
-  _clean_git_branches_print_section "Non-equivalent branches" "keep: contains unique commits" "${non_equivalent_lines%$'\n'}"
-  _clean_git_branches_print_section "Safety exclusions" "hard safety rules (never deleted)" "${excluded_lines%$'\n'}"
+  if [ -n "${non_equivalent_lines%$'\n'}" ]; then
+    _clean_git_branches_print_section "Non-equivalent branches" "keep: contains unique commits" "${non_equivalent_lines%$'\n'}"
+  fi
+  if [ -n "${excluded_lines%$'\n'}" ]; then
+    _clean_git_branches_print_section "Safety exclusions" "hard safety rules (never deleted)" "${excluded_lines%$'\n'}"
+  fi
 
   if [ "$APPLY" -ne 1 ]; then
     return 0
