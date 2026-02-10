@@ -33,8 +33,8 @@
 14. Prioritized `INT-049` immediately on user request to remove `.DS_Store` artifacts from active workflow and prevent recurrence.
 15. Dropped the temporary stash created during branch alignment because it contained only untracked `.DS_Store` content.
 16. Completed `INT-049` by adding repository-level `.gitignore` coverage for `.DS_Store` and `**/.DS_Store`.
-17. Added a deterministic hygiene guard in `test/run-tests.sh` that fails when `.DS_Store` files are tracked or ignore policy is missing.
-18. Documented `.DS_Store` hygiene policy in `README.md` and confirmed no `.DS_Store` files are tracked.
+17. Confirmed no `.DS_Store` files are tracked in the repository.
+18. Narrowed `INT-049` scope to repository ignore policy only (`.gitignore`) and removed extra README/test-runner hardening additions.
 
 ### 2026-02-09
 

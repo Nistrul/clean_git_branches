@@ -3,26 +3,9 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-assert_ds_store_hygiene() {
-  if git -C "$repo_root" ls-files | grep -Eq '(^|/)\.DS_Store$'; then
-    echo ".DS_Store hygiene check failed: tracked .DS_Store file(s) detected." >&2
-    git -C "$repo_root" ls-files | grep -E '(^|/)\.DS_Store$' >&2 || true
-    return 1
-  fi
-
-  if ! printf '.DS_Store\n' | git -C "$repo_root" check-ignore --stdin -q; then
-    echo ".DS_Store hygiene check failed: .gitignore must include .DS_Store." >&2
-    return 1
-  fi
-}
-
 if ! command -v bats >/dev/null 2>&1; then
   echo "bats is required to run tests. Install bats-core and rerun test/run-tests.sh." >&2
   exit 127
-fi
-
-if ! assert_ds_store_hygiene; then
-  exit 1
 fi
 
 run_suite() {
