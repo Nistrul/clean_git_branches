@@ -92,6 +92,10 @@ Command-line flags (`--force-delete-gone` / `--no-force-delete-gone`) override t
 Git ref rules apply directly to branch names. Branch names containing spaces are unsupported because Git rejects them at creation time.
 Unicode branch names are supported when they satisfy Git ref-format rules (for example, `feature/unicode-ßeta`).
 
+## Repository Hygiene
+
+Temporary macOS metadata files (`.DS_Store`) are ignored by repository policy. `test/run-tests.sh` enforces this by failing if any tracked `.DS_Store` file is detected or if `.gitignore` is missing the `.DS_Store` rule.
+
 ## Mocked Git Workflow
 
 Use the included mocked `git` harness when you want to work on output/layout behavior without a real repository:

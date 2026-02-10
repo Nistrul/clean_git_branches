@@ -30,6 +30,11 @@
 11. Captured new planning slice `INT-048` (`FEAT-004`) to design a render module that centralizes section rendering and formatting while preserving the current indentation-based layout contract.
 12. Captured immediate follow-up hygiene slice `INT-049` (`FEAT-005`) to ensure `.DS_Store` files are not tracked and to add ignore/policy coverage in a dedicated branch/PR.
 13. Reprioritized next slices so `INT-046` remains first for classification/deletion safety validation, followed by output-system planning (`INT-047`, `INT-048`) and immediate `.DS_Store` hygiene (`INT-049`) before deferred integration-consolidation cleanup.
+14. Prioritized `INT-049` immediately on user request to remove `.DS_Store` artifacts from active workflow and prevent recurrence.
+15. Dropped the temporary stash created during branch alignment because it contained only untracked `.DS_Store` content.
+16. Completed `INT-049` by adding repository-level `.gitignore` coverage for `.DS_Store` and `**/.DS_Store`.
+17. Added a deterministic hygiene guard in `test/run-tests.sh` that fails when `.DS_Store` files are tracked or ignore policy is missing.
+18. Documented `.DS_Store` hygiene policy in `README.md` and confirmed no `.DS_Store` files are tracked.
 
 ### 2026-02-09
 
@@ -128,6 +133,5 @@
 1. Execute `INT-046` to validate and document safe handling for patch-equivalent diverged branches using test-first simulated repository states.
 2. Execute `INT-047` to establish color semantics and accessibility constraints for CLI output before renderer abstraction.
 3. Execute `INT-048` to define render-module boundaries and migration sequencing while preserving current indentation layout.
-4. Execute `INT-049` immediately after `INT-048` to add `.DS_Store` tracking/ignore hygiene coverage.
-5. Consolidate duplicate integration scenarios via `INT-042` and `INT-043`.
-6. Proceed to the remaining initiative milestone: add CI entrypoint for automated test execution.
+4. Consolidate duplicate integration scenarios via `INT-042` and `INT-043`.
+5. Proceed to the remaining initiative milestone: add CI entrypoint for automated test execution.
