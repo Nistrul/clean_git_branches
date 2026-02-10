@@ -85,6 +85,7 @@
 | INT-047 | FEAT-004 | Define CLI output color system plan (roles/tokens, semantic meanings, contrast/accessibility constraints, TTY/no-color behavior) using UI/UX review guidance and document deferred visual critique checkpoint | P1 | M | todo |
 | INT-048 | FEAT-004 | Plan and prototype-safe design for a render module so all output sections flow through consistent rendering APIs, preserving current indentation/layout while removing layout concerns from business logic | P1 | M | todo |
 | INT-049 | FEAT-005 | Add `.DS_Store` hygiene slice: verify no tracked `.DS_Store` files, add ignore coverage, and document policy so temporary OS files are not committed | P1 | S | done |
+| INT-050 | FEAT-006 | In post-PR sync workflow, skip rerunning tests when rebase is a no-op and relevant tests already passed on the current HEAD | P1 | S | done |
 
 ## Suggested Execution Order
 
