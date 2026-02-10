@@ -26,7 +26,10 @@
 7. Verified updated runner output and regression safety via `test/run-tests.sh` (38 tests passing with `[timing]` lines).
 8. Captured new backlog investigation slice `INT-046` (`FEAT-003`) for diverged branches whose commits are already integrated into `main` by patch-equivalence (for example via squash/cherry-pick/rewrite paths).
 9. Recorded recommendations for `INT-046`: keep ancestor-merged auto-delete behavior unchanged, add a separate patch-equivalent-diverged classification, and validate with test-first simulated states before implementation (prototype permitted if needed to prove detection semantics).
-10. Reprioritized next slice so `INT-046` executes before remaining `FEAT-007` consolidation tasks (`INT-042`, `INT-043`) due to higher classification/deletion safety impact.
+10. Captured new planning slice `INT-047` (`FEAT-004`) to define a UI/UX-guided CLI color system plan with semantic token roles, accessibility/contrast constraints, and TTY/no-color behavior expectations.
+11. Captured new planning slice `INT-048` (`FEAT-004`) to design a render module that centralizes section rendering and formatting while preserving the current indentation-based layout contract.
+12. Captured immediate follow-up hygiene slice `INT-049` (`FEAT-005`) to ensure `.DS_Store` files are not tracked and to add ignore/policy coverage in a dedicated branch/PR.
+13. Reprioritized next slices so `INT-046` remains first for classification/deletion safety validation, followed by output-system planning (`INT-047`, `INT-048`) and immediate `.DS_Store` hygiene (`INT-049`) before deferred integration-consolidation cleanup.
 
 ### 2026-02-09
 
@@ -123,5 +126,8 @@
 ## Current Focus
 
 1. Execute `INT-046` to validate and document safe handling for patch-equivalent diverged branches using test-first simulated repository states.
-2. Consolidate duplicate integration scenarios via `INT-042` and `INT-043`.
-3. Proceed to the remaining initiative milestone: add CI entrypoint for automated test execution.
+2. Execute `INT-047` to establish color semantics and accessibility constraints for CLI output before renderer abstraction.
+3. Execute `INT-048` to define render-module boundaries and migration sequencing while preserving current indentation layout.
+4. Execute `INT-049` immediately after `INT-048` to add `.DS_Store` tracking/ignore hygiene coverage.
+5. Consolidate duplicate integration scenarios via `INT-042` and `INT-043`.
+6. Proceed to the remaining initiative milestone: add CI entrypoint for automated test execution.
