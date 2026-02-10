@@ -75,19 +75,17 @@
 | INT-037 | FEAT-006 | After PR creation, report initiative completeness %, completed vs remaining features, total initiatives, and next initiative before handoff | P1 | S | done |
 | INT-038 | FEAT-005 | Add intent comments for non-obvious advanced integration tests to document failure modes | P2 | S | done |
 | INT-039 | FEAT-007 | Reorder integration tests so related scenarios are grouped and the file has a logical progression | P2 | S | done |
-| INT-040 | FEAT-007 | Validate integration-test coverage map and capture/add missing high-risk scenarios before closing FEAT-007 | P1 | M | in_progress |
-| INT-041 | FEAT-001 | Non-interactive `--dry-run --force-delete-gone` without `--silent` has deterministic confirmation/preview behavior and explicit output contract | P1 | S | todo |
+| INT-040 | FEAT-007 | Validate integration-test coverage map and capture/add missing high-risk scenarios before closing FEAT-007 | P1 | M | done |
+| INT-041 | FEAT-001 | Non-interactive `--dry-run --force-delete-gone` without `--silent` has deterministic confirmation/preview behavior and explicit output contract | P1 | S | done |
 | INT-042 | FEAT-007 | Consolidate overlapping subdirectory integration scenarios into one broader context-coverage test to reduce runtime and maintenance overhead | P2 | S | todo |
 | INT-043 | FEAT-007 | Consolidate overlapping dirty-worktree integration scenarios into one broader cleanup-plus-reporting test to reduce runtime and maintenance overhead | P2 | S | todo |
 | INT-044 | FEAT-007 | Move integration assertions that are equally effective in mocked tests to `test/clean_git_branches.bats` and keep only stateful/destructive checks in integration suite | P1 | M | todo |
 
 ## Suggested Execution Order
 
-1. Execute `INT-040` to validate coverage and add any missing high-risk integration scenarios.
-2. Execute `INT-041` to lock down non-interactive dry-run behavior contract.
-3. Execute `INT-044` to reduce runtime by shifting equivalent assertions from integration to mocked tests.
-4. Execute `INT-042` and `INT-043` to consolidate duplicate integration coverage.
+1. Execute `INT-044` to reduce runtime by shifting equivalent assertions from integration to mocked tests.
+2. Execute `INT-042` and `INT-043` to consolidate duplicate integration coverage.
 
 ## Sprintable Next Slice
 
-1. Continue `INT-040` and then implement `INT-041` to close the highest-risk remaining confirmation-path gap.
+1. Implement `INT-044` to move equivalent assertions from integration to mocked tests and keep integration focused on stateful/destructive behaviors.

@@ -233,27 +233,40 @@ function _clean_git_branches_confirm_force_delete() {
     return 0
   fi
 
+  if [ "$DRY_RUN" -eq 1 ]; then
+    echo >&2
+    echo -e "\033[1;93mRemote-gone force delete dry run\033[0m" >&2
+    echo "─────────────────────────────────────" >&2
+    echo -e "\033[1;93m  DRY RUN: no branches will be deleted.\033[0m" >&2
+    echo -e "\033[1;93m  This preview shows branches that would be force deleted.\033[0m" >&2
+    echo -e "\033[1;93m  Reason: each branch below has an upstream marked 'gone' by Git.\033[0m" >&2
+    echo >&2
+    echo -e "\033[1;96mBranches to be deleted\033[0m" >&2
+    echo "──────────────────────" >&2
+    while IFS= read -r branch; do
+      [ -z "$branch" ] && continue
+      branch_info=$(git branch -vv | awk -v b="$branch" '$1==b {print; exit}')
+      if [ -n "$branch_info" ]; then
+        echo "  $(echo "$branch_info" | sed 's/^ *//')" >&2
+      else
+        echo "  $branch [upstream: gone]" >&2
+      fi
+    done <<< "$candidate_list"
+    echo >&2
+    return 0
+  fi
+
   if [ ! -t 0 ] && [ "$assume_tty_for_tests" -ne 1 ]; then
     echo "Force deletion requires confirmation. Re-run with --silent to proceed non-interactively." >&2
     return 2
   fi
 
   echo >&2
-  if [ "$DRY_RUN" -eq 1 ]; then
-    echo -e "\033[1;93mRemote-gone force delete dry run\033[0m" >&2
-  else
-    echo -e "\033[1;91mRemote-gone force delete confirmation\033[0m" >&2
-  fi
+  echo -e "\033[1;91mRemote-gone force delete confirmation\033[0m" >&2
   echo "─────────────────────────────────────" >&2
-  if [ "$DRY_RUN" -eq 1 ]; then
-    echo -e "\033[1;93m  DRY RUN: no branches will be deleted.\033[0m" >&2
-    echo -e "\033[1;93m  This preview shows branches that would be force deleted.\033[0m" >&2
-    echo -e "\033[1;93m  Reason: each branch below has an upstream marked 'gone' by Git.\033[0m" >&2
-  else
-    echo -e "\033[1;91m  DANGER: this will permanently delete $candidate_count local branches.\033[0m" >&2
-    echo -e "\033[1;93m  This action is destructive and cannot be undone by this script.\033[0m" >&2
-    echo -e "\033[1;93m  Reason: each branch below has an upstream marked 'gone' by Git.\033[0m" >&2
-  fi
+  echo -e "\033[1;91m  DANGER: this will permanently delete $candidate_count local branches.\033[0m" >&2
+  echo -e "\033[1;93m  This action is destructive and cannot be undone by this script.\033[0m" >&2
+  echo -e "\033[1;93m  Reason: each branch below has an upstream marked 'gone' by Git.\033[0m" >&2
   echo >&2
   echo -e "\033[1;96mBranches to be deleted\033[0m" >&2
   echo "──────────────────────" >&2
@@ -266,11 +279,6 @@ function _clean_git_branches_confirm_force_delete() {
       echo "  $branch [upstream: gone]" >&2
     fi
   done <<< "$candidate_list"
-  if [ "$DRY_RUN" -eq 1 ]; then
-    echo >&2
-    return 0
-  fi
-
   echo >&2
   printf "\033[1;96mType DELETE to continue, or press Enter to skip:\033[0m " >&2
   read -r response
