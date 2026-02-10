@@ -80,6 +80,7 @@
 | INT-042 | FEAT-007 | Consolidate overlapping subdirectory integration scenarios into one broader context-coverage test to reduce runtime and maintenance overhead | P2 | S | todo |
 | INT-043 | FEAT-007 | Consolidate overlapping dirty-worktree integration scenarios into one broader cleanup-plus-reporting test to reduce runtime and maintenance overhead | P2 | S | todo |
 | INT-044 | FEAT-007 | Move integration assertions that are equally effective in mocked tests to `test/clean_git_branches.bats` and keep only stateful/destructive checks in integration suite | P1 | M | done |
+| INT-045 | FEAT-007 | Add persistent mocked/integration/full-suite timing metrics to `test/run-tests.sh` and capture before-vs-after runtime comparison for `INT-044` | P2 | S | done |
 
 ## Suggested Execution Order
 
