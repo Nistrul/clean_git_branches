@@ -1,147 +1,126 @@
 # Clean Git Branches
 
-Clean Git Branches is a command-line tool that helps maintain a tidy Git repository by categorizing and displaying branches based on their status: deleted, untracked, tracked, and protected. It also streamlines branch management by automatically removing merged branches and optionally force deleting remote-gone branches, excluding those specified as protected.
+Clean Git Branches is a safety-first CLI for local branch cleanup.
 
-## Features
+It only deletes branches that are provably redundant:
+- `merged` branches (fully merged into the detected base)
+- `equivalent` branches (patch-equivalent to base, opt-in)
 
-- Categorize and display branches by status (deleted, untracked, tracked, protected)
-- Delete merged branches, excluding protected branches
-- Optionally force delete remote-gone branches with `git branch -D`
-- Easy-to-read, color-coded branch output
-- Customizable protected branches
-- Optional verbose diagnostics mode for troubleshooting
+Branches with potentially unique local work are never deleted.
 
 ## Installation
 
-install the clean-git-branches script using Homebrew, first tap this repository:
+Install with Homebrew:
 
 ```bash
 brew tap Nistrul/clean-git-branches
-```
-
-Then, install the clean-git-branches script:
-
-```bash
 brew install clean-git-branches
 ```
 
 ## Usage
 
-Simply run the clean_git_branches function in your terminal from inside a git repository:
+Default mode is preview-only (dry-run semantics):
 
 ```bash
 clean_git_branches
 ```
 
-The script will display branches categorized by status and remove merged branches, excluding those specified as protected.
-
-Remote-gone branch deletion is optional and disabled by default. Enable force deletion with either:
+Execute deletions:
 
 ```bash
-clean_git_branches --force-delete-gone
+clean_git_branches --apply
 ```
 
-or in repo config (`.clean_git_branches.conf`):
+Also delete equivalent branches (still safe-delete first):
 
 ```bash
-FORCE_DELETE_GONE_BRANCHES=true
+clean_git_branches --apply --delete-equivalent
 ```
 
-Disable with:
+Allow equivalent fallback force delete (`-D`) only when safe delete fails:
 
 ```bash
-clean_git_branches --no-force-delete-gone
+clean_git_branches --apply --delete-equivalent --force-delete-equivalent
 ```
 
-Preview without deleting:
+Choose equivalence detection mode:
 
 ```bash
-clean_git_branches --force-delete-gone --dry-run
+clean_git_branches --equivalence cherry
+clean_git_branches --equivalence patch-id
 ```
 
-Skip confirmation prompt (dangerous):
+Prompt once per deletion category:
 
 ```bash
-clean_git_branches --force-delete-gone --silent
+clean_git_branches --apply --confirm
 ```
 
-To print additional runtime diagnostics while troubleshooting:
+Refresh remote state before analysis:
+
+```bash
+clean_git_branches --prune
+```
+
+Verbose diagnostics:
 
 ```bash
 clean_git_branches --verbose
 ```
 
-## Configuration
+## CLI Flags
 
-Set the **PROTECTED_BRANCHES** environment variable if you want to customize the protected branches. By default, the script protects the "main", "master", "prod", and "dev" branches. To set the variable, add the following line to your shell's configuration file (e.g., **.bashrc**, **.zshrc**, etc.):
+- `--help`
+- `--apply`
+- `--confirm`
+- `--delete-equivalent`
+- `--equivalence {cherry|patch-id}`
+- `--force-delete-equivalent`
+- `--prune`
+- `--verbose`
+
+Removed legacy flags:
+- `--force-delete-gone`
+- `--no-force-delete-gone`
+- `--delete-patch-equivalent-diverged`
+- `--dry-run`
+- `--silent`
+
+## Safety Guarantees
+
+The tool never deletes:
+- current checked-out branch
+- branches with unpushed commits
+- branches ahead of upstream
+- branches with unique (non-equivalent) commits
+
+## Protected Branches
+
+`PROTECTED_BRANCHES` is supported as a pipe-separated regex list.
+Default: `main|master|prod|dev`.
+
+Example:
 
 ```bash
-export PROTECTED_BRANCHES="main|master|prod|dev|custom-branch"
+export PROTECTED_BRANCHES="main|master|prod|dev|release"
 ```
-
-To configure remote-gone deletion for one repository, create `.clean_git_branches.conf` in the repo root:
-
-```bash
-FORCE_DELETE_GONE_BRANCHES=true
-```
-
-Command-line flags (`--force-delete-gone` / `--no-force-delete-gone`) override this config.
-
-## Branch Name Constraints
-
-Git ref rules apply directly to branch names. Branch names containing spaces are unsupported because Git rejects them at creation time.
-Unicode branch names are supported when they satisfy Git ref-format rules (for example, `feature/unicode-ßeta`).
-
-## Mocked Git Workflow
-
-Use the included mocked `git` harness when you want to work on output/layout behavior without a real repository:
-
-```bash
-test/helpers/run-with-mock-git.sh test/fixtures/mock-git/default.env --verbose --no-force-delete-gone
-```
-
-Additional scenarios:
-
-- `test/fixtures/mock-git/no-upstream.env`
-- `test/fixtures/mock-git/delete-failure.env`
-
-The helper prints a log path containing all mocked `git` invocations.
 
 ## Testing
 
-Run the automated tests with:
+Run all tests:
 
 ```bash
 test/run-tests.sh
 ```
 
-`test/run-tests.sh` executes the Bats suite (`test/clean_git_branches.bats`) and expects `bats` to be installed.
-
 ## Project Management
 
-Project management entrypoint:
-
 - `docs/project-management/index.md`
-
-Current initiative planning and tracking files:
-
 - `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/initiative.md`
 - `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/tracker.md`
 - `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/backlog.md`
 - `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/backlog-tracker.md`
 
-## Updating
-
-To update the clean-git-branches script to the latest version, run:
-
-```bash
-brew update && brew upgrade clean-git-branches
-```
-
 ## License
 
-This project is licensed under the MIT License.
-
-## Contributing
-
-Contributions are welcome! Feel free to submit issues or pull requests to help improve Clean Git Branches.
+MIT
