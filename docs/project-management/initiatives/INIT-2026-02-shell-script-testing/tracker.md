@@ -2,7 +2,7 @@
 
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Status: In Progress
-- Current Feature Focus: `FEAT-007` runtime and maintainability reduction remains in progress; assertion-migration slice is complete and consolidation slices remain before CI entrypoint work.
+- Current Feature Focus: `FEAT-003` patch-equivalent diverged-branch classification investigation (`INT-046`) is prioritized next for deletion-safety policy validation; `FEAT-007` consolidation slices remain queued.
 - Last updated: 2026-02-10
 
 ## Completion Legend
@@ -35,5 +35,6 @@
 
 ## Next Actions
 
-1. Consolidate overlapping integration scenarios (`INT-042`, `INT-043`) after completing assertion migration (`INT-044`).
-2. Add CI entrypoint for automated test execution.
+1. Execute `INT-046` to validate classification policy for diverged branches whose commits are already integrated into `main` by patch-equivalence, using test-first simulated states (prototype optional if needed to prove semantics).
+2. Consolidate overlapping integration scenarios (`INT-042`, `INT-043`) after `INT-046`.
+3. Add CI entrypoint for automated test execution.

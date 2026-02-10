@@ -81,11 +81,13 @@
 | INT-043 | FEAT-007 | Consolidate overlapping dirty-worktree integration scenarios into one broader cleanup-plus-reporting test to reduce runtime and maintenance overhead | P2 | S | todo |
 | INT-044 | FEAT-007 | Move integration assertions that are equally effective in mocked tests to `test/clean_git_branches.bats` and keep only stateful/destructive checks in integration suite | P1 | M | done |
 | INT-045 | FEAT-007 | Add persistent mocked/integration/full-suite timing metrics to `test/run-tests.sh` and capture before-vs-after runtime comparison for `INT-044` | P2 | S | done |
+| INT-046 | FEAT-003 | Investigate diverged branches whose commits are already integrated in `main` (patch-equivalent) and define safe classification/deletion policy via test-first scenarios (optionally prototype-first) before implementation | P1 | M | todo |
 
 ## Suggested Execution Order
 
-1. Execute `INT-042` and `INT-043` to consolidate duplicate integration coverage.
+1. Execute `INT-046` first to validate classification policy for patch-equivalent diverged branches before any behavior change that could affect deletion safety.
+2. Execute `INT-042` and `INT-043` to consolidate duplicate integration coverage.
 
 ## Sprintable Next Slice
 
-1. Implement `INT-042` to consolidate overlapping subdirectory integration scenarios into one broader context-coverage test.
+1. Execute `INT-046` by simulating patch-equivalent and non-equivalent diverged branch states in integration tests, then decide whether to proceed with a small prototype or direct implementation.

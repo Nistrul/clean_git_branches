@@ -24,6 +24,9 @@
    - before (`main`): mocked/unit `2.01s`, integration `51.64s`
    - after (`feat/INIT-2026-02-shell-script-testing/FEAT-007-int-044-mock-assertion-shift`): mocked/unit `4.14s`, integration `42.44s`
 7. Verified updated runner output and regression safety via `test/run-tests.sh` (38 tests passing with `[timing]` lines).
+8. Captured new backlog investigation slice `INT-046` (`FEAT-003`) for diverged branches whose commits are already integrated into `main` by patch-equivalence (for example via squash/cherry-pick/rewrite paths).
+9. Recorded recommendations for `INT-046`: keep ancestor-merged auto-delete behavior unchanged, add a separate patch-equivalent-diverged classification, and validate with test-first simulated states before implementation (prototype permitted if needed to prove detection semantics).
+10. Reprioritized next slice so `INT-046` executes before remaining `FEAT-007` consolidation tasks (`INT-042`, `INT-043`) due to higher classification/deletion safety impact.
 
 ### 2026-02-09
 
@@ -119,5 +122,6 @@
 
 ## Current Focus
 
-1. Consolidate duplicate integration scenarios via `INT-042` and `INT-043`.
+1. Execute `INT-046` to validate and document safe handling for patch-equivalent diverged branches using test-first simulated repository states.
+2. Consolidate duplicate integration scenarios via `INT-042` and `INT-043`.
 3. Proceed to the remaining initiative milestone: add CI entrypoint for automated test execution.
