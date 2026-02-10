@@ -38,6 +38,27 @@ run_with_mock_scenario() {
     "$@"
 }
 
+run_with_mock_scenario_in_dir() {
+  local scenario_file="$1"
+  local run_dir="$2"
+  shift 2
+
+  local scenario_path="$repo_root/$scenario_file"
+  if [ ! -f "$scenario_path" ]; then
+    echo "Missing scenario file: $scenario_file" >&2
+    return 1
+  fi
+
+  run env \
+    PATH="$repo_root/test/mocks:$PATH" \
+    MOCK_GIT_LOG="$MOCK_GIT_LOG" \
+    MOCK_GIT_TOPLEVEL="$run_dir" \
+    SCENARIO_RUN_DIR="$run_dir" \
+    "$repo_root/test/helpers/run-scenario-command.sh" \
+    "$scenario_path" \
+    "$@"
+}
+
 assert_output_contains() {
   local needle="$1"
   [[ "$output" == *"$needle"* ]]

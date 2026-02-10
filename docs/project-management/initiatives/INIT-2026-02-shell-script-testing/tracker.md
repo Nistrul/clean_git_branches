@@ -2,8 +2,8 @@
 
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Status: In Progress
-- Current Feature Focus: `FEAT-007` runtime and maintainability reduction is in progress after coverage-contract closure; CI entrypoint remains next milestone after FEAT-007 closure.
-- Last updated: 2026-02-09
+- Current Feature Focus: `FEAT-007` runtime and maintainability reduction remains in progress; assertion-migration slice is complete and consolidation slices remain before CI entrypoint work.
+- Last updated: 2026-02-10
 
 ## Completion Legend
 
@@ -35,5 +35,5 @@
 
 ## Next Actions
 
-1. Reduce integration runtime by shifting equivalent assertions to mocked tests (`INT-044`) and consolidating overlap (`INT-042`, `INT-043`).
+1. Consolidate overlapping integration scenarios (`INT-042`, `INT-043`) after completing assertion migration (`INT-044`).
 2. Add CI entrypoint for automated test execution.
