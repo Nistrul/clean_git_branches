@@ -142,7 +142,7 @@ function _clean_git_branches_require_git_repo() {
 function _clean_git_branches_detect_remote() {
   local upstream
   upstream=$(git rev-parse --abbrev-ref --symbolic-full-name "@{upstream}" 2>/dev/null || true)
-  if [ -n "$upstream" ]; then
+  if [ -n "$upstream" ] && [ "$upstream" != "@{upstream}" ] && [ "$upstream" != "HEAD" ] && echo "$upstream" | grep -q '/'; then
     echo "${upstream%%/*}"
     return
   fi
