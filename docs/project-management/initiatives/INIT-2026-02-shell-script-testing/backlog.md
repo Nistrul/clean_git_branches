@@ -81,7 +81,7 @@
 | INT-043 | FEAT-007 | Consolidate overlapping dirty-worktree integration scenarios into one broader cleanup-plus-reporting test to reduce runtime and maintenance overhead | P2 | S | todo |
 | INT-044 | FEAT-007 | Move integration assertions that are equally effective in mocked tests to `test/clean_git_branches.bats` and keep only stateful/destructive checks in integration suite | P1 | M | done |
 | INT-045 | FEAT-007 | Add persistent mocked/integration/full-suite timing metrics to `test/run-tests.sh` and capture before-vs-after runtime comparison for `INT-044` | P2 | S | done |
-| INT-046 | FEAT-003 | Investigate diverged branches whose commits are already integrated in `main` (patch-equivalent) and define safe classification/deletion policy via test-first scenarios (optionally prototype-first) before implementation | P1 | M | done |
+| INT-046 | FEAT-003 | Investigate diverged branches whose commits are already integrated in `main` (patch-equivalent), define safe classification/deletion policy, and add explicit opt-in deletion control via test-first scenarios | P1 | M | done |
 | INT-047 | FEAT-004 | Define CLI output color system plan (roles/tokens, semantic meanings, contrast/accessibility constraints, TTY/no-color behavior) using UI/UX review guidance and document deferred visual critique checkpoint | P1 | M | todo |
 | INT-048 | FEAT-004 | Plan and prototype-safe design for a render module so all output sections flow through consistent rendering APIs, preserving current indentation/layout while removing layout concerns from business logic | P1 | M | todo |
 | INT-049 | FEAT-005 | Add `.DS_Store` hygiene slice: verify no tracked `.DS_Store` files, add ignore coverage, and document policy so temporary OS files are not committed | P1 | S | done |

@@ -41,6 +41,10 @@
 22. Added safe classification policy in `clean_git_branches.sh`: keep ancestor-merged auto-delete behavior unchanged, exclude patch-equivalent diverged gone branches from force-delete candidates, and report them in a dedicated `Patch-equivalent diverged branches (not deleted)` section.
 23. Added deterministic integration helper setup to force true history divergence before cherry-pick so patch-equivalent scenarios cannot collapse into ancestor-merged commits during fast test runs.
 24. Verified regression safety via `bats test/clean_git_branches.integration.bats -f "patch-equivalent"` and `test/run-tests.sh` (40 tests passing total: 11 mocked + 29 integration).
+25. Extended `INT-046` with explicit opt-in deletion control via `--delete-patch-equivalent-diverged`, keeping patch-equivalent diverged branches report-only by default.
+26. Updated force-delete confirmation/dry-run output to show separate candidate groups for standard remote-gone vs patch-equivalent diverged branches when opt-in deletion is enabled.
+27. Added integration coverage for opt-in patch-equivalent deletion and confirmation-prompt category rendering.
+28. Verified regression safety via `test/run-tests.sh` (42 tests passing total: 11 mocked + 31 integration).
 
 ### 2026-02-09
 

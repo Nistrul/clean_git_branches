@@ -8,6 +8,7 @@ load 'helpers/test_helper.bash'
 
   [ "$status" -eq 0 ]
   assert_output_contains "Usage: clean_git_branches"
+  assert_output_contains "--delete-patch-equivalent-diverged"
 }
 
 @test "default scenario reports sections with deletion disabled" {

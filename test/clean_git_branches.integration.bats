@@ -244,6 +244,64 @@ create_local_only_branch() {
   [[ "$output" == *"feature/patch-equivalent-report"* ]]
 }
 
+@test "integration: opt-in flag deletes patch-equivalent diverged gone branches during force delete" {
+  # Patch-equivalent diverged deletion stays explicit via --delete-patch-equivalent-diverged. With that opt-in
+  # enabled, force-delete should remove both standard remote-gone and patch-equivalent diverged candidates.
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+
+  create_patch_equivalent_diverged_gone_branch "$work_dir" "feature/patch-equivalent-opt-in"
+  create_gone_branch "$work_dir" "feature/non-equivalent-opt-in"
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --force-delete-gone --delete-patch-equivalent-diverged --silent
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Deleted remote-gone branches"* ]]
+  [[ "$output" == *"feature/non-equivalent-opt-in"* ]]
+  [[ "$output" == *"feature/patch-equivalent-opt-in"* ]]
+  [[ "$output" != *"Patch-equivalent diverged branches (not deleted)"* ]]
+
+  run git -C "$work_dir" branch --list feature/non-equivalent-opt-in
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+
+  run git -C "$work_dir" branch --list feature/patch-equivalent-opt-in
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "integration: confirmation prompt shows separate patch-equivalent opt-in section" {
+  # The confirmation view should clearly separate standard remote-gone candidates from patch-equivalent
+  # diverged candidates when opt-in deletion is enabled, so users can review each class before confirming.
+  local dirs
+  local work_dir
+
+  dirs="$(create_repo_with_origin)"
+  work_dir="${dirs##*|}"
+
+  create_patch_equivalent_diverged_gone_branch "$work_dir" "feature/patch-equivalent-confirm"
+  create_gone_branch "$work_dir" "feature/non-equivalent-confirm"
+
+  run bash -c "printf '\\n' | CLEAN_GIT_BRANCHES_ASSUME_TTY=1 '$repo_root/test/helpers/run-in-repo.sh' '$work_dir' --force-delete-gone --delete-patch-equivalent-diverged"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Standard remote-gone branches to be deleted"* ]]
+  [[ "$output" == *"Patch-equivalent diverged branches to be deleted (opt-in)"* ]]
+  [[ "$output" == *"Type DELETE to continue, or press Enter to skip:"* ]]
+  [[ "$output" == *"Skipped remote-gone force deletion"* ]]
+
+  run git -C "$work_dir" branch --list feature/non-equivalent-confirm
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"feature/non-equivalent-confirm"* ]]
+
+  run git -C "$work_dir" branch --list feature/patch-equivalent-confirm
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"feature/patch-equivalent-confirm"* ]]
+}
+
 @test "integration: dry run with force delete previews gone branches and does not delete" {
   # Dry-run mode should show what would be deleted without changing branch state. This test confirms we get the
   # preview message and that the branch still exists afterward.

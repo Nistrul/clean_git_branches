@@ -17,7 +17,7 @@
 # performs, and the supported command-line options and environment variables.
 function _clean_git_branches_display_help() {
   cat <<EOF
-Usage: clean_git_branches [--help] [--verbose] [--force-delete-gone|--no-force-delete-gone] [--dry-run] [--silent]
+Usage: clean_git_branches [--help] [--verbose] [--force-delete-gone|--no-force-delete-gone] [--delete-patch-equivalent-diverged] [--dry-run] [--silent]
 
 This script is a utility to help manage your Git branches. It performs the following actions:
 
@@ -33,6 +33,7 @@ Options:
   --verbose          Print verbose diagnostics while running
   --force-delete-gone      Force delete remote-gone branches (-D)
   --no-force-delete-gone   Do not delete remote-gone branches
+  --delete-patch-equivalent-diverged  Also delete patch-equivalent diverged gone branches (requires --force-delete-gone)
   --dry-run                Show what would be deleted without deleting
   --silent                 Skip interactive confirmation prompt (dangerous)
 
@@ -50,6 +51,7 @@ EOF
 
 VERBOSE=0
 DELETE_GONE_MODE="auto"
+DELETE_PATCH_EQUIVALENT_DIVERGED=0
 DRY_RUN=0
 SILENT=0
 for arg in "$@"; do
@@ -66,6 +68,9 @@ for arg in "$@"; do
       ;;
     --no-force-delete-gone)
       DELETE_GONE_MODE="off"
+      ;;
+    --delete-patch-equivalent-diverged)
+      DELETE_PATCH_EQUIVALENT_DIVERGED=1
       ;;
     --dry-run)
       DRY_RUN=1
@@ -141,6 +146,7 @@ function _clean_git_branches_should_delete_gone() {
   _clean_git_branches_verbose_section "Mode Selection"
   _clean_git_branches_verbose_kv "Delete remote-gone mode" "$DELETE_GONE_MODE"
   _clean_git_branches_verbose_kv "Delete remote-gone effective" "$DELETE_GONE_EFFECTIVE"
+  _clean_git_branches_verbose_kv "Delete patch-equivalent diverged" "$DELETE_PATCH_EQUIVALENT_DIVERGED"
   _clean_git_branches_verbose_kv "Dry run" "$DRY_RUN"
   _clean_git_branches_verbose_kv "Silent" "$SILENT"
 }
@@ -298,9 +304,13 @@ function _clean_git_branches_delete_gone() {
 function _clean_git_branches_confirm_force_delete() {
   local candidate_count="$1"
   local candidate_list="$2"
+  local regular_candidate_list="$3"
+  local patch_equivalent_candidate_list="$4"
+  local include_patch_equivalent="$5"
   local assume_tty_for_tests="${CLEAN_GIT_BRANCHES_ASSUME_TTY:-0}"
   local response
   local branch_info
+  local branch
 
   if [ "$candidate_count" -eq 0 ]; then
     return 0
@@ -318,17 +328,34 @@ function _clean_git_branches_confirm_force_delete() {
     echo -e "\033[1;93m  This preview shows branches that would be force deleted.\033[0m" >&2
     echo -e "\033[1;93m  Reason: each branch below has an upstream marked 'gone' by Git.\033[0m" >&2
     echo >&2
-    echo -e "\033[1;96mBranches to be deleted\033[0m" >&2
-    echo "──────────────────────" >&2
-    while IFS= read -r branch; do
-      [ -z "$branch" ] && continue
-      branch_info=$(git branch -vv | awk -v b="$branch" '$1==b {print; exit}')
-      if [ -n "$branch_info" ]; then
-        echo "  $(echo "$branch_info" | sed 's/^ *//')" >&2
-      else
-        echo "  $branch [upstream: gone]" >&2
-      fi
-    done <<< "$candidate_list"
+    if [ -n "$regular_candidate_list" ]; then
+      echo -e "\033[1;96mStandard remote-gone branches to be deleted\033[0m" >&2
+      echo "───────────────────────────────────────────" >&2
+      while IFS= read -r branch; do
+        [ -z "$branch" ] && continue
+        branch_info=$(git branch -vv | awk -v b="$branch" '$1==b {print; exit}')
+        if [ -n "$branch_info" ]; then
+          echo "  $(echo "$branch_info" | sed 's/^ *//')" >&2
+        else
+          echo "  $branch [upstream: gone]" >&2
+        fi
+      done <<< "$regular_candidate_list"
+      echo >&2
+    fi
+    if [ "$include_patch_equivalent" -eq 1 ] && [ -n "$patch_equivalent_candidate_list" ]; then
+      echo -e "\033[1;96mPatch-equivalent diverged branches to be deleted (opt-in)\033[0m" >&2
+      echo "─────────────────────────────────────────────────────────────" >&2
+      while IFS= read -r branch; do
+        [ -z "$branch" ] && continue
+        branch_info=$(git branch -vv | awk -v b="$branch" '$1==b {print; exit}')
+        if [ -n "$branch_info" ]; then
+          echo "  $(echo "$branch_info" | sed 's/^ *//')" >&2
+        else
+          echo "  $branch [upstream: gone]" >&2
+        fi
+      done <<< "$patch_equivalent_candidate_list"
+      echo >&2
+    fi
     echo >&2
     return 0
   fi
@@ -344,18 +371,38 @@ function _clean_git_branches_confirm_force_delete() {
   echo -e "\033[1;91m  DANGER: this will permanently delete $candidate_count local branches.\033[0m" >&2
   echo -e "\033[1;93m  This action is destructive and cannot be undone by this script.\033[0m" >&2
   echo -e "\033[1;93m  Reason: each branch below has an upstream marked 'gone' by Git.\033[0m" >&2
+  if [ "$include_patch_equivalent" -eq 1 ] && [ -n "$patch_equivalent_candidate_list" ]; then
+    echo -e "\033[1;93m  Patch-equivalent diverged deletion is enabled by --delete-patch-equivalent-diverged.\033[0m" >&2
+  fi
   echo >&2
-  echo -e "\033[1;96mBranches to be deleted\033[0m" >&2
-  echo "──────────────────────" >&2
-  while IFS= read -r branch; do
-    [ -z "$branch" ] && continue
-    branch_info=$(git branch -vv | awk -v b="$branch" '$1==b {print; exit}')
-    if [ -n "$branch_info" ]; then
-      echo "  $(echo "$branch_info" | sed 's/^ *//')" >&2
-    else
-      echo "  $branch [upstream: gone]" >&2
-    fi
-  done <<< "$candidate_list"
+  if [ -n "$regular_candidate_list" ]; then
+    echo -e "\033[1;96mStandard remote-gone branches to be deleted\033[0m" >&2
+    echo "───────────────────────────────────────────" >&2
+    while IFS= read -r branch; do
+      [ -z "$branch" ] && continue
+      branch_info=$(git branch -vv | awk -v b="$branch" '$1==b {print; exit}')
+      if [ -n "$branch_info" ]; then
+        echo "  $(echo "$branch_info" | sed 's/^ *//')" >&2
+      else
+        echo "  $branch [upstream: gone]" >&2
+      fi
+    done <<< "$regular_candidate_list"
+    echo >&2
+  fi
+  if [ "$include_patch_equivalent" -eq 1 ] && [ -n "$patch_equivalent_candidate_list" ]; then
+    echo -e "\033[1;96mPatch-equivalent diverged branches to be deleted (opt-in)\033[0m" >&2
+    echo "─────────────────────────────────────────────────────────────" >&2
+    while IFS= read -r branch; do
+      [ -z "$branch" ] && continue
+      branch_info=$(git branch -vv | awk -v b="$branch" '$1==b {print; exit}')
+      if [ -n "$branch_info" ]; then
+        echo "  $(echo "$branch_info" | sed 's/^ *//')" >&2
+      else
+        echo "  $branch [upstream: gone]" >&2
+      fi
+    done <<< "$patch_equivalent_candidate_list"
+    echo >&2
+  fi
   echo >&2
   printf "\033[1;96mType DELETE to continue, or press Enter to skip:\033[0m " >&2
   read -r response
@@ -387,13 +434,14 @@ function _clean_git_branches_show_untracked() {
 # This function lists all deleted branches in the Git repository. Deleted branches are
 # branches that have been deleted from the remote repository but still exist locally.
 function _clean_git_branches_show_deleted() {
+  local gone_candidates="$1"
   local branch
   local deleted=""
 
   while IFS= read -r branch; do
     [ -z "$branch" ] && continue
     deleted="${deleted}$(git branch -vv | awk -v b="$branch" '$1==b {print; exit}')"$'\n'
-  done <<< "$GONE_DELETE_CANDIDATES"
+  done <<< "$gone_candidates"
   deleted="${deleted%$'\n'}"
 
   _clean_git_branches_verbose_section "Remote-Gone Reporting"
@@ -446,6 +494,9 @@ function clean_git_branches() {
   local branch_vv_probe_output
   local gone_candidates
   local gone_candidate_count
+  local effective_delete_candidates
+  local effective_delete_count
+  local gone_report_candidates
   local show_remote_gone_report=1
   local patch_equivalent_diverged_count
   local printed_report_section=0
@@ -473,8 +524,22 @@ function clean_git_branches() {
   _clean_git_branches_partition_gone_candidates "$gone_candidates"
   gone_candidate_count=$(echo "$GONE_DELETE_CANDIDATES" | sed '/^$/d' | wc -l | tr -d ' ')
   patch_equivalent_diverged_count=$(echo "$PATCH_EQUIVALENT_DIVERGED_BRANCHES" | sed '/^$/d' | wc -l | tr -d ' ')
+  effective_delete_candidates="$GONE_DELETE_CANDIDATES"
+  if [ "$DELETE_PATCH_EQUIVALENT_DIVERGED" -eq 1 ] && [ -n "$PATCH_EQUIVALENT_DIVERGED_BRANCHES" ]; then
+    if [ -n "$effective_delete_candidates" ]; then
+      effective_delete_candidates="${effective_delete_candidates}"$'\n'"$PATCH_EQUIVALENT_DIVERGED_BRANCHES"
+    else
+      effective_delete_candidates="$PATCH_EQUIVALENT_DIVERGED_BRANCHES"
+    fi
+  fi
+  effective_delete_count=$(echo "$effective_delete_candidates" | sed '/^$/d' | wc -l | tr -d ' ')
+  gone_report_candidates="$GONE_DELETE_CANDIDATES"
+  if [ "$DELETE_PATCH_EQUIVALENT_DIVERGED" -eq 1 ]; then
+    gone_report_candidates="$effective_delete_candidates"
+  fi
   _clean_git_branches_verbose_kv "Remote-gone deletion candidates" "$gone_candidate_count"
   _clean_git_branches_verbose_kv "Patch-equivalent diverged gone branches" "$patch_equivalent_diverged_count"
+  _clean_git_branches_verbose_kv "Effective deletion candidates" "$effective_delete_count"
 
   deleted_merged=$(_clean_git_branches_delete_merged)
   if [ -n "$deleted_merged" ]; then
@@ -502,9 +567,17 @@ function clean_git_branches() {
 
   if [ "$DELETE_GONE_EFFECTIVE" -eq 1 ]; then
     if [ "$DRY_RUN" -eq 1 ]; then
-      _clean_git_branches_verbose_log "Remote-gone mode: dry run (force-delete preview only)"
+      if [ "$DELETE_PATCH_EQUIVALENT_DIVERGED" -eq 1 ]; then
+        _clean_git_branches_verbose_log "Remote-gone mode: dry run (includes patch-equivalent diverged opt-in candidates)"
+      else
+        _clean_git_branches_verbose_log "Remote-gone mode: dry run (force-delete preview only)"
+      fi
     else
-      _clean_git_branches_verbose_log "Remote-gone mode: force delete enabled"
+      if [ "$DELETE_PATCH_EQUIVALENT_DIVERGED" -eq 1 ]; then
+        _clean_git_branches_verbose_log "Remote-gone mode: force delete enabled (includes patch-equivalent diverged opt-in candidates)"
+      else
+        _clean_git_branches_verbose_log "Remote-gone mode: force delete enabled"
+      fi
     fi
   else
     _clean_git_branches_verbose_log "Remote-gone mode: deletion disabled (report only)"
@@ -515,8 +588,8 @@ function clean_git_branches() {
       echo -e "\033[1;91mWARNING: --silent skips the destructive confirmation prompt.\033[0m"
       echo
     fi
-    if _clean_git_branches_confirm_force_delete "$gone_candidate_count" "$GONE_DELETE_CANDIDATES"; then
-      deleted_gone=$(_clean_git_branches_delete_gone "$GONE_DELETE_CANDIDATES")
+    if _clean_git_branches_confirm_force_delete "$effective_delete_count" "$effective_delete_candidates" "$GONE_DELETE_CANDIDATES" "$PATCH_EQUIVALENT_DIVERGED_BRANCHES" "$DELETE_PATCH_EQUIVALENT_DIVERGED"; then
+      deleted_gone=$(_clean_git_branches_delete_gone "$effective_delete_candidates")
       if [ -n "$deleted_gone" ]; then
         if [ "$VERBOSE" -eq 1 ] && [ "$printed_report_section" -eq 0 ]; then
           echo
@@ -548,7 +621,7 @@ function clean_git_branches() {
     _clean_git_branches_verbose_log "Skipping remote-gone deletions"
   fi
 
-  deleted=$(_clean_git_branches_show_deleted)
+  deleted=$(_clean_git_branches_show_deleted "$gone_report_candidates")
   if [ "$show_remote_gone_report" -eq 1 ] && [ -n "$deleted" ]; then
     if [ "$VERBOSE" -eq 1 ] && [ "$printed_report_section" -eq 0 ]; then
       echo
@@ -570,7 +643,7 @@ function clean_git_branches() {
     echo
   fi
 
-  if [ -n "$PATCH_EQUIVALENT_DIVERGED_BRANCHES" ]; then
+  if { [ "$DELETE_GONE_EFFECTIVE" -eq 0 ] || [ "$DELETE_PATCH_EQUIVALENT_DIVERGED" -eq 0 ]; } && [ -n "$PATCH_EQUIVALENT_DIVERGED_BRANCHES" ]; then
     local patch_equivalent_diverged_report
 
     patch_equivalent_diverged_report=""
