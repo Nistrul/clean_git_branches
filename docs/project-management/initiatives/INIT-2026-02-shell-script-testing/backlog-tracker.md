@@ -45,6 +45,12 @@
 26. Updated force-delete confirmation/dry-run output to show separate candidate groups for standard remote-gone vs patch-equivalent diverged branches when opt-in deletion is enabled.
 27. Added integration coverage for opt-in patch-equivalent deletion and confirmation-prompt category rendering.
 28. Verified regression safety via `test/run-tests.sh` (42 tests passing total: 11 mocked + 31 integration).
+29. Completed `INT-051` (`FEAT-004`) by replacing the legacy remote-gone force-delete model with a minimal safe cleanup contract: default dry-run preview, `--apply` for execution, and branch classification into merged/equivalent/non-equivalent.
+30. Removed deprecated flags and behaviors from `clean_git_branches.sh`: `--force-delete-gone`, `--no-force-delete-gone`, `--delete-patch-equivalent-diverged`, `--dry-run`, and `--silent`.
+31. Added new minimal CLI surface and behavior: `--apply`, `--confirm` (category-level prompts), `--delete-equivalent`, `--equivalence {cherry|patch-id}`, `--force-delete-equivalent`, `--prune`, and `--verbose`.
+32. Enforced non-overridable deletion safeguards for current branch, protected branches, ahead-of-upstream branches, unpushed branches, and non-equivalent branches.
+33. Reworked output contract to deterministic grouped sections with explicit reasons and optional per-branch diagnostics in verbose mode.
+34. Replaced legacy tests with contract-focused suites aligned to the new behavior model in `test/clean_git_branches.bats` and `test/clean_git_branches.integration.bats`.
 
 ### 2026-02-09
 

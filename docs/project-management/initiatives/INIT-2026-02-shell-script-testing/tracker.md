@@ -2,7 +2,7 @@
 
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Status: In Progress
-- Current Feature Focus: `FEAT-003` patch-equivalent diverged-branch classification investigation (`INT-046`) is complete. `FEAT-004` output-system planning (`INT-047`, `INT-048`) is now next. `.DS_Store` hygiene (`INT-049`) and post-PR rebase no-op rerun refinement (`INT-050`) are complete.
+- Current Feature Focus: `FEAT-004` minimal CLI safety simplification (`INT-051`) is complete. Output-system planning slices (`INT-047`, `INT-048`) remain next, and integration-maintainability follow-up (`INT-042`, `INT-043`) is still pending.
 - Last updated: 2026-02-10
 
 ## Completion Legend

@@ -1,194 +1,173 @@
 #!/bin/bash
 # clean_git_branches.sh
 #
-# A script to clean up git branches, including deleting merged branches,
-# listing untracked, deleted, tracked, and protected branches.
-#
-# Copyright (C) 2023 Dale Freya
-# This program is released under the terms of the MIT License.
+# Safe local-branch cleanup utility.
 
-
-# Display help
-#
-# Usage: _clean_git_branches_display_help
-#
-# This function displays a help message with usage instructions and available options for the
-# clean_git_branches script. It provides an overview of the script's purpose, the actions it
-# performs, and the supported command-line options and environment variables.
 function _clean_git_branches_display_help() {
-  cat <<EOF
-Usage: clean_git_branches [--help] [--verbose] [--force-delete-gone|--no-force-delete-gone] [--delete-patch-equivalent-diverged] [--dry-run] [--silent]
+  cat <<EOF_HELP
+Usage: clean_git_branches [--help] [--apply] [--confirm] [--delete-equivalent] [--equivalence {cherry|patch-id}] [--force-delete-equivalent] [--prune] [--verbose]
 
-This script is a utility to help manage your Git branches. It performs the following actions:
-
-- Deletes merged branches, excluding protected branches
-- Force deletes remote-gone branches when enabled
-- Lists untracked branches
-- Lists remote-gone branches that were not deleted
-- Lists tracked branches, excluding protected branches
-- Lists protected branches
+Default behavior is dry-run. Nothing is deleted unless --apply is provided.
 
 Options:
-  --help             Show this help message and exit
-  --verbose          Print verbose diagnostics while running
-  --force-delete-gone      Force delete remote-gone branches (-D)
-  --no-force-delete-gone   Do not delete remote-gone branches
-  --delete-patch-equivalent-diverged  Also delete patch-equivalent diverged gone branches (requires --force-delete-gone)
-  --dry-run                Show what would be deleted without deleting
-  --silent                 Skip interactive confirmation prompt (dangerous)
+  --help                     Show this help message and exit
+  --apply                    Execute deletions (default is preview only)
+  --confirm                  Prompt before each deletion category (merged/equivalent)
+  --delete-equivalent        Also delete patch-equivalent branches
+  --equivalence METHOD       Equivalence method: cherry|patch-id (default: cherry)
+  --force-delete-equivalent  For equivalent branches only, retry with -D if safe delete fails
+  --prune                    Run fetch/prune before analysis
+  --verbose                  Print detailed diagnostics and per-branch reasoning
 
-Environment Variables:
-  PROTECTED_BRANCHES   A pipe-separated list of protected branches, e.g., "main|master|prod|dev".
-                       Defaults to "main|master|prod|dev" if not set.
-
-Repository Config:
-  .clean_git_branches.conf
-    FORCE_DELETE_GONE_BRANCHES=true|false
-    Defaults to false when unset. Command-line flags override config.
-
-EOF
+Safety rules (always enforced):
+  - Never delete current checked-out branch
+  - Never delete branches with unpushed commits
+  - Never delete branches ahead of upstream
+  - Never delete branches with unique (non-equivalent) commits
+EOF_HELP
 }
 
+APPLY=0
+CONFIRM=0
+DELETE_EQUIVALENT=0
+EQUIVALENCE_METHOD="cherry"
+FORCE_DELETE_EQUIVALENT=0
+PRUNE=0
 VERBOSE=0
-DELETE_GONE_MODE="auto"
-DELETE_PATCH_EQUIVALENT_DIVERGED=0
-DRY_RUN=0
-SILENT=0
-for arg in "$@"; do
-  case "$arg" in
+ASSUME_TTY_FOR_TESTS="${CLEAN_GIT_BRANCHES_ASSUME_TTY:-0}"
+VERBOSE_LINES=""
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
     --help)
       _clean_git_branches_display_help
       exit 0
       ;;
+    --apply)
+      APPLY=1
+      ;;
+    --confirm)
+      CONFIRM=1
+      ;;
+    --delete-equivalent)
+      DELETE_EQUIVALENT=1
+      ;;
+    --equivalence)
+      shift
+      if [ -z "${1:-}" ]; then
+        echo "Missing value for --equivalence" >&2
+        _clean_git_branches_display_help >&2
+        exit 1
+      fi
+      case "$1" in
+        cherry|patch-id)
+          EQUIVALENCE_METHOD="$1"
+          ;;
+        *)
+          echo "Invalid --equivalence value: $1" >&2
+          _clean_git_branches_display_help >&2
+          exit 1
+          ;;
+      esac
+      ;;
+    --force-delete-equivalent)
+      FORCE_DELETE_EQUIVALENT=1
+      ;;
+    --prune)
+      PRUNE=1
+      ;;
     --verbose)
       VERBOSE=1
       ;;
-    --force-delete-gone)
-      DELETE_GONE_MODE="on"
-      ;;
-    --no-force-delete-gone)
-      DELETE_GONE_MODE="off"
-      ;;
-    --delete-patch-equivalent-diverged)
-      DELETE_PATCH_EQUIVALENT_DIVERGED=1
-      ;;
-    --dry-run)
-      DRY_RUN=1
-      ;;
-    --silent)
-      SILENT=1
-      ;;
     *)
-      echo "Unknown option: $arg" >&2
+      echo "Unknown option: $1" >&2
       _clean_git_branches_display_help >&2
       exit 1
       ;;
   esac
+  shift
 done
 
-function _clean_git_branches_verbose_section() {
+function _clean_git_branches_verbose() {
   if [ "$VERBOSE" -eq 1 ]; then
-    echo >&2
-    echo -e "\033[1;36m[verbose] $*\033[0m" >&2
+    VERBOSE_LINES="${VERBOSE_LINES}$*"$'\n'
   fi
 }
 
-function _clean_git_branches_verbose_log() {
-  if [ "$VERBOSE" -eq 1 ]; then
-    echo -e "\033[0;36m[verbose]\033[0m $*" >&2
-  fi
+function _clean_git_branches_repeat_char() {
+  local count="$1"
+  local char="$2"
+  local output=""
+
+  while [ "$count" -gt 0 ]; do
+    output="${output}${char}"
+    count=$((count - 1))
+  done
+
+  printf "%s" "$output"
 }
 
-function _clean_git_branches_verbose_kv() {
-  if [ "$VERBOSE" -eq 1 ]; then
-    printf "\033[0;36m[verbose]\033[0m %-30s %s\n" "$1:" "$2" >&2
-  fi
-}
+function _clean_git_branches_header_color() {
+  local title="$1"
 
-function _clean_git_branches_load_delete_gone_default() {
-  local repo_root
-  local config_file
-  local config_value
-
-  repo_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
-  config_file="$repo_root/.clean_git_branches.conf"
-
-  DELETE_GONE_DEFAULT=0
-  if [ -f "$config_file" ]; then
-    config_value=$(grep -E '^[[:space:]]*FORCE_DELETE_GONE_BRANCHES[[:space:]]*=' "$config_file" | tail -n 1 | cut -d '=' -f 2- | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
-    if [ "$config_value" = "true" ] || [ "$config_value" = "1" ] || [ "$config_value" = "yes" ]; then
-      DELETE_GONE_DEFAULT=1
-    fi
-    _clean_git_branches_verbose_section "Configuration"
-    _clean_git_branches_verbose_kv "Config file" "$config_file"
-    _clean_git_branches_verbose_kv "FORCE_DELETE_GONE_BRANCHES" "${config_value:-unset}"
-  else
-    _clean_git_branches_verbose_section "Configuration"
-    _clean_git_branches_verbose_kv "Config file" "(none)"
-  fi
-}
-
-function _clean_git_branches_should_delete_gone() {
-  _clean_git_branches_load_delete_gone_default
-
-  case "$DELETE_GONE_MODE" in
-    on)
-      DELETE_GONE_EFFECTIVE=1
+  case "$title" in
+    "Merged branches")
+      printf "1;94"
       ;;
-    off)
-      DELETE_GONE_EFFECTIVE=0
+    "Equivalent branches")
+      printf "1;96"
+      ;;
+    "Non-equivalent branches")
+      printf "1;92"
+      ;;
+    "Safety exclusions")
+      printf "1;93"
+      ;;
+    "Run summary")
+      printf "1;95"
+      ;;
+    "Execution results")
+      printf "1;94"
+      ;;
+    "Deletion failures")
+      printf "1;91"
       ;;
     *)
-      DELETE_GONE_EFFECTIVE=$DELETE_GONE_DEFAULT
+      printf "1;97"
       ;;
   esac
-
-  _clean_git_branches_verbose_section "Mode Selection"
-  _clean_git_branches_verbose_kv "Delete remote-gone mode" "$DELETE_GONE_MODE"
-  _clean_git_branches_verbose_kv "Delete remote-gone effective" "$DELETE_GONE_EFFECTIVE"
-  _clean_git_branches_verbose_kv "Delete patch-equivalent diverged" "$DELETE_PATCH_EQUIVALENT_DIVERGED"
-  _clean_git_branches_verbose_kv "Dry run" "$DRY_RUN"
-  _clean_git_branches_verbose_kv "Silent" "$SILENT"
 }
 
-# Delete merged branches, excluding protected branches
-#
-# Usage: clean_git_branches_delete_merged
-#
-# This function deletes all branches that have been merged into the
-# current branch, excluding branches specified in the PROTECTED_BRANCHES
-# environment variable. If PROTECTED_BRANCHES is not set, it defaults to
-# "main|master|prod|dev".
-function _clean_git_branches_delete_merged() {
-  local merged_candidates
-
-  if [ -z "$PROTECTED_BRANCHES" ]; then
-    PROTECTED_BRANCHES="main|master|prod|dev"
-  fi
-
-  merged_candidates=$(git branch --merged | egrep -v "(^\*|$PROTECTED_BRANCHES)")
-  _clean_git_branches_verbose_section "Merged Cleanup"
-  _clean_git_branches_verbose_kv "Protected branch regex" "$PROTECTED_BRANCHES"
-  _clean_git_branches_verbose_kv "Merged branch candidates" "$(echo "$merged_candidates" | sed '/^$/d' | wc -l | tr -d ' ')"
-  if [ -n "$merged_candidates" ]; then
-    _clean_git_branches_verbose_log "Merged candidates list:"
-    _clean_git_branches_verbose_log "$(echo "$merged_candidates" | sed '/^$/d' | tr '\n' '; ')"
-    printf '%s\n' "$merged_candidates" | xargs git branch -d
+function _clean_git_branches_require_git_repo() {
+  if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    echo "Not inside a Git repository." >&2
+    return 1
   fi
 }
 
-# List local branches whose upstream is gone, excluding protected branches
-#
-# Usage: _clean_git_branches_gone_branch_names
-function _clean_git_branches_gone_branch_names() {
-  if [ -z "$PROTECTED_BRANCHES" ]; then
-    PROTECTED_BRANCHES="main|master|prod|dev"
+function _clean_git_branches_detect_remote() {
+  local upstream
+  upstream=$(git rev-parse --abbrev-ref --symbolic-full-name "@{upstream}" 2>/dev/null || true)
+  if [ -n "$upstream" ] && [ "$upstream" != "@{upstream}" ] && [ "$upstream" != "HEAD" ] && echo "$upstream" | grep -q '/'; then
+    echo "${upstream%%/*}"
+    return
   fi
 
-  git branch -vv | grep -vE '^\*' | grep -E 'gone' | awk '{print $1}' | egrep -v "^($PROTECTED_BRANCHES)$"
+  git remote | head -n 1
 }
 
-function _clean_git_branches_merge_target_branch() {
+function _clean_git_branches_detect_base_branch() {
+  local remote="$1"
+  local remote_head
+
+  if [ -n "$remote" ]; then
+    remote_head=$(git symbolic-ref --quiet --short "refs/remotes/$remote/HEAD" 2>/dev/null || true)
+    if [ -n "$remote_head" ]; then
+      echo "${remote_head#${remote}/}"
+      return
+    fi
+  fi
+
   if git show-ref --verify --quiet refs/heads/main; then
     echo "main"
     return
@@ -199,35 +178,90 @@ function _clean_git_branches_merge_target_branch() {
     return
   fi
 
-  echo ""
+  git branch --show-current
 }
 
-function _clean_git_branches_is_patch_equivalent_diverged() {
+function _clean_git_branches_resolve_base_ref() {
+  local remote="$1"
+  local base_branch="$2"
+
+  if git show-ref --verify --quiet "refs/heads/$base_branch"; then
+    echo "$base_branch"
+    return
+  fi
+
+  if [ -n "$remote" ] && git show-ref --verify --quiet "refs/remotes/$remote/$base_branch"; then
+    echo "$remote/$base_branch"
+    return
+  fi
+
+  echo "$base_branch"
+}
+
+function _clean_git_branches_is_protected() {
   local branch="$1"
-  local target_branch="$2"
+  local pattern="${PROTECTED_BRANCHES:-main|master|prod|dev}"
+
+  if echo "$branch" | egrep -q "^($pattern)$"; then
+    return 0
+  fi
+
+  return 1
+}
+
+function _clean_git_branches_branch_upstream() {
+  local branch="$1"
+  git for-each-ref --format='%(upstream:short)' "refs/heads/$branch"
+}
+
+function _clean_git_branches_branch_has_unpushed() {
+  local branch="$1"
+  local commit
+
+  commit=$(git rev-list --max-count=1 "$branch" --not --remotes 2>/dev/null || true)
+  if [ -n "$commit" ]; then
+    return 0
+  fi
+
+  return 1
+}
+
+function _clean_git_branches_branch_ahead_of_upstream() {
+  local branch="$1"
+  local upstream
+  local counts
+  local ahead_count
+
+  upstream=$(_clean_git_branches_branch_upstream "$branch")
+  if [ -z "$upstream" ]; then
+    return 1
+  fi
+
+  counts=$(git rev-list --left-right --count "$upstream...$branch" 2>/dev/null || echo "0 0")
+  ahead_count=$(echo "$counts" | awk '{print $2}')
+  if [ "${ahead_count:-0}" -gt 0 ]; then
+    return 0
+  fi
+
+  return 1
+}
+
+BASE_PATCH_IDS=""
+BASE_PATCH_IDS_READY=0
+function _clean_git_branches_load_base_patch_ids() {
+  if [ "$BASE_PATCH_IDS_READY" -eq 1 ]; then
+    return
+  fi
+
+  BASE_PATCH_IDS=$(git log "$BASE_REF" --no-merges -p --pretty=format: 2>/dev/null | git patch-id --stable 2>/dev/null | awk '{print $1}' | sort -u)
+  BASE_PATCH_IDS_READY=1
+}
+
+function _clean_git_branches_is_equivalent_cherry() {
+  local branch="$1"
   local cherry_output
 
-  if [ -z "$branch" ] || [ -z "$target_branch" ]; then
-    return 1
-  fi
-
-  if ! git show-ref --verify --quiet "refs/heads/$branch"; then
-    return 1
-  fi
-
-  if ! git show-ref --verify --quiet "refs/heads/$target_branch"; then
-    return 1
-  fi
-
-  if git merge-base --is-ancestor "$branch" "$target_branch" >/dev/null 2>&1; then
-    return 1
-  fi
-
-  if ! git merge-base "$target_branch" "$branch" >/dev/null 2>&1; then
-    return 1
-  fi
-
-  cherry_output=$(git cherry "$target_branch" "$branch" 2>/dev/null || true)
+  cherry_output=$(git cherry "$BASE_REF" "$branch" 2>/dev/null || true)
   if [ -z "$cherry_output" ]; then
     return 1
   fi
@@ -243,454 +277,359 @@ function _clean_git_branches_is_patch_equivalent_diverged() {
   return 1
 }
 
-function _clean_git_branches_partition_gone_candidates() {
-  local gone_candidates="$1"
-  local target_branch
-  local branch
-  local delete_candidates=""
-  local patch_equivalent_diverged=""
+function _clean_git_branches_is_equivalent_patch_id() {
+  local branch="$1"
+  local merge_commit
+  local commits
+  local commit
+  local patch_id
 
-  target_branch=$(_clean_git_branches_merge_target_branch)
+  merge_commit=$(git rev-list --max-count=1 "$BASE_REF..$branch" --merges 2>/dev/null || true)
+  if [ -n "$merge_commit" ]; then
+    return 1
+  fi
 
-  while IFS= read -r branch; do
-    [ -z "$branch" ] && continue
-    if _clean_git_branches_is_patch_equivalent_diverged "$branch" "$target_branch"; then
-      patch_equivalent_diverged="${patch_equivalent_diverged}${branch}"$'\n'
-    else
-      delete_candidates="${delete_candidates}${branch}"$'\n'
+  commits=$(git rev-list "$BASE_REF..$branch" --no-merges 2>/dev/null || true)
+  if [ -z "$commits" ]; then
+    return 1
+  fi
+
+  _clean_git_branches_load_base_patch_ids
+  for commit in $commits; do
+    patch_id=$(git show --pretty=format: --no-notes --no-color "$commit" 2>/dev/null | git patch-id --stable 2>/dev/null | awk 'NR==1 {print $1}')
+    if [ -z "$patch_id" ]; then
+      return 1
     fi
-  done <<< "$gone_candidates"
 
-  PATCH_EQUIVALENT_DIVERGED_BRANCHES="${patch_equivalent_diverged%$'\n'}"
-  GONE_DELETE_CANDIDATES="${delete_candidates%$'\n'}"
+    if ! echo "$BASE_PATCH_IDS" | grep -Fxq "$patch_id"; then
+      return 1
+    fi
+  done
+
+  return 0
 }
 
-# Delete remote-gone local branches using force delete (-D)
-#
-# Usage: _clean_git_branches_delete_gone
-function _clean_git_branches_delete_gone() {
-  local branch
-  local output
-  local branch_info
-  local gone_candidates="$1"
+function _clean_git_branches_is_equivalent() {
+  local branch="$1"
 
-  _clean_git_branches_verbose_section "Remote-Gone Cleanup"
-  _clean_git_branches_verbose_kv "Deletion candidates" "$(echo "$gone_candidates" | sed '/^$/d' | wc -l | tr -d ' ')"
-
-  while IFS= read -r branch; do
-    [ -z "$branch" ] && continue
-    branch_info=$(git branch -vv | awk -v b="$branch" '$1==b {print; exit}')
-    if [ "$DRY_RUN" -eq 1 ]; then
-      if [ -n "$branch_info" ]; then
-        echo "  $(echo "$branch_info" | sed 's/^ *//')"
-      else
-        echo "  $branch"
-      fi
-    else
-      output=$(git branch -D "$branch" 2>&1)
-      if echo "$output" | grep -q "^Deleted branch "; then
-        if [ -n "$branch_info" ]; then
-          echo "  $(echo "$branch_info" | sed 's/^ *//')"
-        else
-          echo "  $branch"
-        fi
-      else
-        _clean_git_branches_verbose_log "Could not delete '$branch': $output"
-      fi
-    fi
-  done <<< "$gone_candidates"
-}
-
-function _clean_git_branches_confirm_force_delete() {
-  local candidate_count="$1"
-  local candidate_list="$2"
-  local regular_candidate_list="$3"
-  local patch_equivalent_candidate_list="$4"
-  local include_patch_equivalent="$5"
-  local assume_tty_for_tests="${CLEAN_GIT_BRANCHES_ASSUME_TTY:-0}"
-  local response
-  local branch_info
-  local branch
-
-  if [ "$candidate_count" -eq 0 ]; then
-    return 0
-  fi
-
-  if [ "$SILENT" -eq 1 ]; then
-    return 0
-  fi
-
-  if [ "$DRY_RUN" -eq 1 ]; then
-    echo >&2
-    echo -e "\033[1;93mRemote-gone force delete dry run\033[0m" >&2
-    echo "─────────────────────────────────────" >&2
-    echo -e "\033[1;93m  DRY RUN: no branches will be deleted.\033[0m" >&2
-    echo -e "\033[1;93m  This preview shows branches that would be force deleted.\033[0m" >&2
-    echo -e "\033[1;93m  Reason: each branch below has an upstream marked 'gone' by Git.\033[0m" >&2
-    echo >&2
-    if [ -n "$regular_candidate_list" ]; then
-      echo -e "\033[1;96mStandard remote-gone branches to be deleted\033[0m" >&2
-      echo "───────────────────────────────────────────" >&2
-      while IFS= read -r branch; do
-        [ -z "$branch" ] && continue
-        branch_info=$(git branch -vv | awk -v b="$branch" '$1==b {print; exit}')
-        if [ -n "$branch_info" ]; then
-          echo "  $(echo "$branch_info" | sed 's/^ *//')" >&2
-        else
-          echo "  $branch [upstream: gone]" >&2
-        fi
-      done <<< "$regular_candidate_list"
-      echo >&2
-    fi
-    if [ "$include_patch_equivalent" -eq 1 ] && [ -n "$patch_equivalent_candidate_list" ]; then
-      echo -e "\033[1;96mPatch-equivalent diverged branches to be deleted (opt-in)\033[0m" >&2
-      echo "─────────────────────────────────────────────────────────────" >&2
-      while IFS= read -r branch; do
-        [ -z "$branch" ] && continue
-        branch_info=$(git branch -vv | awk -v b="$branch" '$1==b {print; exit}')
-        if [ -n "$branch_info" ]; then
-          echo "  $(echo "$branch_info" | sed 's/^ *//')" >&2
-        else
-          echo "  $branch [upstream: gone]" >&2
-        fi
-      done <<< "$patch_equivalent_candidate_list"
-      echo >&2
-    fi
-    echo >&2
-    return 0
-  fi
-
-  if [ ! -t 0 ] && [ "$assume_tty_for_tests" -ne 1 ]; then
-    echo "Force deletion requires confirmation. Re-run with --silent to proceed non-interactively." >&2
-    return 2
-  fi
-
-  echo >&2
-  echo -e "\033[1;91mRemote-gone force delete confirmation\033[0m" >&2
-  echo "─────────────────────────────────────" >&2
-  echo -e "\033[1;91m  DANGER: this will permanently delete $candidate_count local branches.\033[0m" >&2
-  echo -e "\033[1;93m  This action is destructive and cannot be undone by this script.\033[0m" >&2
-  echo -e "\033[1;93m  Reason: each branch below has an upstream marked 'gone' by Git.\033[0m" >&2
-  if [ "$include_patch_equivalent" -eq 1 ] && [ -n "$patch_equivalent_candidate_list" ]; then
-    echo -e "\033[1;93m  Patch-equivalent diverged deletion is enabled by --delete-patch-equivalent-diverged.\033[0m" >&2
-  fi
-  echo >&2
-  if [ -n "$regular_candidate_list" ]; then
-    echo -e "\033[1;96mStandard remote-gone branches to be deleted\033[0m" >&2
-    echo "───────────────────────────────────────────" >&2
-    while IFS= read -r branch; do
-      [ -z "$branch" ] && continue
-      branch_info=$(git branch -vv | awk -v b="$branch" '$1==b {print; exit}')
-      if [ -n "$branch_info" ]; then
-        echo "  $(echo "$branch_info" | sed 's/^ *//')" >&2
-      else
-        echo "  $branch [upstream: gone]" >&2
-      fi
-    done <<< "$regular_candidate_list"
-    echo >&2
-  fi
-  if [ "$include_patch_equivalent" -eq 1 ] && [ -n "$patch_equivalent_candidate_list" ]; then
-    echo -e "\033[1;96mPatch-equivalent diverged branches to be deleted (opt-in)\033[0m" >&2
-    echo "─────────────────────────────────────────────────────────────" >&2
-    while IFS= read -r branch; do
-      [ -z "$branch" ] && continue
-      branch_info=$(git branch -vv | awk -v b="$branch" '$1==b {print; exit}')
-      if [ -n "$branch_info" ]; then
-        echo "  $(echo "$branch_info" | sed 's/^ *//')" >&2
-      else
-        echo "  $branch [upstream: gone]" >&2
-      fi
-    done <<< "$patch_equivalent_candidate_list"
-    echo >&2
-  fi
-  echo >&2
-  printf "\033[1;96mType DELETE to continue, or press Enter to skip:\033[0m " >&2
-  read -r response
-  case "$response" in
-    DELETE)
-      return 0
+  case "$EQUIVALENCE_METHOD" in
+    cherry)
+      _clean_git_branches_is_equivalent_cherry "$branch"
+      ;;
+    patch-id)
+      _clean_git_branches_is_equivalent_patch_id "$branch"
       ;;
     *)
-      _clean_git_branches_verbose_log "Force deletion skipped by user input"
       return 1
       ;;
   esac
 }
 
-# List untracked branches
-#
-# Usage: _clean_git_branches_show_untracked
-#
-# This function lists all untracked branches in the Git repository. Untracked branches are
-# local branches that do not have a remote-tracking branch.
-function _clean_git_branches_show_untracked() {
-  git branch -vv | grep -vE '^\*' | grep -vE '\[origin/' | grep -vE 'gone'
+function _clean_git_branches_confirm_category() {
+  local label="$1"
+  local count="$2"
+  local response
+
+  if [ "$CONFIRM" -ne 1 ] || [ "$count" -eq 0 ]; then
+    return 0
+  fi
+
+  if [ ! -t 0 ] && [ "$ASSUME_TTY_FOR_TESTS" -ne 1 ]; then
+    echo "Cannot prompt for confirmation in non-interactive mode." >&2
+    return 2
+  fi
+
+  echo
+  printf "Delete %s (%s branch(es))? [y/N]: " "$label" "$count" >&2
+  read -r response
+  case "$response" in
+    y|Y|yes|YES)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
 }
 
-# List deleted branches
-#
-# Usage: _clean_git_branches_show_deleted
-#
-# This function lists all deleted branches in the Git repository. Deleted branches are
-# branches that have been deleted from the remote repository but still exist locally.
-function _clean_git_branches_show_deleted() {
-  local gone_candidates="$1"
+function _clean_git_branches_print_section() {
+  local title="$1"
+  local note="$2"
+  local lines="$3"
+  local line
+  local underline
+  local color
+
+  underline=$(_clean_git_branches_repeat_char "${#title}" "─")
+  color=$(_clean_git_branches_header_color "$title")
+
+  printf "\033[%sm%s\033[0m\n" "$color" "$title"
+  printf "\033[%sm%s\033[0m\n" "$color" "$underline"
+  if [ -n "$note" ]; then
+    printf "\033[3;37m%s\033[0m\n" "$note"
+  fi
+  if [ -n "$lines" ]; then
+    while IFS= read -r line; do
+      [ -z "$line" ] && continue
+      echo "- $line"
+    done <<< "$lines"
+  fi
+  echo
+}
+
+function clean_git_branches() {
+  local current_branch
+  local remote_name
+  local base_branch
   local branch
-  local deleted=""
+  local branches
+  local merged_lines=""
+  local equivalent_lines=""
+  local non_equivalent_lines=""
+  local excluded_lines=""
+  local merged_delete_list=""
+  local equivalent_delete_list=""
+  local merged_delete_count=0
+  local equivalent_delete_count=0
+  local redundant_type
+  local upstream
+  local safety_reasons
+  local exclusion_reason
+  local delete_output
+  local safe_delete_failed
+  local merged_note
+  local equivalent_note
+  local header_lines
+  local execution_lines
+  local failure_lines
+  local merged_deleted_count=0
+  local equivalent_deleted_count=0
+  local equivalent_force_deleted_count=0
+  local merged_skipped=0
+  local equivalent_skipped=0
+
+  if ! _clean_git_branches_require_git_repo; then
+    return 1
+  fi
+
+  if [ "$PRUNE" -eq 1 ]; then
+    _clean_git_branches_verbose "Running fetch --prune before analysis"
+    if ! git fetch --prune >/dev/null 2>&1; then
+      echo "Failed to run git fetch --prune." >&2
+      return 1
+    fi
+  fi
+
+  current_branch=$(git branch --show-current)
+  remote_name=$(_clean_git_branches_detect_remote)
+  base_branch=$(_clean_git_branches_detect_base_branch "$remote_name")
+  BASE_REF=$(_clean_git_branches_resolve_base_ref "$remote_name" "$base_branch")
+
+  _clean_git_branches_verbose "Remote: ${remote_name:-<none>}"
+  _clean_git_branches_verbose "Base branch: ${base_branch:-<none>}"
+  if [ "$BASE_REF" != "$base_branch" ]; then
+    _clean_git_branches_verbose "Base ref: ${BASE_REF:-<none>}"
+  fi
+  _clean_git_branches_verbose "Delete equivalent: $DELETE_EQUIVALENT"
+  _clean_git_branches_verbose "Equivalence method: $EQUIVALENCE_METHOD"
+  _clean_git_branches_verbose "Force delete equivalent: $FORCE_DELETE_EQUIVALENT"
+
+  branches=$(git for-each-ref --format='%(refname:short)' refs/heads | sort)
 
   while IFS= read -r branch; do
     [ -z "$branch" ] && continue
-    deleted="${deleted}$(git branch -vv | awk -v b="$branch" '$1==b {print; exit}')"$'\n'
-  done <<< "$gone_candidates"
-  deleted="${deleted%$'\n'}"
 
-  _clean_git_branches_verbose_section "Remote-Gone Reporting"
-  _clean_git_branches_verbose_kv "Remote-gone local branches" "$(echo "$deleted" | sed '/^$/d' | wc -l | tr -d ' ')"
-  if [ -n "$deleted" ]; then
-    _clean_git_branches_verbose_log "Remote-gone branch list:"
-    _clean_git_branches_verbose_log "$(echo "$deleted" | sed '/^$/d' | awk '{print $1}' | tr '\n' '; ')"
-  fi
-  echo "$deleted"
-}
+    if [ "$branch" = "$current_branch" ]; then
+      excluded_lines="${excluded_lines}${branch} - skipped: current checked-out branch"$'\n'
+      continue
+    fi
 
-# List tracked branches, excluding protected branches
-#
-# Usage: _clean_git_branches_show_tracked
-#
-# This function lists all tracked branches in the Git repository, excluding branches specified
-# in the PROTECTED_BRANCHES environment variable. Tracked branches are local branches that
-# have a remote-tracking branch. If PROTECTED_BRANCHES is not set, it defaults to
-# "main|master|prod|dev".
-function _clean_git_branches_show_tracked() {
-  if [ -z "$PROTECTED_BRANCHES" ]; then
-    PROTECTED_BRANCHES="main|master|prod|dev"
-  fi
-  git branch -vv | grep -vE '^\*' | grep -E '\[origin/' | grep -vE 'gone' | egrep -v "($PROTECTED_BRANCHES)"
-}
+    if _clean_git_branches_is_protected "$branch"; then
+      excluded_lines="${excluded_lines}${branch} - skipped: protected branch"$'\n'
+      continue
+    fi
 
-# List protected branches
-#
-# Usage: _clean_git_branches_show_protected
-#
-# This function lists all protected branches in the Git repository, as specified by the
-# PROTECTED_BRANCHES environment variable. If PROTECTED_BRANCHES is not set, it defaults to
-# "main|master|prod|dev".
-function _clean_git_branches_show_protected() {
-  if [ -z "$PROTECTED_BRANCHES" ]; then
-    PROTECTED_BRANCHES="main|master|prod|dev"
-  fi
-  git branch -vv | egrep "($PROTECTED_BRANCHES)"
-}
-
-# Function clean your git branches and show you their status
-#
-# Usage: clean_git_branches
-#
-# This function calls all of the other functions in this script to delete merged branches,
-# and list untracked, deleted, tracked, and protected branches.
-function clean_git_branches() {
-  local current_branch
-  local upstream_branch
-  local branch_vv_probe_output
-  local gone_candidates
-  local gone_candidate_count
-  local effective_delete_candidates
-  local effective_delete_count
-  local gone_report_candidates
-  local show_remote_gone_report=1
-  local patch_equivalent_diverged_count
-  local printed_report_section=0
-
-  echo
-
-  current_branch=$(git branch --show-current)
-  upstream_branch=$(git rev-parse --abbrev-ref --symbolic-full-name "@{upstream}" 2>/dev/null || true)
-  _clean_git_branches_verbose_section "Repository State"
-  _clean_git_branches_verbose_kv "Repository" "$(pwd)"
-  _clean_git_branches_verbose_kv "Current branch" "$current_branch"
-  if [ -n "$upstream_branch" ]; then
-    _clean_git_branches_verbose_kv "Current branch upstream" "$upstream_branch"
-  else
-    _clean_git_branches_verbose_kv "Current branch upstream" "(none)"
-  fi
-  _clean_git_branches_verbose_kv "Branch status" "$(git status -sb | head -n 1)"
-  _clean_git_branches_should_delete_gone
-  if ! branch_vv_probe_output=$(git branch -vv 2>&1); then
-    echo "Failed to list branches via 'git branch -vv'." >&2
-    echo "$branch_vv_probe_output" >&2
-    return 1
-  fi
-  gone_candidates=$(_clean_git_branches_gone_branch_names)
-  _clean_git_branches_partition_gone_candidates "$gone_candidates"
-  gone_candidate_count=$(echo "$GONE_DELETE_CANDIDATES" | sed '/^$/d' | wc -l | tr -d ' ')
-  patch_equivalent_diverged_count=$(echo "$PATCH_EQUIVALENT_DIVERGED_BRANCHES" | sed '/^$/d' | wc -l | tr -d ' ')
-  effective_delete_candidates="$GONE_DELETE_CANDIDATES"
-  if [ "$DELETE_PATCH_EQUIVALENT_DIVERGED" -eq 1 ] && [ -n "$PATCH_EQUIVALENT_DIVERGED_BRANCHES" ]; then
-    if [ -n "$effective_delete_candidates" ]; then
-      effective_delete_candidates="${effective_delete_candidates}"$'\n'"$PATCH_EQUIVALENT_DIVERGED_BRANCHES"
+    if git merge-base --is-ancestor "$branch" "$BASE_REF" >/dev/null 2>&1; then
+      redundant_type="merged"
+    elif _clean_git_branches_is_equivalent "$branch"; then
+      redundant_type="equivalent"
     else
-      effective_delete_candidates="$PATCH_EQUIVALENT_DIVERGED_BRANCHES"
+      redundant_type="non-equivalent"
     fi
-  fi
-  effective_delete_count=$(echo "$effective_delete_candidates" | sed '/^$/d' | wc -l | tr -d ' ')
-  gone_report_candidates="$GONE_DELETE_CANDIDATES"
-  if [ "$DELETE_PATCH_EQUIVALENT_DIVERGED" -eq 1 ]; then
-    gone_report_candidates="$effective_delete_candidates"
-  fi
-  _clean_git_branches_verbose_kv "Remote-gone deletion candidates" "$gone_candidate_count"
-  _clean_git_branches_verbose_kv "Patch-equivalent diverged gone branches" "$patch_equivalent_diverged_count"
-  _clean_git_branches_verbose_kv "Effective deletion candidates" "$effective_delete_count"
 
-  deleted_merged=$(_clean_git_branches_delete_merged)
-  if [ -n "$deleted_merged" ]; then
-    if [ "$VERBOSE" -eq 1 ] && [ "$printed_report_section" -eq 0 ]; then
-      echo
-      printed_report_section=1
+    safety_reasons=""
+    upstream=$(_clean_git_branches_branch_upstream "$branch")
+
+    if _clean_git_branches_branch_has_unpushed "$branch"; then
+      safety_reasons="has unpushed commits"
     fi
-    echo -e "\033[1;94mDeleted merged branches\033[0m"
-    echo "─────────────────────"
-    echo "$deleted_merged"
-    echo
-  fi
 
-  untracked=$(_clean_git_branches_show_untracked)
-  if [ -n "$untracked" ]; then
-    if [ "$VERBOSE" -eq 1 ] && [ "$printed_report_section" -eq 0 ]; then
-      echo
-      printed_report_section=1
-    fi
-    echo -e "\033[1;93mUntracked branches\033[0m"
-    echo "───────────────────"
-    echo "$untracked"
-    echo
-  fi
-
-  if [ "$DELETE_GONE_EFFECTIVE" -eq 1 ]; then
-    if [ "$DRY_RUN" -eq 1 ]; then
-      if [ "$DELETE_PATCH_EQUIVALENT_DIVERGED" -eq 1 ]; then
-        _clean_git_branches_verbose_log "Remote-gone mode: dry run (includes patch-equivalent diverged opt-in candidates)"
+    if _clean_git_branches_branch_ahead_of_upstream "$branch"; then
+      if [ -n "$safety_reasons" ]; then
+        safety_reasons="$safety_reasons; ahead of upstream"
       else
-        _clean_git_branches_verbose_log "Remote-gone mode: dry run (force-delete preview only)"
-      fi
-    else
-      if [ "$DELETE_PATCH_EQUIVALENT_DIVERGED" -eq 1 ]; then
-        _clean_git_branches_verbose_log "Remote-gone mode: force delete enabled (includes patch-equivalent diverged opt-in candidates)"
-      else
-        _clean_git_branches_verbose_log "Remote-gone mode: force delete enabled"
+        safety_reasons="ahead of upstream"
       fi
     fi
+
+    case "$redundant_type" in
+      merged)
+        if [ -n "$safety_reasons" ]; then
+          exclusion_reason="$safety_reasons"
+        elif [ "$APPLY" -eq 1 ]; then
+          merged_delete_list="${merged_delete_list}${branch}"$'\n'
+          merged_delete_count=$((merged_delete_count + 1))
+        fi
+
+        merged_lines="${merged_lines}${branch}"$'\n'
+        ;;
+      equivalent)
+        if [ "$DELETE_EQUIVALENT" -ne 1 ]; then
+          :
+        elif [ -n "$safety_reasons" ]; then
+          exclusion_reason="$safety_reasons"
+        elif [ "$APPLY" -eq 1 ]; then
+          equivalent_delete_list="${equivalent_delete_list}${branch}"$'\n'
+          equivalent_delete_count=$((equivalent_delete_count + 1))
+        fi
+
+        equivalent_lines="${equivalent_lines}${branch}"$'\n'
+        ;;
+      non-equivalent)
+        non_equivalent_lines="${non_equivalent_lines}${branch}"$'\n'
+        ;;
+    esac
+
+    if [ -n "$exclusion_reason" ]; then
+      excluded_lines="${excluded_lines}${branch} - skipped: $exclusion_reason"$'\n'
+    fi
+
+    exclusion_reason=""
+  done <<< "$branches"
+
+  header_lines=""
+  if [ "$APPLY" -eq 1 ]; then
+    header_lines="${header_lines}Execution mode: apply"$'\n'
   else
-    _clean_git_branches_verbose_log "Remote-gone mode: deletion disabled (report only)"
+    header_lines="${header_lines}Execution mode: dry-run (preview only)"$'\n'
+  fi
+  header_lines="${header_lines}Current branch: ${current_branch:-<detached>}"$'\n'
+  header_lines="${header_lines}Base branch: ${base_branch:-<none>}"$'\n'
+  if [ "$BASE_REF" != "$base_branch" ]; then
+    header_lines="${header_lines}Base ref: $BASE_REF"$'\n'
+  fi
+  if [ "$VERBOSE" -eq 1 ] && [ -n "${VERBOSE_LINES%$'\n'}" ]; then
+    header_lines="${header_lines}${VERBOSE_LINES%$'\n'}"$'\n'
   fi
 
-  if [ "$DELETE_GONE_EFFECTIVE" -eq 1 ]; then
-    if [ "$SILENT" -eq 1 ] && [ "$DRY_RUN" -eq 0 ]; then
-      echo -e "\033[1;91mWARNING: --silent skips the destructive confirmation prompt.\033[0m"
-      echo
-    fi
-    if _clean_git_branches_confirm_force_delete "$effective_delete_count" "$effective_delete_candidates" "$GONE_DELETE_CANDIDATES" "$PATCH_EQUIVALENT_DIVERGED_BRANCHES" "$DELETE_PATCH_EQUIVALENT_DIVERGED"; then
-      deleted_gone=$(_clean_git_branches_delete_gone "$effective_delete_candidates")
-      if [ -n "$deleted_gone" ]; then
-        if [ "$VERBOSE" -eq 1 ] && [ "$printed_report_section" -eq 0 ]; then
-          echo
-          printed_report_section=1
-        fi
-        if [ "$DRY_RUN" -eq 1 ]; then
-          echo -e "\033[1;93mWould delete remote-gone branches (dry run)\033[0m"
-          echo "──────────────────────────────────────────"
-          show_remote_gone_report=0
-        else
-          echo -e "\033[1;94mDeleted remote-gone branches\033[0m"
-          echo "────────────────────────────"
-        fi
-        echo "$deleted_gone"
-        echo
-      fi
+  _clean_git_branches_print_section "Run summary" "" "${header_lines%$'\n'}"
+
+  if [ "$APPLY" -eq 1 ]; then
+    merged_note="fully merged into $BASE_REF; candidates are deleted with git branch -d"
+  else
+    merged_note="fully merged into $BASE_REF; preview only (use --apply to delete)"
+  fi
+  if [ -n "${merged_lines%$'\n'}" ]; then
+    _clean_git_branches_print_section "Merged branches" "$merged_note" "${merged_lines%$'\n'}"
+  fi
+
+  equivalent_note="patch-equivalent to $BASE_REF via $EQUIVALENCE_METHOD; default keep (use --delete-equivalent to include deletion)"
+  if [ "$DELETE_EQUIVALENT" -eq 1 ]; then
+    if [ "$APPLY" -eq 1 ]; then
+      equivalent_note="patch-equivalent to $BASE_REF via $EQUIVALENCE_METHOD; candidates are deleted with git branch -d"
     else
-      confirmation_status=$?
-      echo -e "\033[1;93mSkipped remote-gone force deletion\033[0m"
-      echo "──────────────────────────────────"
-      echo "You chose to skip force deletion."
-      echo
-      show_remote_gone_report=0
-      if [ "$confirmation_status" -eq 2 ]; then
+      equivalent_note="patch-equivalent to $BASE_REF via $EQUIVALENCE_METHOD; preview only (use --apply to delete)"
+    fi
+  fi
+  if [ -n "${equivalent_lines%$'\n'}" ]; then
+    _clean_git_branches_print_section "Equivalent branches" "$equivalent_note" "${equivalent_lines%$'\n'}"
+  fi
+
+  if [ -n "${non_equivalent_lines%$'\n'}" ]; then
+    _clean_git_branches_print_section "Non-equivalent branches" "keep: contains unique commits" "${non_equivalent_lines%$'\n'}"
+  fi
+  if [ -n "${excluded_lines%$'\n'}" ]; then
+    _clean_git_branches_print_section "Safety exclusions" "hard safety rules (never deleted)" "${excluded_lines%$'\n'}"
+  fi
+
+  if [ "$APPLY" -ne 1 ]; then
+    return 0
+  fi
+
+  if ! _clean_git_branches_confirm_category "merged" "$merged_delete_count"; then
+    case "$?" in
+      1)
+        merged_skipped=1
+        merged_delete_list=""
+        ;;
+      2)
         return 1
-      fi
-    fi
-  else
-    _clean_git_branches_verbose_log "Skipping remote-gone deletions"
+        ;;
+    esac
   fi
 
-  deleted=$(_clean_git_branches_show_deleted "$gone_report_candidates")
-  if [ "$show_remote_gone_report" -eq 1 ] && [ -n "$deleted" ]; then
-    if [ "$VERBOSE" -eq 1 ] && [ "$printed_report_section" -eq 0 ]; then
-      echo
-      printed_report_section=1
+  if ! _clean_git_branches_confirm_category "equivalent" "$equivalent_delete_count"; then
+    case "$?" in
+      1)
+        equivalent_skipped=1
+        equivalent_delete_list=""
+        ;;
+      2)
+        return 1
+        ;;
+    esac
+  fi
+
+  while IFS= read -r branch; do
+    [ -z "$branch" ] && continue
+    if delete_output=$(git branch -d "$branch" 2>&1); then
+      merged_deleted_count=$((merged_deleted_count + 1))
+    else
+      failure_lines="${failure_lines}merged: $branch"$'\n'
     fi
-    if [ "$DELETE_GONE_EFFECTIVE" -eq 1 ]; then
-      if [ "$DRY_RUN" -eq 1 ]; then
-        echo -e "\033[1;91mRemote-gone branches (dry run, not deleted)\033[0m"
-        echo "───────────────────────────────────────────"
+  done <<< "$merged_delete_list"
+
+  while IFS= read -r branch; do
+    [ -z "$branch" ] && continue
+
+    safe_delete_failed=0
+    if delete_output=$(git branch -d "$branch" 2>&1); then
+      equivalent_deleted_count=$((equivalent_deleted_count + 1))
+      continue
+    fi
+
+    safe_delete_failed=1
+
+    if [ "$safe_delete_failed" -eq 1 ] && [ "$FORCE_DELETE_EQUIVALENT" -eq 1 ]; then
+      if delete_output=$(git branch -D "$branch" 2>&1); then
+        equivalent_force_deleted_count=$((equivalent_force_deleted_count + 1))
       else
-        echo -e "\033[1;91mRemote-gone branches (not deleted)\033[0m"
-        echo "──────────────────────────────────"
+        failure_lines="${failure_lines}equivalent: $branch"$'\n'
       fi
     else
-      echo -e "\033[1;91mRemote-gone branches (deletion disabled)\033[0m"
-      echo "─────────────────────────────────────────"
+      failure_lines="${failure_lines}equivalent (safe-delete failed): $branch"$'\n'
     fi
-    echo "$deleted"
-    echo
+  done <<< "$equivalent_delete_list"
+
+  execution_lines=""
+  execution_lines="${execution_lines}Merged deleted: $merged_deleted_count"$'\n'
+  execution_lines="${execution_lines}Equivalent deleted (safe): $equivalent_deleted_count"$'\n'
+  if [ "$equivalent_force_deleted_count" -gt 0 ]; then
+    execution_lines="${execution_lines}Equivalent deleted (force): $equivalent_force_deleted_count"$'\n'
+  fi
+  if [ "$merged_skipped" -eq 1 ]; then
+    execution_lines="${execution_lines}Merged deletions skipped by confirmation"$'\n'
+  fi
+  if [ "$equivalent_skipped" -eq 1 ]; then
+    execution_lines="${execution_lines}Equivalent deletions skipped by confirmation"$'\n'
   fi
 
-  if { [ "$DELETE_GONE_EFFECTIVE" -eq 0 ] || [ "$DELETE_PATCH_EQUIVALENT_DIVERGED" -eq 0 ]; } && [ -n "$PATCH_EQUIVALENT_DIVERGED_BRANCHES" ]; then
-    local patch_equivalent_diverged_report
-
-    patch_equivalent_diverged_report=""
-    while IFS= read -r branch; do
-      [ -z "$branch" ] && continue
-      patch_equivalent_diverged_report="${patch_equivalent_diverged_report}$(git branch -vv | awk -v b="$branch" '$1==b {print; exit}')"$'\n'
-    done <<< "$PATCH_EQUIVALENT_DIVERGED_BRANCHES"
-    patch_equivalent_diverged_report="${patch_equivalent_diverged_report%$'\n'}"
-
-    if [ "$VERBOSE" -eq 1 ] && [ "$printed_report_section" -eq 0 ]; then
-      echo
-      printed_report_section=1
-    fi
-    echo -e "\033[1;91mPatch-equivalent diverged branches (not deleted)\033[0m"
-    echo "───────────────────────────────────────────────"
-    echo "$patch_equivalent_diverged_report"
-    echo
+  _clean_git_branches_print_section "Execution results" "" "${execution_lines%$'\n'}"
+  if [ -n "${failure_lines%$'\n'}" ]; then
+    _clean_git_branches_print_section "Deletion failures" "manual review required" "${failure_lines%$'\n'}"
   fi
-
-  tracked=$(_clean_git_branches_show_tracked)
-  if [ -n "$tracked" ]; then
-    if [ "$VERBOSE" -eq 1 ] && [ "$printed_report_section" -eq 0 ]; then
-      echo
-      printed_report_section=1
-    fi
-    echo -e "\033[1;92mTracked branches\033[0m"
-    echo "───────────────"
-    echo "$tracked"
-  fi
-
-  echo
-
-  protected=$(_clean_git_branches_show_protected)
-  if [ -n "$protected" ]; then
-    if [ "$VERBOSE" -eq 1 ] && [ "$printed_report_section" -eq 0 ]; then
-      echo
-      printed_report_section=1
-    fi
-    echo -e "\033[1;95mProtected branches\033[0m"
-    echo "─────────────────"
-    echo "$protected"
-  fi
-
-  echo
 }
 
-# Call the clean_git_branches function when the script is executed directly
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   clean_git_branches
 fi
