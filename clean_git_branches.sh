@@ -123,7 +123,7 @@ function _clean_git_branches_header_color() {
     "Safety exclusions")
       printf "1;93"
       ;;
-    "Header")
+    "Run summary")
       printf "1;95"
       ;;
     *)
@@ -491,9 +491,6 @@ function clean_git_branches() {
       excluded_lines="${excluded_lines}${branch} - skipped: $exclusion_reason"$'\n'
     fi
 
-    if [ "$VERBOSE" -eq 1 ]; then
-      _clean_git_branches_verbose "branch=$branch type=$redundant_type upstream=${upstream:-<none>} safety=${safety_reasons:-none}"
-    fi
     exclusion_reason=""
   done <<< "$branches"
 
@@ -508,7 +505,7 @@ function clean_git_branches() {
     header_lines="${header_lines}${VERBOSE_LINES%$'\n'}"$'\n'
   fi
 
-  _clean_git_branches_print_section "Header" "" "${header_lines%$'\n'}"
+  _clean_git_branches_print_section "Run summary" "" "${header_lines%$'\n'}"
 
   if [ "$APPLY" -eq 1 ]; then
     merged_note="fully merged into $BASE_REF; candidates are deleted with git branch -d"
