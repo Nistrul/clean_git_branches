@@ -16,6 +16,7 @@ Agents can skip workflow steps when instructions are implied instead of explicit
 5. Keep examples concrete and imperative so action order is unambiguous.
 6. For functional behavior changes, require one deterministic local demo per PR with before/after captures and a local diff gate so validation evidence is explicit.
 7. Scope demo evidence to runtime behavior: prefer direct execution output over indirect test-signaling output unless the slice is explicitly test-behavior-only.
+8. Treat PTY capture normalization as part of the artifact contract so platform-specific control-sequence noise does not leak into review artifacts.
 
 ## Prompting Pattern We Adopted
 
@@ -40,7 +41,7 @@ Agents can skip workflow steps when instructions are implied instead of explicit
 5. Visual validation for functional-change PRs:
    - select or create exactly one deterministic demo before implementation
    - execute `clean_git_branches.sh` directly in the demo so evidence reflects actual CLI behavior
-   - capture before and after ANSI output locally and create plain-text versions
+   - capture before and after ANSI output locally, sanitize raw PTY output with `demos/sanitize-ansi.py`, then create plain-text versions
    - review local `before` vs `after` diff as a gate
    - upload raw ANSI artifacts and keep one collapsible plain-text `Visual Validation` PR comment
 6. For process/docs/tracker-only PRs with no runtime behavior change:

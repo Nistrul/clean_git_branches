@@ -130,10 +130,12 @@ Bad:
 9. Keep a demo catalog in `demos/README.md` and update it when adding/changing demos.
 10. Capture before output before implementation:
    - create artifacts directory: `mkdir -p pr-artifacts`
-   - run selected demo: `script -q pr-artifacts/before.ansi ./demos/${DEMO_ID}.sh`
+   - run selected demo (raw capture): `script -q pr-artifacts/before.raw.ansi ./demos/${DEMO_ID}.sh`
+   - sanitize capture: `python3 demos/sanitize-ansi.py pr-artifacts/before.raw.ansi pr-artifacts/before.ansi`
    - generate plain text: `sed -E 's/\x1b\[[0-9;]*m//g' pr-artifacts/before.ansi > pr-artifacts/before.txt`
 11. After implementation, run the same demo for after output:
-   - `script -q pr-artifacts/after.ansi ./demos/${DEMO_ID}.sh`
+   - `script -q pr-artifacts/after.raw.ansi ./demos/${DEMO_ID}.sh`
+   - `python3 demos/sanitize-ansi.py pr-artifacts/after.raw.ansi pr-artifacts/after.ansi`
    - `sed -E 's/\x1b\[[0-9;]*m//g' pr-artifacts/after.ansi > pr-artifacts/after.txt`
 12. Validate local behavior delta:
    - `diff -u pr-artifacts/before.txt pr-artifacts/after.txt > pr-artifacts/before-after.diff || true`
