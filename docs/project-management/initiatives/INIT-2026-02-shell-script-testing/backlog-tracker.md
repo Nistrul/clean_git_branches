@@ -22,6 +22,11 @@
 5. Added focused integration coverage for non-TTY plain output, TTY color emission, and `NO_COLOR` suppression behavior.
 6. Verified regression safety via `test/run-tests.sh` (16 tests passing total: 4 mocked + 12 integration).
 7. Updated initiative/backlog planning artifacts so `INT-048` is marked done and `INT-042` is the next sprintable slice.
+8. Completed process-slice `INT-052` (`FEAT-006`) on branch `feat/INIT-2026-02-shell-script-testing/FEAT-006-visual-validation-demo-workflow`.
+9. Added mandatory `AGENTS.md` workflow rules requiring exactly one deterministic local demo per PR, pre/post implementation capture, local before/after diff validation, and single-comment PR publication contract for visual validation artifacts.
+10. Updated `docs/project-management/agent-prompting-research.md` to include prompting guidance for deterministic demo selection-before-implementation and explicit visual validation evidence requirements.
+11. Added `demos/README.md` plus deterministic starter demo `demos/minimal-safe-cleanup.sh` that builds isolated temporary Git fixtures and prints labeled output sections.
+12. Added `pr-artifacts/` ignore coverage in `.gitignore` so generated visual-validation artifacts are never committed.
 
 ### 2026-02-10
 
