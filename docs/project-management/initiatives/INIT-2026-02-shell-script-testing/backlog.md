@@ -95,17 +95,16 @@
 | INT-053 | FEAT-006 | Clarify visual-validation scope so before/after demo capture is required only for functional behavior changes and must show direct CLI runtime output | P1 | S | done |
 | INT-054 | FEAT-008 | Add GitHub Actions CI workflow that installs bats and runs `test/run-tests.sh` on pull requests and pushes to `main` | P1 | S | done |
 | INT-055 | FEAT-008 | Suppress Git default-branch advice warnings in CI logs by setting deterministic global Git defaults in workflow setup | P2 | S | done |
-| INT-056 | FEAT-009 | Expand dry-run reporting for non-merged branches with commit-level divergence evidence (for example unique commit subjects/counts) and verify parity under each equivalence strategy mode | P1 | M | todo |
+| INT-056 | FEAT-009 | Expand dry-run reporting for non-merged branches with commit-level divergence evidence (for example unique commit subjects/counts) and verify parity under each equivalence strategy mode | P1 | M | done |
 | INT-057 | FEAT-010 | Add explicit safe-delete diagnostics that reflect whether Git `branch -d` would succeed for each candidate and validate classification alignment with actual `-d` behavior in tests | P1 | M | todo |
 | INT-058 | FEAT-011 | Rename CLI to `git-branch-tidy`, add compatibility entrypoint for `git branch-tidy`, and update docs/tests/tooling references | P1 | S | todo |
 | INT-059 | FEAT-006 | Normalize visual-validation ANSI captures before text derivation so PTY control-sequence artifacts (for example `^D\\b\\b`) do not pollute PR artifacts | P1 | S | done |
 
 ## Suggested Execution Order
 
-1. `INT-056` (`FEAT-009`) to add branch divergence diagnostics and strategy-parity verification in dry-run output.
-2. `INT-057` (`FEAT-010`) to align safe-delete classification with Git `-d` viability and add explicit diagnostics/tests.
-3. `INT-058` (`FEAT-011`) to rename the tool and add Git extension invocation support.
+1. `INT-057` (`FEAT-010`) to align safe-delete classification with Git `-d` viability and add explicit diagnostics/tests.
+2. `INT-058` (`FEAT-011`) to rename the tool and add Git extension invocation support.
 
 ## Sprintable Next Slice
 
-1. `INT-056` (`FEAT-009`): add divergence diagnostics for non-merged branches and verify parity across equivalence strategy modes.
+1. `INT-057` (`FEAT-010`): add explicit safe-delete diagnostics and validate parity with `git branch -d` behavior.

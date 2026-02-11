@@ -392,6 +392,33 @@ function _clean_git_branches_is_equivalent() {
   esac
 }
 
+function _clean_git_branches_branch_divergence_summary() {
+  local branch="$1"
+  local unique_count
+  local sample_subjects
+  local sample_line
+  local sample_text=""
+
+  unique_count=$(git rev-list --count "$BASE_REF..$branch" 2>/dev/null || echo "0")
+  sample_subjects=$(git log "$BASE_REF..$branch" --format='%s' --no-merges 2>/dev/null | awk 'NF {print; if (++count == 2) exit}')
+
+  if [ -z "$sample_subjects" ]; then
+    printf "unique commits ahead of %s: %s" "$BASE_REF" "$unique_count"
+    return
+  fi
+
+  while IFS= read -r sample_line; do
+    [ -z "$sample_line" ] && continue
+    if [ -n "$sample_text" ]; then
+      sample_text="${sample_text} | ${sample_line}"
+    else
+      sample_text="$sample_line"
+    fi
+  done <<< "$sample_subjects"
+
+  printf "unique commits ahead of %s: %s (sample: %s)" "$BASE_REF" "$unique_count" "$sample_text"
+}
+
 function _clean_git_branches_confirm_category() {
   local label="$1"
   local count="$2"
@@ -490,6 +517,7 @@ function clean_git_branches() {
   local merged_skipped=0
   local equivalent_skipped=0
   local confirm_status
+  local divergence_summary
 
   if ! _clean_git_branches_require_git_repo; then
     return 1
@@ -569,6 +597,7 @@ function clean_git_branches() {
         merged_lines="${merged_lines}${branch}"$'\n'
         ;;
       equivalent)
+        divergence_summary=$(_clean_git_branches_branch_divergence_summary "$branch")
         if [ "$DELETE_EQUIVALENT" -ne 1 ]; then
           :
         elif [ -n "$safety_reasons" ]; then
@@ -578,10 +607,11 @@ function clean_git_branches() {
           equivalent_delete_count=$((equivalent_delete_count + 1))
         fi
 
-        equivalent_lines="${equivalent_lines}${branch}"$'\n'
+        equivalent_lines="${equivalent_lines}${branch} - ${divergence_summary}"$'\n'
         ;;
       non-equivalent)
-        non_equivalent_lines="${non_equivalent_lines}${branch}"$'\n'
+        divergence_summary=$(_clean_git_branches_branch_divergence_summary "$branch")
+        non_equivalent_lines="${non_equivalent_lines}${branch} - ${divergence_summary}"$'\n'
         ;;
     esac
 
