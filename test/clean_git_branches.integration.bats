@@ -95,11 +95,13 @@ create_non_equivalent_branch() {
   git -C "$work_dir" checkout main >/dev/null
 }
 
-@test "integration: default mode is dry-run and does not delete merged branches" {
+@test "integration: dirty worktree coverage validates preview and apply cleanup behavior" {
   local work_dir
 
   work_dir="$(create_repo_with_origin)"
-  create_merged_branch "$work_dir" "feature/merged-dry-run"
+  create_merged_branch "$work_dir" "feature/dirty-worktree-merged"
+  echo "dirty tracked change" >> "$work_dir/README.md"
+  echo "dirty untracked change" > "$work_dir/local-notes.txt"
 
   run env NO_COLOR= "$repo_root/test/helpers/run-in-repo.sh" "$work_dir"
 
@@ -107,13 +109,33 @@ create_non_equivalent_branch() {
   [[ "$output" == *"Execution mode: dry-run (preview only)"* ]]
   [[ "$output" == *"Current branch: main"* ]]
   [[ "$output" == *"Merged branches"* ]]
-  [[ "$output" == *"feature/merged-dry-run"* ]]
+  [[ "$output" == *"feature/dirty-worktree-merged"* ]]
   [[ "$output" == *"preview only (use --apply to delete)"* ]]
 
-  run git -C "$work_dir" branch --list feature/merged-dry-run
+  run git -C "$work_dir" branch --list feature/dirty-worktree-merged
   [ "$status" -eq 0 ]
-  [[ "$output" == *"feature/merged-dry-run"* ]]
+  [[ "$output" == *"feature/dirty-worktree-merged"* ]]
   [[ "$output" != *$'\033['* ]]
+
+  run git -C "$work_dir" status --short
+  [ "$status" -eq 0 ]
+  [[ "$output" == *" M README.md"* ]]
+  [[ "$output" == *"?? local-notes.txt"* ]]
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --apply
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Execution results"* ]]
+  [[ "$output" == *"Merged deleted: 1"* ]]
+
+  run git -C "$work_dir" branch --list feature/dirty-worktree-merged
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+
+  run git -C "$work_dir" status --short
+  [ "$status" -eq 0 ]
+  [[ "$output" == *" M README.md"* ]]
+  [[ "$output" == *"?? local-notes.txt"* ]]
 }
 
 @test "integration: subdirectory context coverage validates nested preview and apply behavior" {
@@ -196,23 +218,6 @@ EOF_SHIM
   [ "$status" -eq 0 ]
   [[ "$output" == *"Remote: origin"* ]]
   [[ "$output" != *"Remote: @{upstream}"* ]]
-}
-
-@test "integration: apply deletes merged branches" {
-  local work_dir
-
-  work_dir="$(create_repo_with_origin)"
-  create_merged_branch "$work_dir" "feature/merged-apply"
-
-  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --apply
-
-  [ "$status" -eq 0 ]
-  [[ "$output" == *"Execution results"* ]]
-  [[ "$output" == *"Merged deleted: 1"* ]]
-
-  run git -C "$work_dir" branch --list feature/merged-apply
-  [ "$status" -eq 0 ]
-  [ -z "$output" ]
 }
 
 @test "integration: apply never deletes non-equivalent branches" {
