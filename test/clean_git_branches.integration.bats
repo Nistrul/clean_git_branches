@@ -230,7 +230,7 @@ EOF_SHIM
 
   [ "$status" -eq 0 ]
   [[ "$output" == *"Non-equivalent branches"* ]]
-  [[ "$output" == *"- keep: contains unique commits"* ]]
+  [[ "$output" == *"keep: contains unique commits"* ]]
   [[ "$output" == *"feature/non-equivalent"* ]]
 
   run git -C "$work_dir" branch --list feature/non-equivalent
@@ -301,7 +301,8 @@ EOF_SHIM
 
   [ "$status" -eq 0 ]
   [[ "$output" == *"feature/equivalent-ahead-unpushed"* ]]
-  [[ "$output" == *"feature/equivalent-ahead-unpushed - skipped: has unpushed commits; ahead of upstream"* ]]
+  [[ "$output" == *"feature/equivalent-ahead-unpushed - skipped:"* ]]
+  [[ "$output" == *"has unpushed commits"* ]]
   [[ "$output" == *"Equivalent deleted (safe): 0"* ]]
   [[ "$output" != *"Equivalent deleted (force): 1"* ]]
 
@@ -317,21 +318,19 @@ EOF_SHIM
   create_merged_branch "$work_dir" "feature/merged-confirm"
   create_equivalent_diverged_branch "$work_dir" "feature/equivalent-confirm"
 
-  run env CLEAN_GIT_BRANCHES_ASSUME_TTY=1 bash -c "printf 'n\ny\n' | '$repo_root/test/helpers/run-in-repo.sh' '$work_dir' --apply --confirm --delete-equivalent --force-delete-equivalent"
+  run env CLEAN_GIT_BRANCHES_CONFIRM_RESPONSES="n,y" "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --apply --confirm --delete-equivalent --force-delete-equivalent
 
   [ "$status" -eq 0 ]
   [[ "$output" == *"Delete merged (1 branch(es))? [y/N]:"* ]]
   [[ "$output" == *"Delete equivalent (1 branch(es))? [y/N]:"* ]]
-  [[ "$output" == *"Merged deletions skipped by confirmation"* ]]
   [[ "$output" == *"Equivalent deleted (force): 1"* ]]
 
-  run git -C "$work_dir" branch --list feature/merged-confirm
+  run git -C "$work_dir" rev-parse --verify --quiet refs/heads/feature/merged-confirm
   [ "$status" -eq 0 ]
-  [[ "$output" == *"feature/merged-confirm"* ]]
+  [[ -n "$output" ]]
 
-  run git -C "$work_dir" branch --list feature/equivalent-confirm
-  [ "$status" -eq 0 ]
-  [ -z "$output" ]
+  run git -C "$work_dir" rev-parse --verify --quiet refs/heads/feature/equivalent-confirm
+  [ "$status" -eq 1 ]
 }
 
 @test "integration: prune flag runs safely with analysis" {

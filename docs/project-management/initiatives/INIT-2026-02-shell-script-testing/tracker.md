@@ -1,8 +1,8 @@
 # Initiative Tracker: Shell Script Testing
 
 - Initiative ID: `INIT-2026-02-shell-script-testing`
-- Status: In Progress
-- Current Feature Focus: `FEAT-004` minimal CLI safety simplification (`INT-051`), color-system planning (`INT-047`), render-module extraction (`INT-048`), `FEAT-006` visual-validation workflow policy (`INT-052`, `INT-053`), and `FEAT-007` integration-maintainability consolidation (`INT-042`, `INT-043`) are complete. CI entrypoint automation is next.
+- Status: Complete
+- Current Feature Focus: `FEAT-004` minimal CLI safety simplification (`INT-051`), color-system planning (`INT-047`), render-module extraction (`INT-048`), `FEAT-006` visual-validation workflow policy (`INT-052`, `INT-053`), `FEAT-007` integration-maintainability consolidation (`INT-042`, `INT-043`), and `FEAT-008` CI entrypoint automation/log hardening (`INT-054`, `INT-055`) are complete.
 - Last updated: 2026-02-11
 
 ## Completion Legend
@@ -22,7 +22,7 @@
 7. `[x]` Add mocked failure-path tests.
 8. `[x]` Add real Git integration tests.
 9. `[x]` Validate integration-test coverage and close remaining `FEAT-007` slices.
-10. `[ ]` Add CI entrypoint for tests.
+10. `[x]` Add CI entrypoint for tests.
 
 ## Working Notes
 
@@ -35,4 +35,4 @@
 
 ## Next Actions
 
-1. Add CI entrypoint for automated test execution.
+1. No pending initiative slice is currently defined.
