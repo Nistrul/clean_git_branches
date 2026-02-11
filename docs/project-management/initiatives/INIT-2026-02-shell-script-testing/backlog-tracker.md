@@ -2,7 +2,7 @@
 
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Scope: Execution tracking for `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/backlog.md`
-- Status: In Progress
+- Status: Complete
 - Last updated: 2026-02-11
 
 ## Tracking Rules
@@ -39,6 +39,12 @@
 22. Consolidated overlapping dirty-worktree and merged-branch cleanup coverage into one broader integration scenario that validates dry-run reporting, `--apply` deletion, and preservation of local dirty state in a single flow.
 23. Removed the redundant standalone merged-apply integration scenario to reduce suite maintenance overhead while preserving deletion assertions.
 24. Verified regression safety via `bats test/clean_git_branches.integration.bats -f "dirty worktree coverage validates preview and apply cleanup behavior"` and `test/run-tests.sh` (16 tests passing total: 4 mocked + 12 integration).
+25. Completed `INT-054` (`FEAT-008`) on branch `feat/INIT-2026-02-shell-script-testing/FEAT-008-ci-entrypoint-automation`.
+26. Added `.github/workflows/tests.yml` to run `test/run-tests.sh` on pull requests and pushes to `main`.
+27. Installed Bats in CI via `apt-get` so the existing test runner can execute unchanged in GitHub-hosted Linux jobs.
+28. Updated `README.md` testing documentation to note CI runs the same local test command.
+29. Updated planning trackers so `FEAT-008` and `INT-054` are marked complete and no pending slice is currently defined.
+30. Verified regression safety via `test/run-tests.sh` (16 tests passing total: 4 mocked + 12 integration).
 
 ### 2026-02-10
 
@@ -177,4 +183,4 @@
 
 ## Current Focus
 
-1. Proceed to the remaining initiative milestone: add CI entrypoint for automated test execution.
+1. No pending initiative slice is currently defined.

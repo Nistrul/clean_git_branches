@@ -31,6 +31,7 @@
 | FEAT-005 | Hardening and edge-path reliability | Ensure rare and failure-path behavior stays deterministic and safe. |
 | FEAT-006 | PR handoff and visual validation reporting | Ensure handoff includes progress metrics and each PR includes deterministic local visual validation artifacts. |
 | FEAT-007 | Integration test suite coverage and maintainability | Keep integration tests logically ordered and validate coverage completeness before closing integration-test hardening. |
+| FEAT-008 | Test automation entrypoint | Ensure CI executes the existing deterministic test runner on pull requests and mainline updates. |
 
 ## Backlog
 
@@ -89,11 +90,12 @@
 | INT-051 | FEAT-004 | Simplify CLI to minimal safe model (`--apply` gated execution, merged/equivalent/non-equivalent classification, equivalent opt-in + force fallback, remove legacy flags, deterministic grouped output) | P0 | M | done |
 | INT-052 | FEAT-006 | Add mandatory local visual-validation demo workflow (single deterministic demo, before/after capture, local diff gate, PR artifact/comment contract) | P1 | M | done |
 | INT-053 | FEAT-006 | Clarify visual-validation scope so before/after demo capture is required only for functional behavior changes and must show direct CLI runtime output | P1 | S | done |
+| INT-054 | FEAT-008 | Add GitHub Actions CI workflow that installs bats and runs `test/run-tests.sh` on pull requests and pushes to `main` | P1 | S | done |
 
 ## Suggested Execution Order
 
-1. Backlog scenarios complete; proceed to the remaining initiative milestone: add CI entrypoint for automated test execution.
+1. All currently defined backlog scenarios are complete.
 
 ## Sprintable Next Slice
 
-1. Add CI entrypoint for automated test execution.
+1. No pending slice is currently defined.

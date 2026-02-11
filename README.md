@@ -115,6 +115,8 @@ Run all tests:
 test/run-tests.sh
 ```
 
+CI runs the same command in GitHub Actions on pushes to `main` and on pull requests.
+
 ## Project Management
 
 - `docs/project-management/index.md`
