@@ -116,6 +116,39 @@ create_non_equivalent_branch() {
   [[ "$output" != *$'\033['* ]]
 }
 
+@test "integration: subdirectory context coverage validates nested preview and apply behavior" {
+  local work_dir
+
+  work_dir="$(create_repo_with_origin)"
+  create_merged_branch "$work_dir" "feature/subdir-merged"
+  create_non_equivalent_branch "$work_dir" "feature/subdir-non-equivalent"
+  mkdir -p "$work_dir/nested/path"
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --cwd nested/path
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Execution mode: dry-run (preview only)"* ]]
+  [[ "$output" == *"Merged branches"* ]]
+  [[ "$output" == *"feature/subdir-merged"* ]]
+  [[ "$output" == *"Non-equivalent branches"* ]]
+  [[ "$output" == *"feature/subdir-non-equivalent"* ]]
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --cwd nested/path --apply
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Execution results"* ]]
+  [[ "$output" == *"Merged deleted: 1"* ]]
+  [[ "$output" == *"feature/subdir-non-equivalent"* ]]
+
+  run git -C "$work_dir" branch --list feature/subdir-merged
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+
+  run git -C "$work_dir" branch --list feature/subdir-non-equivalent
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"feature/subdir-non-equivalent"* ]]
+}
+
 @test "integration: renderer emits color on TTY output" {
   local work_dir
 

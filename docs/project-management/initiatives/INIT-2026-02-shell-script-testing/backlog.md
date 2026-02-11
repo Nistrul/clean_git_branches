@@ -77,7 +77,7 @@
 | INT-039 | FEAT-007 | Reorder integration tests so related scenarios are grouped and the file has a logical progression | P2 | S | done |
 | INT-040 | FEAT-007 | Validate integration-test coverage map and capture/add missing high-risk scenarios before closing FEAT-007 | P1 | M | done |
 | INT-041 | FEAT-001 | Non-interactive `--dry-run --force-delete-gone` without `--silent` has deterministic confirmation/preview behavior and explicit output contract | P1 | S | done |
-| INT-042 | FEAT-007 | Consolidate overlapping subdirectory integration scenarios into one broader context-coverage test to reduce runtime and maintenance overhead | P2 | S | todo |
+| INT-042 | FEAT-007 | Consolidate overlapping subdirectory integration scenarios into one broader context-coverage test to reduce runtime and maintenance overhead | P2 | S | done |
 | INT-043 | FEAT-007 | Consolidate overlapping dirty-worktree integration scenarios into one broader cleanup-plus-reporting test to reduce runtime and maintenance overhead | P2 | S | todo |
 | INT-044 | FEAT-007 | Move integration assertions that are equally effective in mocked tests to `test/clean_git_branches.bats` and keep only stateful/destructive checks in integration suite | P1 | M | done |
 | INT-045 | FEAT-007 | Add persistent mocked/integration/full-suite timing metrics to `test/run-tests.sh` and capture before-vs-after runtime comparison for `INT-044` | P2 | S | done |
@@ -92,9 +92,8 @@
 
 ## Suggested Execution Order
 
-1. Execute `INT-042` to consolidate duplicate subdirectory integration coverage.
-2. Execute `INT-043` to consolidate duplicate dirty-worktree integration coverage.
+1. Execute `INT-043` to consolidate duplicate dirty-worktree integration coverage.
 
 ## Sprintable Next Slice
 
-1. Execute `INT-042` to consolidate overlapping subdirectory integration scenarios and reduce suite maintenance overhead.
+1. Execute `INT-043` to consolidate overlapping dirty-worktree integration scenarios and reduce suite maintenance overhead.
