@@ -238,6 +238,42 @@ EOF_SHIM
   [[ "$output" == *"feature/non-equivalent"* ]]
 }
 
+@test "integration: dry-run reports non-merged divergence evidence across equivalence modes" {
+  local work_dir
+
+  work_dir="$(create_repo_with_origin)"
+  create_equivalent_diverged_branch "$work_dir" "feature/equivalent-divergence-evidence"
+  create_non_equivalent_branch "$work_dir" "feature/non-equivalent-divergence-evidence"
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --equivalence cherry
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Equivalent branches"* ]]
+  [[ "$output" == *$'- feature/equivalent-divergence-evidence\n'* ]]
+  [[ "$output" == *"Non-equivalent branches"* ]]
+  [[ "$output" == *$'- feature/non-equivalent-divergence-evidence\n'* ]]
+  [[ "$output" == *"Non-equivalent divergence details"* ]]
+  [[ "$output" == *"- feature/non-equivalent-divergence-evidence"* ]]
+  [[ "$output" == *"branch-only commits vs main (ancestry): 1"* ]]
+  [[ "$output" == *"sample commit subjects:"* ]]
+  [[ "$output" == *"- unique commit for feature/non-equivalent-divergence-evidence"* ]]
+  [[ "$output" != *"feature/equivalent-divergence-evidence - unique commits ahead of main"* ]]
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --equivalence patch-id
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Equivalent branches"* ]]
+  [[ "$output" == *$'- feature/equivalent-divergence-evidence\n'* ]]
+  [[ "$output" == *"Non-equivalent branches"* ]]
+  [[ "$output" == *$'- feature/non-equivalent-divergence-evidence\n'* ]]
+  [[ "$output" == *"Non-equivalent divergence details"* ]]
+  [[ "$output" == *"- feature/non-equivalent-divergence-evidence"* ]]
+  [[ "$output" == *"branch-only commits vs main (ancestry): 1"* ]]
+  [[ "$output" == *"sample commit subjects:"* ]]
+  [[ "$output" == *"- unique commit for feature/non-equivalent-divergence-evidence"* ]]
+  [[ "$output" != *"feature/equivalent-divergence-evidence - unique commits ahead of main"* ]]
+}
+
 @test "integration: equivalent branch requires force flag when safe delete fails" {
   local work_dir
 

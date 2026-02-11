@@ -139,7 +139,7 @@ function _clean_git_branches_renderer_section_token() {
     "Equivalent branches")
       printf "cli.color.section.equivalent"
       ;;
-    "Non-equivalent branches")
+    "Non-equivalent branches"|"Non-equivalent divergence details")
       printf "cli.color.section.non_equivalent"
       ;;
     "Safety exclusions")
@@ -392,6 +392,26 @@ function _clean_git_branches_is_equivalent() {
   esac
 }
 
+function _clean_git_branches_branch_divergence_details() {
+  local branch="$1"
+  local unique_count
+  local sample_subjects
+  local sample_line
+
+  unique_count=$(git rev-list --count "$BASE_REF..$branch" 2>/dev/null || echo "0")
+  sample_subjects=$(git log "$BASE_REF..$branch" --format='%s' --no-merges 2>/dev/null | awk 'NF {print; if (++count == 2) exit}')
+
+  printf -- "- %s\n" "$branch"
+  printf "  branch-only commits vs %s (ancestry): %s\n" "$BASE_REF" "$unique_count"
+  if [ -n "$sample_subjects" ]; then
+    printf "  sample commit subjects:\n"
+    while IFS= read -r sample_line; do
+      [ -z "$sample_line" ] && continue
+      printf "    - %s\n" "$sample_line"
+    done <<< "$sample_subjects"
+  fi
+}
+
 function _clean_git_branches_confirm_category() {
   local label="$1"
   local count="$2"
@@ -434,6 +454,7 @@ function _clean_git_branches_print_section() {
   local title="$1"
   local note="$2"
   local lines="$3"
+  local mode="${4:-bullet}"
   local line
   local underline
   local token
@@ -453,7 +474,11 @@ function _clean_git_branches_print_section() {
   if [ -n "$lines" ]; then
     while IFS= read -r line; do
       [ -z "$line" ] && continue
-      echo "- $line"
+      if [ "$mode" = "raw" ]; then
+        echo "$line"
+      else
+        echo "- $line"
+      fi
     done <<< "$lines"
   fi
   echo
@@ -490,6 +515,7 @@ function clean_git_branches() {
   local merged_skipped=0
   local equivalent_skipped=0
   local confirm_status
+  local non_equivalent_details=""
 
   if ! _clean_git_branches_require_git_repo; then
     return 1
@@ -582,6 +608,7 @@ function clean_git_branches() {
         ;;
       non-equivalent)
         non_equivalent_lines="${non_equivalent_lines}${branch}"$'\n'
+        non_equivalent_details="${non_equivalent_details}$(_clean_git_branches_branch_divergence_details "$branch")"$'\n'
         ;;
     esac
 
@@ -632,6 +659,9 @@ function clean_git_branches() {
 
   if [ -n "${non_equivalent_lines%$'\n'}" ]; then
     _clean_git_branches_print_section "Non-equivalent branches" "keep: contains unique commits" "${non_equivalent_lines%$'\n'}"
+  fi
+  if [ -n "${non_equivalent_details%$'\n'}" ]; then
+    _clean_git_branches_print_section "Non-equivalent divergence details" "dry-run evidence for non-equivalent branches" "${non_equivalent_details%$'\n'}" "raw"
   fi
   if [ -n "${excluded_lines%$'\n'}" ]; then
     _clean_git_branches_print_section "Safety exclusions" "hard safety rules (never deleted)" "${excluded_lines%$'\n'}"

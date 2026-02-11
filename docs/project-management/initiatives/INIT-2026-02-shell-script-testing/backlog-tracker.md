@@ -64,6 +64,14 @@
 46. Updated `AGENTS.md` visual-validation commands to capture raw `script` output (`before.raw.ansi`/`after.raw.ansi`), sanitize into final `.ansi`, and only then derive `.txt`.
 47. Updated `demos/README.md` and `docs/project-management/agent-prompting-research.md` so capture normalization is part of the default artifact contract.
 48. Verified sanitizer behavior with a deterministic byte-level fixture (`^D\b\b\r\n` prefix + CRLF payload) and confirmed normalized output removed the prefix and emitted LF-only text.
+49. Completed `INT-056` (`FEAT-009`) on branch `feat/INIT-2026-02-shell-script-testing/FEAT-009-int-056-dry-run-divergence-diagnostics`.
+50. Expanded dry-run reporting for non-merged branches in `clean_git_branches.sh` to include commit-level divergence evidence (`unique commits ahead of <base>`, plus sample commit subjects) for both equivalent and non-equivalent categories.
+51. Added integration coverage in `test/clean_git_branches.integration.bats` to verify divergence-evidence output contract and parity across `--equivalence cherry` and `--equivalence patch-id`.
+52. Verified regression safety via targeted test `bats test/clean_git_branches.integration.bats -f "integration: dry-run reports non-merged divergence evidence across equivalence modes"` and full suite `test/run-tests.sh` (17 tests passing total: 4 mocked + 13 integration).
+53. Captured required visual-validation artifacts for functional behavior change using deterministic demo `minimal-safe-cleanup` with sanitized `before/after` ANSI transcripts and a local `before-after.diff`.
+54. Refined `INT-056` output UX based on review feedback: removed divergence annotations from equivalent branches to avoid implying they contain unique content.
+55. Added a dedicated multi-line `Non-equivalent divergence details` section that presents branch-only ancestry commit count and sample commit subjects with readable line breaks.
+56. Revalidated refinement via targeted parity test, full-suite run (`test/run-tests.sh`), and refreshed visual-validation artifacts/diff for PR update.
 
 ### 2026-02-10
 

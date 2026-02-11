@@ -2,7 +2,7 @@
 
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Status: Active
-- Current Feature Focus: `FEAT-009` dry-run divergence diagnostics (`INT-056`), `FEAT-010` safe-delete parity with Git `-d` (`INT-057`), and `FEAT-011` git-extension rename (`INT-058`).
+- Current Feature Focus: `FEAT-010` safe-delete parity with Git `-d` (`INT-057`) and `FEAT-011` git-extension rename (`INT-058`).
 - Last updated: 2026-02-11
 
 ## Completion Legend
@@ -23,7 +23,7 @@
 8. `[x]` Add real Git integration tests.
 9. `[x]` Validate integration-test coverage and close remaining `FEAT-007` slices.
 10. `[x]` Add CI entrypoint for tests.
-11. `[ ]` Add dry-run divergence diagnostics and strategy-parity verification.
+11. `[x]` Add dry-run divergence diagnostics and strategy-parity verification.
 12. `[ ]` Align safe-delete diagnostics with Git `branch -d` viability.
 13. `[ ]` Rename CLI to `git-branch-tidy` and support `git branch-tidy`.
 
@@ -38,4 +38,4 @@
 
 ## Next Actions
 
-1. Start `INT-056` (`FEAT-009`) to enrich dry-run output with non-merged branch divergence evidence and cross-strategy parity checks.
+1. Start `INT-057` (`FEAT-010`) to add explicit safe-delete diagnostics that mirror `git branch -d` viability per branch.
