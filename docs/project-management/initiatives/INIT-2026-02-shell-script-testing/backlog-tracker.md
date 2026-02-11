@@ -59,6 +59,11 @@
 41. Identified and fixed a confirmation-flow bug in `clean_git_branches.sh`: decline/abort statuses were read incorrectly after `if ! func` (always observing status `0`), causing declined categories to proceed with deletion.
 42. Added test-only deterministic confirmation input support via `CLEAN_GIT_BRANCHES_CONFIRM_RESPONSES` and switched the confirm-category integration test to use scripted responses instead of piped stdin.
 43. Validated stability with a 40x targeted stress run of `integration: confirm prompts once per deletion category` plus full-suite pass via `test/run-tests.sh`.
+44. Completed process-slice `INT-059` (`FEAT-006`) on branch `feat/INIT-2026-02-shell-script-testing/FEAT-006-int-059-ansi-sanitization-workflow`.
+45. Added `demos/sanitize-ansi.py` as a canonical binary-safe normalization step for visual-validation capture artifacts.
+46. Updated `AGENTS.md` visual-validation commands to capture raw `script` output (`before.raw.ansi`/`after.raw.ansi`), sanitize into final `.ansi`, and only then derive `.txt`.
+47. Updated `demos/README.md` and `docs/project-management/agent-prompting-research.md` so capture normalization is part of the default artifact contract.
+48. Verified sanitizer behavior with a deterministic byte-level fixture (`^D\b\b\r\n` prefix + CRLF payload) and confirmed normalized output removed the prefix and emitted LF-only text.
 
 ### 2026-02-10
 

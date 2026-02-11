@@ -98,6 +98,7 @@
 | INT-056 | FEAT-009 | Expand dry-run reporting for non-merged branches with commit-level divergence evidence (for example unique commit subjects/counts) and verify parity under each equivalence strategy mode | P1 | M | todo |
 | INT-057 | FEAT-010 | Add explicit safe-delete diagnostics that reflect whether Git `branch -d` would succeed for each candidate and validate classification alignment with actual `-d` behavior in tests | P1 | M | todo |
 | INT-058 | FEAT-011 | Rename CLI to `git-branch-tidy`, add compatibility entrypoint for `git branch-tidy`, and update docs/tests/tooling references | P1 | S | todo |
+| INT-059 | FEAT-006 | Normalize visual-validation ANSI captures before text derivation so PTY control-sequence artifacts (for example `^D\\b\\b`) do not pollute PR artifacts | P1 | S | done |
 
 ## Suggested Execution Order
 
