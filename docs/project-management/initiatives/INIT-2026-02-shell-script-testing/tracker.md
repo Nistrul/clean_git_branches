@@ -2,7 +2,7 @@
 
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Status: In Progress
-- Current Feature Focus: `FEAT-004` minimal CLI safety simplification (`INT-051`), color-system planning (`INT-047`), render-module extraction (`INT-048`), `FEAT-006` visual-validation workflow policy (`INT-052`, `INT-053`), and subdirectory context consolidation (`INT-042`) are complete. Dirty-worktree consolidation (`INT-043`) is next.
+- Current Feature Focus: `FEAT-004` minimal CLI safety simplification (`INT-051`), color-system planning (`INT-047`), render-module extraction (`INT-048`), `FEAT-006` visual-validation workflow policy (`INT-052`, `INT-053`), and `FEAT-007` integration-maintainability consolidation (`INT-042`, `INT-043`) are complete. CI entrypoint automation is next.
 - Last updated: 2026-02-11
 
 ## Completion Legend
@@ -21,7 +21,7 @@
 6. `[x]` Add first mocked success-path test.
 7. `[x]` Add mocked failure-path tests.
 8. `[x]` Add real Git integration tests.
-9. `[~]` Validate integration-test coverage and close remaining `FEAT-007` slices.
+9. `[x]` Validate integration-test coverage and close remaining `FEAT-007` slices.
 10. `[ ]` Add CI entrypoint for tests.
 
 ## Working Notes
@@ -35,5 +35,4 @@
 
 ## Next Actions
 
-1. Execute `INT-043` to consolidate overlapping dirty-worktree integration coverage into one broader cleanup/reporting test.
-2. Add CI entrypoint for automated test execution.
+1. Add CI entrypoint for automated test execution.

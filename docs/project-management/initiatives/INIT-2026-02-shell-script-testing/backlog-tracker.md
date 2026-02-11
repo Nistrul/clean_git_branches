@@ -35,6 +35,10 @@
 18. Extended `test/helpers/run-in-repo.sh` with optional `--cwd <relative-subdir>` support so integration tests can run deterministically from nested repository paths without shell chaining.
 19. Kept `INT-042` validation as integration-test evidence only and removed non-runtime demo usage so demo workflows remain reserved for direct `clean_git_branches.sh` output.
 20. Verified regression safety via `bats test/clean_git_branches.integration.bats -f "subdirectory context coverage validates nested preview and apply behavior"` and `test/run-tests.sh` (17 tests passing total: 4 mocked + 13 integration).
+21. Completed `INT-043` (`FEAT-007`) on branch `feat/INIT-2026-02-shell-script-testing/FEAT-007-int-043-dirty-worktree-context-consolidation`.
+22. Consolidated overlapping dirty-worktree and merged-branch cleanup coverage into one broader integration scenario that validates dry-run reporting, `--apply` deletion, and preservation of local dirty state in a single flow.
+23. Removed the redundant standalone merged-apply integration scenario to reduce suite maintenance overhead while preserving deletion assertions.
+24. Verified regression safety via `bats test/clean_git_branches.integration.bats -f "dirty worktree coverage validates preview and apply cleanup behavior"` and `test/run-tests.sh` (16 tests passing total: 4 mocked + 12 integration).
 
 ### 2026-02-10
 
@@ -173,5 +177,4 @@
 
 ## Current Focus
 
-1. Execute `INT-043` to consolidate duplicate dirty-worktree integration scenarios.
-2. Proceed to the remaining initiative milestone: add CI entrypoint for automated test execution.
+1. Proceed to the remaining initiative milestone: add CI entrypoint for automated test execution.
