@@ -29,7 +29,7 @@
 | FEAT-003 | Branch classification and protection rules | Ensure tracked/untracked/gone/protected behavior is classified and enforced correctly. |
 | FEAT-004 | CLI contract and diagnostics | Ensure flag behavior, help output, and diagnostics are stable and testable. |
 | FEAT-005 | Hardening and edge-path reliability | Ensure rare and failure-path behavior stays deterministic and safe. |
-| FEAT-006 | PR handoff progress reporting | Ensure handoff includes initiative completion percentage and remaining feature counts after PR creation. |
+| FEAT-006 | PR handoff and visual validation reporting | Ensure handoff includes progress metrics and each PR includes deterministic local visual validation artifacts. |
 | FEAT-007 | Integration test suite coverage and maintainability | Keep integration tests logically ordered and validate coverage completeness before closing integration-test hardening. |
 
 ## Backlog
@@ -87,6 +87,7 @@
 | INT-049 | FEAT-005 | Add `.DS_Store` hygiene slice: verify no tracked `.DS_Store` files, add ignore coverage, and document policy so temporary OS files are not committed | P1 | S | done |
 | INT-050 | FEAT-006 | In post-PR sync workflow, skip rerunning tests when rebase is a no-op and relevant tests already passed on the current HEAD | P1 | S | done |
 | INT-051 | FEAT-004 | Simplify CLI to minimal safe model (`--apply` gated execution, merged/equivalent/non-equivalent classification, equivalent opt-in + force fallback, remove legacy flags, deterministic grouped output) | P0 | M | done |
+| INT-052 | FEAT-006 | Add mandatory local visual-validation demo workflow (single deterministic demo, before/after capture, local diff gate, PR artifact/comment contract) | P1 | M | done |
 
 ## Suggested Execution Order
 

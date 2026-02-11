@@ -1,6 +1,6 @@
 # Agent Prompting Research: Workflow Reliability
 
-- Last updated: 2026-02-10
+- Last updated: 2026-02-11
 - Purpose: Document prompt patterns that reduce workflow misses (branching, PR sequencing, and handoff checks).
 
 ## Problem
@@ -14,6 +14,7 @@ Agents can skip workflow steps when instructions are implied instead of explicit
 3. Prefer fail-closed gates over best-effort reminders.
 4. Encode required output fields as default handoff output contracts when process visibility is required (for example, post-PR progress metrics).
 5. Keep examples concrete and imperative so action order is unambiguous.
+6. For behavior changes, require one deterministic local demo per PR with before/after captures and a local diff gate so validation evidence is explicit.
 
 ## Prompting Pattern We Adopted
 
@@ -35,6 +36,11 @@ Agents can skip workflow steps when instructions are implied instead of explicit
    - features complete vs remaining
    - active initiative count and next initiative (or explicitly none)
    - concise prioritization summary covering what will be worked on next and why it is prioritized over other available tasks
+5. Visual validation for each PR:
+   - select or create exactly one deterministic demo before implementation
+   - capture before and after ANSI output locally and create plain-text versions
+   - review local `before` vs `after` diff as a gate
+   - upload raw ANSI artifacts and keep one collapsible plain-text `Visual Validation` PR comment
 
 ## Repository Mapping
 

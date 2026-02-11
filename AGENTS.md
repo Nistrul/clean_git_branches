@@ -111,6 +111,37 @@ Bad:
 5. Process and agent-instruction changes (for example, edits to `AGENTS.md`) must be delivered separately from functional feature implementation changes; however, cohesive process-slice updates (agent rules + supporting project-management docs/trackers) may be delivered together in one PR.
 6. Documentation-only, tracker-only, and other non-code slices still require creating or updating a PR as the final step before handoff; do not skip PR creation because a change is "docs only."
 
+## Visual Validation Demo Workflow (Mandatory)
+
+1. For every PR, demonstrate behavioral change with exactly one deterministic local demo.
+2. Select or create the demo before implementation starts so pre-change capture is always possible.
+3. Prefer reusing an existing script under `demos/`; create a new demo only when no existing demo directly shows the behavior change.
+4. Set `DEMO_ID` to the selected script basename (without `.sh`) before capture commands.
+5. Demos must:
+   - live at `demos/<demo-id>.sh`
+   - create their own temporary Git repositories/fixtures
+   - never modify the caller repository
+   - print clearly labeled sections with normal ANSI-colored console output
+   - exit non-zero on failure
+   - run quickly (target under 10 seconds)
+6. Keep a demo catalog in `demos/README.md` and update it when adding/changing demos.
+7. Capture before output before implementation:
+   - create artifacts directory: `mkdir -p pr-artifacts`
+   - run selected demo: `script -q pr-artifacts/before.ansi ./demos/${DEMO_ID}.sh`
+   - generate plain text: `sed -E 's/\x1b\[[0-9;]*m//g' pr-artifacts/before.ansi > pr-artifacts/before.txt`
+8. After implementation, run the same demo for after output:
+   - `script -q pr-artifacts/after.ansi ./demos/${DEMO_ID}.sh`
+   - `sed -E 's/\x1b\[[0-9;]*m//g' pr-artifacts/after.ansi > pr-artifacts/after.txt`
+9. Validate local behavior delta:
+   - `diff -u pr-artifacts/before.txt pr-artifacts/after.txt > pr-artifacts/before-after.diff || true`
+   - treat empty diffs (when change should be visible) or unexpected diffs as failures
+10. `pr-artifacts/` must be gitignored; never commit artifacts, logs, or screenshots.
+11. Publish artifacts in the PR:
+   - upload raw `.ansi` and diff files (for download/view with `less -R`)
+   - post or update one `Visual Validation` PR comment with plain-text before/after output in collapsible `<details>` blocks
+   - keep only one active `Visual Validation` comment per PR
+12. Use local-only execution for this workflow; do not depend on CI for visual validation capture.
+
 ## Title Style Rules (Mandatory)
 
 1. Write commit subjects and PR titles in imperative mood.
