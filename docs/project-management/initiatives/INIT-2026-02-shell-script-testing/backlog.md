@@ -2,7 +2,7 @@
 
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Status: Active
-- Last updated: 2026-02-10
+- Last updated: 2026-02-11
 - Tracker: `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/backlog-tracker.md`
 
 ## Prioritization Model
@@ -83,16 +83,16 @@
 | INT-045 | FEAT-007 | Add persistent mocked/integration/full-suite timing metrics to `test/run-tests.sh` and capture before-vs-after runtime comparison for `INT-044` | P2 | S | done |
 | INT-046 | FEAT-003 | Investigate diverged branches whose commits are already integrated in `main` (patch-equivalent), define safe classification/deletion policy, and add explicit opt-in deletion control via test-first scenarios | P1 | M | done |
 | INT-047 | FEAT-004 | Define CLI output color system plan (roles/tokens, semantic meanings, contrast/accessibility constraints, TTY/no-color behavior) using UI/UX review guidance and document deferred visual critique checkpoint | P1 | M | done |
-| INT-048 | FEAT-004 | Plan and prototype-safe design for a render module so all output sections flow through consistent rendering APIs, preserving current indentation/layout while removing layout concerns from business logic | P1 | M | todo |
+| INT-048 | FEAT-004 | Plan and prototype-safe design for a render module so all output sections flow through consistent rendering APIs, preserving current indentation/layout while removing layout concerns from business logic | P1 | M | done |
 | INT-049 | FEAT-005 | Add `.DS_Store` hygiene slice: verify no tracked `.DS_Store` files, add ignore coverage, and document policy so temporary OS files are not committed | P1 | S | done |
 | INT-050 | FEAT-006 | In post-PR sync workflow, skip rerunning tests when rebase is a no-op and relevant tests already passed on the current HEAD | P1 | S | done |
 | INT-051 | FEAT-004 | Simplify CLI to minimal safe model (`--apply` gated execution, merged/equivalent/non-equivalent classification, equivalent opt-in + force fallback, remove legacy flags, deterministic grouped output) | P0 | M | done |
 
 ## Suggested Execution Order
 
-1. Execute `INT-048` to establish render-module boundaries and migration plan while preserving current layout contract.
-2. Execute `INT-042` and `INT-043` to consolidate duplicate integration coverage.
+1. Execute `INT-042` to consolidate duplicate subdirectory integration coverage.
+2. Execute `INT-043` to consolidate duplicate dirty-worktree integration coverage.
 
 ## Sprintable Next Slice
 
-1. Execute `INT-048` to plan and prototype-safe a render module using the color-system contract defined in `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/feat-004-cli-color-system-plan.md`.
+1. Execute `INT-042` to consolidate overlapping subdirectory integration scenarios and reduce suite maintenance overhead.
