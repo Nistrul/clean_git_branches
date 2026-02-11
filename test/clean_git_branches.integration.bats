@@ -249,21 +249,29 @@ EOF_SHIM
 
   [ "$status" -eq 0 ]
   [[ "$output" == *"Equivalent branches"* ]]
-  [[ "$output" == *"feature/equivalent-divergence-evidence - unique commits ahead of main: 1"* ]]
-  [[ "$output" == *"sample: equivalent commit for feature/equivalent-divergence-evidence"* ]]
+  [[ "$output" == *$'- feature/equivalent-divergence-evidence\n'* ]]
   [[ "$output" == *"Non-equivalent branches"* ]]
-  [[ "$output" == *"feature/non-equivalent-divergence-evidence - unique commits ahead of main: 1"* ]]
-  [[ "$output" == *"sample: unique commit for feature/non-equivalent-divergence-evidence"* ]]
+  [[ "$output" == *$'- feature/non-equivalent-divergence-evidence\n'* ]]
+  [[ "$output" == *"Non-equivalent divergence details"* ]]
+  [[ "$output" == *"- feature/non-equivalent-divergence-evidence"* ]]
+  [[ "$output" == *"branch-only commits vs main (ancestry): 1"* ]]
+  [[ "$output" == *"sample commit subjects:"* ]]
+  [[ "$output" == *"- unique commit for feature/non-equivalent-divergence-evidence"* ]]
+  [[ "$output" != *"feature/equivalent-divergence-evidence - unique commits ahead of main"* ]]
 
   run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --equivalence patch-id
 
   [ "$status" -eq 0 ]
   [[ "$output" == *"Equivalent branches"* ]]
-  [[ "$output" == *"feature/equivalent-divergence-evidence - unique commits ahead of main: 1"* ]]
-  [[ "$output" == *"sample: equivalent commit for feature/equivalent-divergence-evidence"* ]]
+  [[ "$output" == *$'- feature/equivalent-divergence-evidence\n'* ]]
   [[ "$output" == *"Non-equivalent branches"* ]]
-  [[ "$output" == *"feature/non-equivalent-divergence-evidence - unique commits ahead of main: 1"* ]]
-  [[ "$output" == *"sample: unique commit for feature/non-equivalent-divergence-evidence"* ]]
+  [[ "$output" == *$'- feature/non-equivalent-divergence-evidence\n'* ]]
+  [[ "$output" == *"Non-equivalent divergence details"* ]]
+  [[ "$output" == *"- feature/non-equivalent-divergence-evidence"* ]]
+  [[ "$output" == *"branch-only commits vs main (ancestry): 1"* ]]
+  [[ "$output" == *"sample commit subjects:"* ]]
+  [[ "$output" == *"- unique commit for feature/non-equivalent-divergence-evidence"* ]]
+  [[ "$output" != *"feature/equivalent-divergence-evidence - unique commits ahead of main"* ]]
 }
 
 @test "integration: equivalent branch requires force flag when safe delete fails" {
