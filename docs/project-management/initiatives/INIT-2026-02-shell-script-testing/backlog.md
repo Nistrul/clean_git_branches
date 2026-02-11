@@ -32,6 +32,9 @@
 | FEAT-006 | PR handoff and visual validation reporting | Ensure handoff includes progress metrics and each PR includes deterministic local visual validation artifacts. |
 | FEAT-007 | Integration test suite coverage and maintainability | Keep integration tests logically ordered and validate coverage completeness before closing integration-test hardening. |
 | FEAT-008 | Test automation entrypoint | Ensure CI executes the existing deterministic test runner on pull requests and mainline updates. |
+| FEAT-009 | Dry-run branch divergence diagnostics | Ensure dry-run output explains why non-merged branches differ and verifies classification parity across configured equivalence strategies. |
+| FEAT-010 | Safe-delete parity with Git `-d` | Ensure branch safety classification aligns with what Git would allow via non-force delete semantics and expose explicit `-d` viability diagnostics. |
+| FEAT-011 | Git extension rename | Ensure the tool is renamed to `git-branch-tidy` and can be invoked as `git branch-tidy` while preserving existing behavior contracts. |
 
 ## Backlog
 
@@ -92,11 +95,16 @@
 | INT-053 | FEAT-006 | Clarify visual-validation scope so before/after demo capture is required only for functional behavior changes and must show direct CLI runtime output | P1 | S | done |
 | INT-054 | FEAT-008 | Add GitHub Actions CI workflow that installs bats and runs `test/run-tests.sh` on pull requests and pushes to `main` | P1 | S | done |
 | INT-055 | FEAT-008 | Suppress Git default-branch advice warnings in CI logs by setting deterministic global Git defaults in workflow setup | P2 | S | done |
+| INT-056 | FEAT-009 | Expand dry-run reporting for non-merged branches with commit-level divergence evidence (for example unique commit subjects/counts) and verify parity under each equivalence strategy mode | P1 | M | todo |
+| INT-057 | FEAT-010 | Add explicit safe-delete diagnostics that reflect whether Git `branch -d` would succeed for each candidate and validate classification alignment with actual `-d` behavior in tests | P1 | M | todo |
+| INT-058 | FEAT-011 | Rename CLI to `git-branch-tidy`, add compatibility entrypoint for `git branch-tidy`, and update docs/tests/tooling references | P1 | S | todo |
 
 ## Suggested Execution Order
 
-1. All currently defined backlog scenarios are complete.
+1. `INT-056` (`FEAT-009`) to add branch divergence diagnostics and strategy-parity verification in dry-run output.
+2. `INT-057` (`FEAT-010`) to align safe-delete classification with Git `-d` viability and add explicit diagnostics/tests.
+3. `INT-058` (`FEAT-011`) to rename the tool and add Git extension invocation support.
 
 ## Sprintable Next Slice
 
-1. No pending slice is currently defined.
+1. `INT-056` (`FEAT-009`): add divergence diagnostics for non-merged branches and verify parity across equivalence strategy modes.

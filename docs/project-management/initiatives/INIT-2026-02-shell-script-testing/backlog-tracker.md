@@ -2,7 +2,7 @@
 
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Scope: Execution tracking for `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/backlog.md`
-- Status: Complete
+- Status: Active
 - Last updated: 2026-02-11
 
 ## Tracking Rules
@@ -15,43 +15,50 @@
 
 ### 2026-02-11
 
-1. Completed `INT-048` (`FEAT-004`) on branch `feat/INIT-2026-02-shell-script-testing/FEAT-004-int-048-render-module-plan`.
-2. Extracted renderer boundaries in `clean_git_branches.sh` so section-token mapping, token-to-ANSI mapping, and color gating are centralized in dedicated renderer API functions.
-3. Replaced title-based hard-coded color selection with semantic renderer tokens aligned to `INT-047` color-system planning.
-4. Added TTY/`NO_COLOR` policy implementation so ANSI output is enabled only for TTY output (or test-assumed TTY) and suppressed for non-TTY or non-empty `NO_COLOR`.
-5. Added focused integration coverage for non-TTY plain output, TTY color emission, and `NO_COLOR` suppression behavior.
-6. Verified regression safety via `test/run-tests.sh` (16 tests passing total: 4 mocked + 12 integration).
-7. Updated initiative/backlog planning artifacts so `INT-048` is marked done and `INT-042` is the next sprintable slice.
-8. Completed process-slice `INT-052` (`FEAT-006`) on branch `feat/INIT-2026-02-shell-script-testing/FEAT-006-visual-validation-demo-workflow`.
-9. Added mandatory `AGENTS.md` workflow rules requiring exactly one deterministic local demo per PR, pre/post implementation capture, local before/after diff validation, and single-comment PR publication contract for visual validation artifacts.
-10. Updated `docs/project-management/agent-prompting-research.md` to include prompting guidance for deterministic demo selection-before-implementation and explicit visual validation evidence requirements.
-11. Added `demos/README.md` plus deterministic starter demo `demos/minimal-safe-cleanup.sh` that builds isolated temporary Git fixtures and prints labeled output sections.
-12. Added `pr-artifacts/` ignore coverage in `.gitignore` so generated visual-validation artifacts are never committed.
-13. Completed process refinement slice `INT-053` (`FEAT-006`) on branch `feat/INIT-2026-02-shell-script-testing/FEAT-006-int-053-functional-visual-validation-gate`.
-14. Refined `AGENTS.md` visual-validation rules so before/after capture is mandatory only for functional behavior changes, skipped by default for docs/process/tracker-only PRs, and required to show direct `clean_git_branches.sh` runtime output for functional-change slices.
-15. Updated `docs/project-management/agent-prompting-research.md` with explicit prompting guidance to avoid substituting indirect test-signaling output when runtime behavior evidence is expected.
-16. Completed `INT-042` (`FEAT-007`) on branch `feat/INIT-2026-02-shell-script-testing/FEAT-007-int-042-subdirectory-context-consolidation`.
-17. Added a consolidated integration scenario in `test/clean_git_branches.integration.bats` that runs from a nested subdirectory and validates both dry-run analysis and `--apply` behavior in one context-coverage test.
-18. Extended `test/helpers/run-in-repo.sh` with optional `--cwd <relative-subdir>` support so integration tests can run deterministically from nested repository paths without shell chaining.
-19. Kept `INT-042` validation as integration-test evidence only and removed non-runtime demo usage so demo workflows remain reserved for direct `clean_git_branches.sh` output.
-20. Verified regression safety via `bats test/clean_git_branches.integration.bats -f "subdirectory context coverage validates nested preview and apply behavior"` and `test/run-tests.sh` (17 tests passing total: 4 mocked + 13 integration).
-21. Completed `INT-043` (`FEAT-007`) on branch `feat/INIT-2026-02-shell-script-testing/FEAT-007-int-043-dirty-worktree-context-consolidation`.
-22. Consolidated overlapping dirty-worktree and merged-branch cleanup coverage into one broader integration scenario that validates dry-run reporting, `--apply` deletion, and preservation of local dirty state in a single flow.
-23. Removed the redundant standalone merged-apply integration scenario to reduce suite maintenance overhead while preserving deletion assertions.
-24. Verified regression safety via `bats test/clean_git_branches.integration.bats -f "dirty worktree coverage validates preview and apply cleanup behavior"` and `test/run-tests.sh` (16 tests passing total: 4 mocked + 12 integration).
-25. Completed `INT-054` (`FEAT-008`) on branch `feat/INIT-2026-02-shell-script-testing/FEAT-008-ci-entrypoint-automation`.
-26. Added `.github/workflows/tests.yml` to run `test/run-tests.sh` on pull requests and pushes to `main`.
-27. Installed Bats in CI via `apt-get` so the existing test runner can execute unchanged in GitHub-hosted Linux jobs.
-28. Updated `README.md` testing documentation to note CI runs the same local test command.
-29. Updated planning trackers so `FEAT-008` and `INT-054` are marked complete and no pending slice is currently defined.
-30. Verified regression safety via `test/run-tests.sh` (16 tests passing total: 4 mocked + 12 integration).
-31. Hardened CI-facing integration assertions in `test/clean_git_branches.integration.bats` so output-contract checks tolerate stable formatting variants (bullet prefix and safety-reason ordering) while still asserting required semantics.
-32. Completed `INT-055` (`FEAT-008`) by configuring global Git defaults in `.github/workflows/tests.yml` (`init.defaultBranch=main`, `advice.defaultBranchName=false`) to suppress `git init` default-branch advice noise in CI logs.
-33. Verified regression safety via `test/run-tests.sh` (16 tests passing total: 4 mocked + 12 integration).
-34. Further stabilized CI behavior by removing two remaining environment-sensitive string assertions (optional `ahead of upstream` and merged-confirmation summary wording) while retaining prompt and branch-state outcome checks.
-35. Identified and fixed a confirmation-flow bug in `clean_git_branches.sh`: decline/abort statuses were read incorrectly after `if ! func` (always observing status `0`), causing declined categories to proceed with deletion.
-36. Added test-only deterministic confirmation input support via `CLEAN_GIT_BRANCHES_CONFIRM_RESPONSES` and switched the confirm-category integration test to use scripted responses instead of piped stdin.
-37. Validated stability with a 40x targeted stress run of `integration: confirm prompts once per deletion category` plus full-suite pass via `test/run-tests.sh`.
+1. Split a newly requested mixed scope into three separate PR-ready backlog slices so execution can proceed as isolated changesets.
+2. Added `FEAT-009` + `INT-056` for dry-run divergence diagnostics and equivalence-strategy parity verification for non-merged branches.
+3. Added `FEAT-010` + `INT-057` for safe-delete parity checks against Git `branch -d` viability, including explicit diagnostics and test coverage.
+4. Added `FEAT-011` + `INT-058` for renaming the tool to `git-branch-tidy` and enabling `git branch-tidy` invocation.
+5. Reopened initiative tracking status to `Active` and set `INT-056` as the next sprintable slice.
+6. Left implementation out of scope for this slice; this branch is tracking/planning updates only.
+
+7. Completed `INT-048` (`FEAT-004`) on branch `feat/INIT-2026-02-shell-script-testing/FEAT-004-int-048-render-module-plan`.
+8. Extracted renderer boundaries in `clean_git_branches.sh` so section-token mapping, token-to-ANSI mapping, and color gating are centralized in dedicated renderer API functions.
+9. Replaced title-based hard-coded color selection with semantic renderer tokens aligned to `INT-047` color-system planning.
+10. Added TTY/`NO_COLOR` policy implementation so ANSI output is enabled only for TTY output (or test-assumed TTY) and suppressed for non-TTY or non-empty `NO_COLOR`.
+11. Added focused integration coverage for non-TTY plain output, TTY color emission, and `NO_COLOR` suppression behavior.
+12. Verified regression safety via `test/run-tests.sh` (16 tests passing total: 4 mocked + 12 integration).
+13. Updated initiative/backlog planning artifacts so `INT-048` is marked done and `INT-042` is the next sprintable slice.
+14. Completed process-slice `INT-052` (`FEAT-006`) on branch `feat/INIT-2026-02-shell-script-testing/FEAT-006-visual-validation-demo-workflow`.
+15. Added mandatory `AGENTS.md` workflow rules requiring exactly one deterministic local demo per PR, pre/post implementation capture, local before/after diff validation, and single-comment PR publication contract for visual validation artifacts.
+16. Updated `docs/project-management/agent-prompting-research.md` to include prompting guidance for deterministic demo selection-before-implementation and explicit visual validation evidence requirements.
+17. Added `demos/README.md` plus deterministic starter demo `demos/minimal-safe-cleanup.sh` that builds isolated temporary Git fixtures and prints labeled output sections.
+18. Added `pr-artifacts/` ignore coverage in `.gitignore` so generated visual-validation artifacts are never committed.
+19. Completed process refinement slice `INT-053` (`FEAT-006`) on branch `feat/INIT-2026-02-shell-script-testing/FEAT-006-int-053-functional-visual-validation-gate`.
+20. Refined `AGENTS.md` visual-validation rules so before/after capture is mandatory only for functional behavior changes, skipped by default for docs/process/tracker-only PRs, and required to show direct `clean_git_branches.sh` runtime output for functional-change slices.
+21. Updated `docs/project-management/agent-prompting-research.md` with explicit prompting guidance to avoid substituting indirect test-signaling output when runtime behavior evidence is expected.
+22. Completed `INT-042` (`FEAT-007`) on branch `feat/INIT-2026-02-shell-script-testing/FEAT-007-int-042-subdirectory-context-consolidation`.
+23. Added a consolidated integration scenario in `test/clean_git_branches.integration.bats` that runs from a nested subdirectory and validates both dry-run analysis and `--apply` behavior in one context-coverage test.
+24. Extended `test/helpers/run-in-repo.sh` with optional `--cwd <relative-subdir>` support so integration tests can run deterministically from nested repository paths without shell chaining.
+25. Kept `INT-042` validation as integration-test evidence only and removed non-runtime demo usage so demo workflows remain reserved for direct `clean_git_branches.sh` output.
+26. Verified regression safety via `bats test/clean_git_branches.integration.bats -f "subdirectory context coverage validates nested preview and apply behavior"` and `test/run-tests.sh` (17 tests passing total: 4 mocked + 13 integration).
+27. Completed `INT-043` (`FEAT-007`) on branch `feat/INIT-2026-02-shell-script-testing/FEAT-007-int-043-dirty-worktree-context-consolidation`.
+28. Consolidated overlapping dirty-worktree and merged-branch cleanup coverage into one broader integration scenario that validates dry-run reporting, `--apply` deletion, and preservation of local dirty state in a single flow.
+29. Removed the redundant standalone merged-apply integration scenario to reduce suite maintenance overhead while preserving deletion assertions.
+30. Verified regression safety via `bats test/clean_git_branches.integration.bats -f "dirty worktree coverage validates preview and apply cleanup behavior"` and `test/run-tests.sh` (16 tests passing total: 4 mocked + 12 integration).
+31. Completed `INT-054` (`FEAT-008`) on branch `feat/INIT-2026-02-shell-script-testing/FEAT-008-ci-entrypoint-automation`.
+32. Added `.github/workflows/tests.yml` to run `test/run-tests.sh` on pull requests and pushes to `main`.
+33. Installed Bats in CI via `apt-get` so the existing test runner can execute unchanged in GitHub-hosted Linux jobs.
+34. Updated `README.md` testing documentation to note CI runs the same local test command.
+35. Updated planning trackers so `FEAT-008` and `INT-054` are marked complete and no pending slice is currently defined.
+36. Verified regression safety via `test/run-tests.sh` (16 tests passing total: 4 mocked + 12 integration).
+37. Hardened CI-facing integration assertions in `test/clean_git_branches.integration.bats` so output-contract checks tolerate stable formatting variants (bullet prefix and safety-reason ordering) while still asserting required semantics.
+38. Completed `INT-055` (`FEAT-008`) by configuring global Git defaults in `.github/workflows/tests.yml` (`init.defaultBranch=main`, `advice.defaultBranchName=false`) to suppress `git init` default-branch advice noise in CI logs.
+39. Verified regression safety via `test/run-tests.sh` (16 tests passing total: 4 mocked + 12 integration).
+40. Further stabilized CI behavior by removing two remaining environment-sensitive string assertions (optional `ahead of upstream` and merged-confirmation summary wording) while retaining prompt and branch-state outcome checks.
+41. Identified and fixed a confirmation-flow bug in `clean_git_branches.sh`: decline/abort statuses were read incorrectly after `if ! func` (always observing status `0`), causing declined categories to proceed with deletion.
+42. Added test-only deterministic confirmation input support via `CLEAN_GIT_BRANCHES_CONFIRM_RESPONSES` and switched the confirm-category integration test to use scripted responses instead of piped stdin.
+43. Validated stability with a 40x targeted stress run of `integration: confirm prompts once per deletion category` plus full-suite pass via `test/run-tests.sh`.
 
 ### 2026-02-10
 
