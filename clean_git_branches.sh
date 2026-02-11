@@ -35,6 +35,7 @@ FORCE_DELETE_EQUIVALENT=0
 PRUNE=0
 VERBOSE=0
 ASSUME_TTY_FOR_TESTS="${CLEAN_GIT_BRANCHES_ASSUME_TTY:-0}"
+SCRIPTED_CONFIRM_RESPONSES="${CLEAN_GIT_BRANCHES_CONFIRM_RESPONSES:-}"
 VERBOSE_LINES=""
 
 while [ "$#" -gt 0 ]; do
@@ -400,14 +401,25 @@ function _clean_git_branches_confirm_category() {
     return 0
   fi
 
-  if [ ! -t 0 ] && [ "$ASSUME_TTY_FOR_TESTS" -ne 1 ]; then
-    echo "Cannot prompt for confirmation in non-interactive mode." >&2
-    return 2
-  fi
+  if [ -n "$SCRIPTED_CONFIRM_RESPONSES" ]; then
+    if [[ "$SCRIPTED_CONFIRM_RESPONSES" == *,* ]]; then
+      response="${SCRIPTED_CONFIRM_RESPONSES%%,*}"
+      SCRIPTED_CONFIRM_RESPONSES="${SCRIPTED_CONFIRM_RESPONSES#*,}"
+    else
+      response="$SCRIPTED_CONFIRM_RESPONSES"
+      SCRIPTED_CONFIRM_RESPONSES=""
+    fi
+    printf "Delete %s (%s branch(es))? [y/N]: %s\n" "$label" "$count" "$response" >&2
+  else
+    if [ ! -t 0 ] && [ "$ASSUME_TTY_FOR_TESTS" -ne 1 ]; then
+      echo "Cannot prompt for confirmation in non-interactive mode." >&2
+      return 2
+    fi
 
-  echo
-  printf "Delete %s (%s branch(es))? [y/N]: " "$label" "$count" >&2
-  read -r response
+    echo
+    printf "Delete %s (%s branch(es))? [y/N]: " "$label" "$count" >&2
+    read -r response
+  fi
   case "$response" in
     y|Y|yes|YES)
       return 0
@@ -477,6 +489,7 @@ function clean_git_branches() {
   local equivalent_force_deleted_count=0
   local merged_skipped=0
   local equivalent_skipped=0
+  local confirm_status
 
   if ! _clean_git_branches_require_git_repo; then
     return 1
@@ -628,8 +641,10 @@ function clean_git_branches() {
     return 0
   fi
 
-  if ! _clean_git_branches_confirm_category "merged" "$merged_delete_count"; then
-    case "$?" in
+  _clean_git_branches_confirm_category "merged" "$merged_delete_count"
+  confirm_status=$?
+  if [ "$confirm_status" -ne 0 ]; then
+    case "$confirm_status" in
       1)
         merged_skipped=1
         merged_delete_list=""
@@ -640,8 +655,10 @@ function clean_git_branches() {
     esac
   fi
 
-  if ! _clean_git_branches_confirm_category "equivalent" "$equivalent_delete_count"; then
-    case "$?" in
+  _clean_git_branches_confirm_category "equivalent" "$equivalent_delete_count"
+  confirm_status=$?
+  if [ "$confirm_status" -ne 0 ]; then
+    case "$confirm_status" in
       1)
         equivalent_skipped=1
         equivalent_delete_list=""

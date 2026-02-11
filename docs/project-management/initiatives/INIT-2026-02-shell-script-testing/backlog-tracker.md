@@ -49,6 +49,9 @@
 32. Completed `INT-055` (`FEAT-008`) by configuring global Git defaults in `.github/workflows/tests.yml` (`init.defaultBranch=main`, `advice.defaultBranchName=false`) to suppress `git init` default-branch advice noise in CI logs.
 33. Verified regression safety via `test/run-tests.sh` (16 tests passing total: 4 mocked + 12 integration).
 34. Further stabilized CI behavior by removing two remaining environment-sensitive string assertions (optional `ahead of upstream` and merged-confirmation summary wording) while retaining prompt and branch-state outcome checks.
+35. Identified and fixed a confirmation-flow bug in `clean_git_branches.sh`: decline/abort statuses were read incorrectly after `if ! func` (always observing status `0`), causing declined categories to proceed with deletion.
+36. Added test-only deterministic confirmation input support via `CLEAN_GIT_BRANCHES_CONFIRM_RESPONSES` and switched the confirm-category integration test to use scripted responses instead of piped stdin.
+37. Validated stability with a 40x targeted stress run of `integration: confirm prompts once per deletion category` plus full-suite pass via `test/run-tests.sh`.
 
 ### 2026-02-10
 
