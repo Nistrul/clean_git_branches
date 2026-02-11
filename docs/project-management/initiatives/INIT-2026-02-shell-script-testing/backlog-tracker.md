@@ -143,10 +143,13 @@
 66. Updated force-delete confirmation flow so dry-run previews are allowed in non-interactive environments and no longer fail with a confirmation error.
 67. Completed `INT-040` coverage-contract closure by validating the gap was captured and exercised via the new high-risk dry-run scenario.
 68. Verified regression safety via full suite run: `test/run-tests.sh` (38 tests passing).
+69. Completed planning slice `INT-047` (`FEAT-004`) on branch `feat/INIT-2026-02-shell-script-testing/FEAT-004-int-047-cli-color-system-plan`.
+70. Added `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/feat-004-cli-color-system-plan.md` with semantic token roles, section mapping contract, accessibility/contrast constraints, and TTY/`NO_COLOR` behavior policy.
+71. Captured deferred visual critique checkpoint criteria and handoff constraints so palette review occurs after renderer centralization in `INT-048`.
+72. Updated backlog ordering and tracker next actions so `INT-048` is now the immediate next slice.
 
 ## Current Focus
 
-1. Execute `INT-047` to establish color semantics and accessibility constraints for CLI output before renderer abstraction.
-2. Execute `INT-048` to define render-module boundaries and migration sequencing while preserving current indentation layout.
-3. Consolidate duplicate integration scenarios via `INT-042` and `INT-043`.
-4. Proceed to the remaining initiative milestone: add CI entrypoint for automated test execution.
+1. Execute `INT-048` to define render-module boundaries and migration sequencing while preserving current indentation layout.
+2. Consolidate duplicate integration scenarios via `INT-042` and `INT-043`.
+3. Proceed to the remaining initiative milestone: add CI entrypoint for automated test execution.
