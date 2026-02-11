@@ -91,6 +91,7 @@
 | INT-052 | FEAT-006 | Add mandatory local visual-validation demo workflow (single deterministic demo, before/after capture, local diff gate, PR artifact/comment contract) | P1 | M | done |
 | INT-053 | FEAT-006 | Clarify visual-validation scope so before/after demo capture is required only for functional behavior changes and must show direct CLI runtime output | P1 | S | done |
 | INT-054 | FEAT-008 | Add GitHub Actions CI workflow that installs bats and runs `test/run-tests.sh` on pull requests and pushes to `main` | P1 | S | done |
+| INT-055 | FEAT-008 | Suppress Git default-branch advice warnings in CI logs by setting deterministic global Git defaults in workflow setup | P2 | S | done |
 
 ## Suggested Execution Order
 

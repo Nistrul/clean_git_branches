@@ -45,6 +45,9 @@
 28. Updated `README.md` testing documentation to note CI runs the same local test command.
 29. Updated planning trackers so `FEAT-008` and `INT-054` are marked complete and no pending slice is currently defined.
 30. Verified regression safety via `test/run-tests.sh` (16 tests passing total: 4 mocked + 12 integration).
+31. Hardened CI-facing integration assertions in `test/clean_git_branches.integration.bats` so output-contract checks tolerate stable formatting variants (bullet prefix and safety-reason ordering) while still asserting required semantics.
+32. Completed `INT-055` (`FEAT-008`) by configuring global Git defaults in `.github/workflows/tests.yml` (`init.defaultBranch=main`, `advice.defaultBranchName=false`) to suppress `git init` default-branch advice noise in CI logs.
+33. Verified regression safety via `test/run-tests.sh` (16 tests passing total: 4 mocked + 12 integration).
 
 ### 2026-02-10
 

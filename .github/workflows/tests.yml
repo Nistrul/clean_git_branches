@@ -19,5 +19,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y bats
 
+      - name: Configure Git defaults for deterministic test logs
+        run: |
+          git config --global init.defaultBranch main
+          git config --global advice.defaultBranchName false
+
       - name: Run test suites
         run: test/run-tests.sh
