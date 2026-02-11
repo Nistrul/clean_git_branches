@@ -14,7 +14,8 @@ Agents can skip workflow steps when instructions are implied instead of explicit
 3. Prefer fail-closed gates over best-effort reminders.
 4. Encode required output fields as default handoff output contracts when process visibility is required (for example, post-PR progress metrics).
 5. Keep examples concrete and imperative so action order is unambiguous.
-6. For behavior changes, require one deterministic local demo per PR with before/after captures and a local diff gate so validation evidence is explicit.
+6. For functional behavior changes, require one deterministic local demo per PR with before/after captures and a local diff gate so validation evidence is explicit.
+7. Scope demo evidence to runtime behavior: prefer direct execution output over indirect test-signaling output unless the slice is explicitly test-behavior-only.
 
 ## Prompting Pattern We Adopted
 
@@ -36,11 +37,14 @@ Agents can skip workflow steps when instructions are implied instead of explicit
    - features complete vs remaining
    - active initiative count and next initiative (or explicitly none)
    - concise prioritization summary covering what will be worked on next and why it is prioritized over other available tasks
-5. Visual validation for each PR:
+5. Visual validation for functional-change PRs:
    - select or create exactly one deterministic demo before implementation
+   - execute `clean_git_branches.sh` directly in the demo so evidence reflects actual CLI behavior
    - capture before and after ANSI output locally and create plain-text versions
    - review local `before` vs `after` diff as a gate
    - upload raw ANSI artifacts and keep one collapsible plain-text `Visual Validation` PR comment
+6. For process/docs/tracker-only PRs with no runtime behavior change:
+   - skip before/after visual-validation capture by default unless explicitly requested
 
 ## Repository Mapping
 

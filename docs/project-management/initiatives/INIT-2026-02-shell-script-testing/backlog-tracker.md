@@ -27,6 +27,9 @@
 10. Updated `docs/project-management/agent-prompting-research.md` to include prompting guidance for deterministic demo selection-before-implementation and explicit visual validation evidence requirements.
 11. Added `demos/README.md` plus deterministic starter demo `demos/minimal-safe-cleanup.sh` that builds isolated temporary Git fixtures and prints labeled output sections.
 12. Added `pr-artifacts/` ignore coverage in `.gitignore` so generated visual-validation artifacts are never committed.
+13. Completed process refinement slice `INT-053` (`FEAT-006`) on branch `feat/INIT-2026-02-shell-script-testing/FEAT-006-int-053-functional-visual-validation-gate`.
+14. Refined `AGENTS.md` visual-validation rules so before/after capture is mandatory only for functional behavior changes, skipped by default for docs/process/tracker-only PRs, and required to show direct `clean_git_branches.sh` runtime output for functional-change slices.
+15. Updated `docs/project-management/agent-prompting-research.md` with explicit prompting guidance to avoid substituting indirect test-signaling output when runtime behavior evidence is expected.
 
 ### 2026-02-10
 
