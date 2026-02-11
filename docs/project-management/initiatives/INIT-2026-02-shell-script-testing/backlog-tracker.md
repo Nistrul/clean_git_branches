@@ -33,7 +33,7 @@
 16. Completed `INT-042` (`FEAT-007`) on branch `feat/INIT-2026-02-shell-script-testing/FEAT-007-int-042-subdirectory-context-consolidation`.
 17. Added a consolidated integration scenario in `test/clean_git_branches.integration.bats` that runs from a nested subdirectory and validates both dry-run analysis and `--apply` behavior in one context-coverage test.
 18. Extended `test/helpers/run-in-repo.sh` with optional `--cwd <relative-subdir>` support so integration tests can run deterministically from nested repository paths without shell chaining.
-19. Added deterministic visual-validation demo `demos/integration-context-coverage.sh` and catalog entry in `demos/README.md` to show the `INT-042` coverage signal and targeted integration execution.
+19. Kept `INT-042` validation as integration-test evidence only and removed non-runtime demo usage so demo workflows remain reserved for direct `clean_git_branches.sh` output.
 20. Verified regression safety via `bats test/clean_git_branches.integration.bats -f "subdirectory context coverage validates nested preview and apply behavior"` and `test/run-tests.sh` (17 tests passing total: 4 mocked + 13 integration).
 
 ### 2026-02-10
