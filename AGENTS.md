@@ -113,34 +113,37 @@ Bad:
 
 ## Visual Validation Demo Workflow (Mandatory)
 
-1. For every PR, demonstrate behavioral change with exactly one deterministic local demo.
-2. Select or create the demo before implementation starts so pre-change capture is always possible.
-3. Prefer reusing an existing script under `demos/`; create a new demo only when no existing demo directly shows the behavior change.
-4. Set `DEMO_ID` to the selected script basename (without `.sh`) before capture commands.
-5. Demos must:
+1. For PRs that include a functional behavior change, demonstrate that behavior with exactly one deterministic local demo.
+2. For documentation/process/tracker-only PRs with no functional behavior change, skip before/after demo capture unless explicitly requested.
+3. For functional-change PRs in this repository, demos must execute `clean_git_branches.sh` directly so captured output reflects real CLI behavior.
+4. Test-suite signaling demos (for example test counts or test-file diffs) are not valid as visual-validation evidence unless the requested slice itself is test-only behavior.
+5. Select or create the demo before implementation starts so pre-change capture is always possible.
+6. Prefer reusing an existing script under `demos/`; create a new demo only when no existing demo directly shows the behavior change.
+7. Set `DEMO_ID` to the selected script basename (without `.sh`) before capture commands.
+8. Demos must:
    - live at `demos/<demo-id>.sh`
    - create their own temporary Git repositories/fixtures
    - never modify the caller repository
    - print clearly labeled sections with normal ANSI-colored console output
    - exit non-zero on failure
    - run quickly (target under 10 seconds)
-6. Keep a demo catalog in `demos/README.md` and update it when adding/changing demos.
-7. Capture before output before implementation:
+9. Keep a demo catalog in `demos/README.md` and update it when adding/changing demos.
+10. Capture before output before implementation:
    - create artifacts directory: `mkdir -p pr-artifacts`
    - run selected demo: `script -q pr-artifacts/before.ansi ./demos/${DEMO_ID}.sh`
    - generate plain text: `sed -E 's/\x1b\[[0-9;]*m//g' pr-artifacts/before.ansi > pr-artifacts/before.txt`
-8. After implementation, run the same demo for after output:
+11. After implementation, run the same demo for after output:
    - `script -q pr-artifacts/after.ansi ./demos/${DEMO_ID}.sh`
    - `sed -E 's/\x1b\[[0-9;]*m//g' pr-artifacts/after.ansi > pr-artifacts/after.txt`
-9. Validate local behavior delta:
+12. Validate local behavior delta:
    - `diff -u pr-artifacts/before.txt pr-artifacts/after.txt > pr-artifacts/before-after.diff || true`
    - treat empty diffs (when change should be visible) or unexpected diffs as failures
-10. `pr-artifacts/` must be gitignored; never commit artifacts, logs, or screenshots.
-11. Publish artifacts in the PR:
+13. `pr-artifacts/` must be gitignored; never commit artifacts, logs, or screenshots.
+14. Publish artifacts in the PR:
    - upload raw `.ansi` and diff files (for download/view with `less -R`)
    - post or update one `Visual Validation` PR comment with plain-text before/after output in collapsible `<details>` blocks
    - keep only one active `Visual Validation` comment per PR
-12. Use local-only execution for this workflow; do not depend on CI for visual validation capture.
+15. Use local-only execution for this workflow; do not depend on CI for visual validation capture.
 
 ## Title Style Rules (Mandatory)
 

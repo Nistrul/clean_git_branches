@@ -88,6 +88,7 @@
 | INT-050 | FEAT-006 | In post-PR sync workflow, skip rerunning tests when rebase is a no-op and relevant tests already passed on the current HEAD | P1 | S | done |
 | INT-051 | FEAT-004 | Simplify CLI to minimal safe model (`--apply` gated execution, merged/equivalent/non-equivalent classification, equivalent opt-in + force fallback, remove legacy flags, deterministic grouped output) | P0 | M | done |
 | INT-052 | FEAT-006 | Add mandatory local visual-validation demo workflow (single deterministic demo, before/after capture, local diff gate, PR artifact/comment contract) | P1 | M | done |
+| INT-053 | FEAT-006 | Clarify visual-validation scope so before/after demo capture is required only for functional behavior changes and must show direct CLI runtime output | P1 | S | done |
 
 ## Suggested Execution Order
 
