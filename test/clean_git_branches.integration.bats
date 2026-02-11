@@ -101,7 +101,7 @@ create_non_equivalent_branch() {
   work_dir="$(create_repo_with_origin)"
   create_merged_branch "$work_dir" "feature/merged-dry-run"
 
-  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir"
+  run env NO_COLOR= "$repo_root/test/helpers/run-in-repo.sh" "$work_dir"
 
   [ "$status" -eq 0 ]
   [[ "$output" == *"Execution mode: dry-run (preview only)"* ]]
@@ -113,6 +113,29 @@ create_non_equivalent_branch() {
   run git -C "$work_dir" branch --list feature/merged-dry-run
   [ "$status" -eq 0 ]
   [[ "$output" == *"feature/merged-dry-run"* ]]
+  [[ "$output" != *$'\033['* ]]
+}
+
+@test "integration: renderer emits color on TTY output" {
+  local work_dir
+
+  work_dir="$(create_repo_with_origin)"
+
+  run env NO_COLOR= CLEAN_GIT_BRANCHES_ASSUME_TTY=1 "$repo_root/test/helpers/run-in-repo.sh" "$work_dir"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *$'\033['* ]]
+}
+
+@test "integration: NO_COLOR suppresses color even when TTY is assumed" {
+  local work_dir
+
+  work_dir="$(create_repo_with_origin)"
+
+  run env CLEAN_GIT_BRANCHES_ASSUME_TTY=1 NO_COLOR=1 "$repo_root/test/helpers/run-in-repo.sh" "$work_dir"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" != *$'\033['* ]]
 }
 
 @test "integration: remote detection falls back when upstream resolves to literal token" {

@@ -107,35 +107,101 @@ function _clean_git_branches_repeat_char() {
   printf "%s" "$output"
 }
 
-function _clean_git_branches_header_color() {
+COLOR_ENABLED=0
+function _clean_git_branches_renderer_stdout_is_tty() {
+  if [ -t 1 ] || [ "$ASSUME_TTY_FOR_TESTS" -eq 1 ]; then
+    return 0
+  fi
+
+  return 1
+}
+
+function _clean_git_branches_renderer_init() {
+  COLOR_ENABLED=0
+
+  if [ -n "${NO_COLOR:-}" ]; then
+    return
+  fi
+
+  if _clean_git_branches_renderer_stdout_is_tty; then
+    COLOR_ENABLED=1
+  fi
+}
+
+function _clean_git_branches_renderer_section_token() {
   local title="$1"
 
   case "$title" in
     "Merged branches")
-      printf "1;94"
+      printf "cli.color.section.merged"
       ;;
     "Equivalent branches")
-      printf "1;96"
+      printf "cli.color.section.equivalent"
       ;;
     "Non-equivalent branches")
-      printf "1;92"
+      printf "cli.color.section.non_equivalent"
       ;;
     "Safety exclusions")
-      printf "1;93"
+      printf "cli.color.section.safety"
       ;;
     "Run summary")
-      printf "1;95"
+      printf "cli.color.section.summary"
       ;;
     "Execution results")
-      printf "1;94"
+      printf "cli.color.section.execution"
       ;;
     "Deletion failures")
+      printf "cli.color.section.error"
+      ;;
+    *)
+      printf "cli.color.section.default"
+      ;;
+  esac
+}
+
+function _clean_git_branches_renderer_token_color() {
+  local token="$1"
+
+  case "$token" in
+    "cli.color.section.merged")
+      printf "1;94"
+      ;;
+    "cli.color.section.equivalent")
+      printf "1;96"
+      ;;
+    "cli.color.section.non_equivalent")
+      printf "1;92"
+      ;;
+    "cli.color.section.safety")
+      printf "1;93"
+      ;;
+    "cli.color.section.summary")
+      printf "1;95"
+      ;;
+    "cli.color.section.execution")
+      printf "1;94"
+      ;;
+    "cli.color.section.error")
       printf "1;91"
       ;;
     *)
       printf "1;97"
       ;;
   esac
+}
+
+function _clean_git_branches_renderer_print_header_line() {
+  local text="$1"
+  local token="$2"
+  local color
+
+  if [ "$COLOR_ENABLED" -eq 1 ]; then
+    color=$(_clean_git_branches_renderer_token_color "$token")
+    printf "\033[%sm%s\033[0m\n" "$color" "$text"
+    return
+  fi
+
+  printf "%s\n" "$text"
 }
 
 function _clean_git_branches_require_git_repo() {
@@ -358,15 +424,19 @@ function _clean_git_branches_print_section() {
   local lines="$3"
   local line
   local underline
-  local color
+  local token
 
   underline=$(_clean_git_branches_repeat_char "${#title}" "─")
-  color=$(_clean_git_branches_header_color "$title")
+  token=$(_clean_git_branches_renderer_section_token "$title")
 
-  printf "\033[%sm%s\033[0m\n" "$color" "$title"
-  printf "\033[%sm%s\033[0m\n" "$color" "$underline"
+  _clean_git_branches_renderer_print_header_line "$title" "$token"
+  _clean_git_branches_renderer_print_header_line "$underline" "$token"
   if [ -n "$note" ]; then
-    printf "\033[3;37m%s\033[0m\n" "$note"
+    if [ "$COLOR_ENABLED" -eq 1 ]; then
+      printf "\033[3;37m%s\033[0m\n" "$note"
+    else
+      printf "%s\n" "$note"
+    fi
   fi
   if [ -n "$lines" ]; then
     while IFS= read -r line; do
@@ -411,6 +481,8 @@ function clean_git_branches() {
   if ! _clean_git_branches_require_git_repo; then
     return 1
   fi
+
+  _clean_git_branches_renderer_init
 
   if [ "$PRUNE" -eq 1 ]; then
     _clean_git_branches_verbose "Running fetch --prune before analysis"
