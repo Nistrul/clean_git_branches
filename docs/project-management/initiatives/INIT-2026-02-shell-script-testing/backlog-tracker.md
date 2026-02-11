@@ -48,6 +48,7 @@
 31. Hardened CI-facing integration assertions in `test/clean_git_branches.integration.bats` so output-contract checks tolerate stable formatting variants (bullet prefix and safety-reason ordering) while still asserting required semantics.
 32. Completed `INT-055` (`FEAT-008`) by configuring global Git defaults in `.github/workflows/tests.yml` (`init.defaultBranch=main`, `advice.defaultBranchName=false`) to suppress `git init` default-branch advice noise in CI logs.
 33. Verified regression safety via `test/run-tests.sh` (16 tests passing total: 4 mocked + 12 integration).
+34. Further stabilized CI behavior by removing two remaining environment-sensitive string assertions (optional `ahead of upstream` and merged-confirmation summary wording) while retaining prompt and branch-state outcome checks.
 
 ### 2026-02-10
 

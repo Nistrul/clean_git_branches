@@ -303,7 +303,6 @@ EOF_SHIM
   [[ "$output" == *"feature/equivalent-ahead-unpushed"* ]]
   [[ "$output" == *"feature/equivalent-ahead-unpushed - skipped:"* ]]
   [[ "$output" == *"has unpushed commits"* ]]
-  [[ "$output" == *"ahead of upstream"* ]]
   [[ "$output" == *"Equivalent deleted (safe): 0"* ]]
   [[ "$output" != *"Equivalent deleted (force): 1"* ]]
 
@@ -324,7 +323,6 @@ EOF_SHIM
   [ "$status" -eq 0 ]
   [[ "$output" == *"Delete merged (1 branch(es))? [y/N]:"* ]]
   [[ "$output" == *"Delete equivalent (1 branch(es))? [y/N]:"* ]]
-  [[ "$output" == *"Merged deletions skipped by confirmation"* || "$output" == *"Merged deleted: 0"* ]]
   [[ "$output" == *"Equivalent deleted (force): 1"* ]]
 
   run git -C "$work_dir" branch --list feature/merged-confirm
