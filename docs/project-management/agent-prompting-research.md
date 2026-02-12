@@ -28,6 +28,7 @@ Agents can skip workflow steps when instructions are implied instead of explicit
    - classify request type
    - run `git status --short --branch`
    - review remaining backlog work and pick the highest-priority unblocked slice
+   - identify slice dependencies during prioritization (blocked-by and unblocks relationships)
    - check open PRs for overlapping scope before starting implementation
    - verify branch/scope alignment before any non-read command
    - treat "still on previous feature branch" as a normal start state; run routine alignment to `main` + new scoped branch
@@ -63,6 +64,8 @@ Agents can skip workflow steps when instructions are implied instead of explicit
 8. Overlap handling defaults:
    - if open PR scope overlaps the selected slice, continue on that existing branch/PR rather than creating a parallel duplicate slice
    - if overlap is partial or unclear, choose a non-overlapping highest-priority slice and record the overlap deferral in trackers
+9. Prioritization dependency defaults:
+   - record dependency notes when selecting the next slice (for example, prerequisite slice IDs and any slices unblocked by completion)
 
 ## Repository Mapping
 

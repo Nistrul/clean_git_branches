@@ -10,6 +10,7 @@ This file defines repository-level operating rules for coding agents and contrib
    - classify request type (`implement`, `review`, `research`, `docs/process`)
    - run `git status --short --branch`
    - review remaining backlog slices (`todo|in_progress|blocked`) and select the highest-priority unblocked slice before implementation
+   - note dependency relationships while prioritizing (what selected slice is blocked by and what it unblocks)
    - check open pull requests for overlapping scope before implementation (`gh pr list --state open` plus title/files review)
    - confirm current branch is correct for the requested slice
    - expected baseline: starting a new slice from the previous feature branch is normal; treat switching to `main`, updating, and branching as routine alignment
