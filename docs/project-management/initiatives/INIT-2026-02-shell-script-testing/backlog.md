@@ -32,7 +32,7 @@
 | FEAT-007 | Integration test suite coverage and maintainability | Keep integration tests logically ordered and validate coverage completeness before closing integration-test hardening. |
 | FEAT-008 | Test automation entrypoint | Ensure CI executes the existing deterministic test runner on pull requests and mainline updates. |
 | FEAT-009 | Dry-run branch divergence diagnostics | Ensure dry-run output explains why non-merged branches differ and verifies classification parity across configured equivalence strategies. |
-| FEAT-010 | Safe-delete parity with Git `-d` | Ensure branch safety classification aligns with what Git would allow via non-force delete semantics and expose explicit `-d` viability diagnostics. |
+| FEAT-010 | Commit-ancestry branch-state reporting | Ensure classification can explain additional branch states using commit ancestry without changing deletion or cleanup behavior. |
 | FEAT-011 | Git extension rename | Ensure the tool is renamed to `git-branch-tidy` and can be invoked as `git branch-tidy` while preserving existing behavior contracts. |
 
 ## Backlog
@@ -95,16 +95,38 @@
 | INT-054 | FEAT-008 | Add GitHub Actions CI workflow that installs bats and runs `test/run-tests.sh` on pull requests and pushes to `main` | P1 | S | done |
 | INT-055 | FEAT-008 | Suppress Git default-branch advice warnings in CI logs by setting deterministic global Git defaults in workflow setup | P2 | S | done |
 | INT-056 | FEAT-009 | Expand dry-run reporting for non-merged branches with commit-level divergence evidence (for example unique commit subjects/counts) and verify parity under each equivalence strategy mode | P1 | M | done |
-| INT-057 | FEAT-010 | Add explicit safe-delete diagnostics that reflect whether Git `branch -d` would succeed for each candidate and validate classification alignment with actual `-d` behavior in tests | P1 | M | todo |
+| INT-057 | FEAT-010 | ~~Add explicit safe-delete diagnostics that reflect whether Git `branch -d` would succeed for each candidate and validate classification alignment with actual `-d` behavior in tests~~ Add classification-only ancestry reporting for `merged-into-upstream` and `merged-into-head`, including upstream/HEAD names in output, with no deletion or cleanup behavior changes | P1 | M | todo |
 | INT-058 | FEAT-011 | Rename CLI to `git-branch-tidy`, add compatibility entrypoint for `git branch-tidy`, and update docs/tests/tooling references | P1 | S | todo |
 | INT-059 | FEAT-006 | Normalize visual-validation ANSI captures before text derivation so PTY control-sequence artifacts (for example `^D\\b\\b`) do not pollute PR artifacts | P1 | S | done |
 | INT-060 | FEAT-006 | Reduce tracking merge-conflict hotspots by removing manual current-focus fields, switching backlog execution logging to append-only bullets, avoiding volatile metadata churn in routine slices, requiring backlog-priority/open-PR overlap checks before implementation, and capturing dependency notes during slice prioritization | P1 | S | done |
 
 ## Suggested Execution Order
 
-1. `INT-057` (`FEAT-010`) to align safe-delete classification with Git `-d` viability and add explicit diagnostics/tests.
+1. `INT-057` (`FEAT-010`) to add classification-only commit-ancestry states (`merged-into-upstream`, `merged-into-head`) with explicit upstream/current-HEAD output context.
 2. `INT-058` (`FEAT-011`) to rename the tool and add Git extension invocation support.
 
 ## Sprintable Next Slice
 
-1. `INT-057` (`FEAT-010`): add explicit safe-delete diagnostics and validate parity with `git branch -d` behavior.
+1. `INT-057` (`FEAT-010`): add classification-only commit-ancestry states and output context (`merged-into-upstream`, `merged-into-head`) without changing deletion behavior.
+
+## INT-057 Scope Notes
+
+### Goal
+
+Improve reporting so the tool can explain more branch states using commit ancestry, without changing deletion or cleanup behavior. These new states are classification only.
+
+### Category: `merged-into-upstream`
+
+- Definition: branch tip commit is already contained in the branch's configured upstream tracking branch.
+- Detection:
+  - Resolve upstream ref for the branch.
+  - If upstream exists, run `git merge-base --is-ancestor <branch_tip_commit> <upstream_ref>`.
+  - If true, classify as `merged-into-upstream`.
+- Output: include upstream name, for example `merged into upstream origin/develop`.
+
+### Category: `merged-into-head`
+
+- Definition: branch tip commit is already contained in the currently checked-out branch (`HEAD`).
+- Detection: run `git merge-base --is-ancestor <branch_tip_commit> HEAD`.
+- If true, classify as `merged-into-head`.
+- Output: include current branch name, for example `merged into current HEAD develop`.

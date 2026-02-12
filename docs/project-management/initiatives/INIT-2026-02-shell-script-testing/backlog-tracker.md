@@ -223,3 +223,5 @@
 - Added explicit tracking hygiene rules in `AGENTS.md` and prompting guidance in `docs/project-management/agent-prompting-research.md` to avoid volatile metadata churn in routine PRs.
 - Added intake guardrails requiring backlog-priority selection and open-PR overlap checks before implementation so duplicate slices are avoided by default.
 - Added prioritization guidance requiring dependency notes (blocked-by and unblocks) when choosing the next slice.
+- Rescoped `INT-057` (`FEAT-010`) from safe-delete parity diagnostics to classification-only commit-ancestry reporting, preserving existing deletion/cleanup behavior.
+- Added explicit `INT-057` scope notes for `merged-into-upstream` and `merged-into-head` categories, including definition, detection checks, and required output context.
