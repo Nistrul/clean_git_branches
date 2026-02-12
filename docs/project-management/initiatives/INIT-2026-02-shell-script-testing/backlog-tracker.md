@@ -211,6 +211,9 @@
 74. Updated raw section rendering to preserve intentional blank lines and added explicit spacing between non-equivalent divergence detail branch groups.
 75. Added deterministic visual-validation demo `demos/non-equivalent-divergence-layout.sh` plus catalog entry in `demos/README.md`.
 76. Verified regression safety via targeted integration run: `bats test/clean_git_branches.integration.bats --filter "dry-run reports non-merged divergence evidence across equivalence modes"` (passing).
+77. Added explicit visual-validation artifact workflow guardrails to `AGENTS.md`: mandatory `pr-artifacts` reset, canonical filename set, no suffix variants, and pre-handoff artifact-name verification.
+78. Synced workflow rationale updates into `docs/project-management/agent-prompting-research.md` for canonical artifact naming and single-set capture discipline.
+79. Added repository-local Codex permission rule `.codex/rules/default.rules` to allow `rm -rf pr-artifacts` without escalation during artifact resets.
 
 ## Current Focus
 
