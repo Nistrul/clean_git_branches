@@ -2,7 +2,6 @@
 
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Status: Active
-- Last updated: 2026-02-11
 - Tracker: `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/backlog-tracker.md`
 
 ## Prioritization Model
@@ -99,6 +98,7 @@
 | INT-057 | FEAT-010 | Add explicit safe-delete diagnostics that reflect whether Git `branch -d` would succeed for each candidate and validate classification alignment with actual `-d` behavior in tests | P1 | M | todo |
 | INT-058 | FEAT-011 | Rename CLI to `git-branch-tidy`, add compatibility entrypoint for `git branch-tidy`, and update docs/tests/tooling references | P1 | S | todo |
 | INT-059 | FEAT-006 | Normalize visual-validation ANSI captures before text derivation so PTY control-sequence artifacts (for example `^D\\b\\b`) do not pollute PR artifacts | P1 | S | done |
+| INT-060 | FEAT-006 | Reduce tracking merge-conflict hotspots by removing manual current-focus fields, switching backlog execution logging to append-only bullets, and avoiding volatile metadata churn in routine slices | P1 | S | done |
 
 ## Suggested Execution Order
 

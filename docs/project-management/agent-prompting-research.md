@@ -20,6 +20,7 @@ Agents can skip workflow steps when instructions are implied instead of explicit
 9. Reset visual-validation artifact directories between slices so reviewers never inspect stale capture files from prior work.
 10. Design demos with enough repeated structure (for example multiple entries in the changed layout region) so whitespace or grouping changes are obvious in plain-text diffs.
 11. Enforce one canonical artifact filename set per slice and reject ad-hoc suffix/prefix variants so review always targets the current capture set.
+12. For shared tracker files, use append-only bullet logs and remove manual current-focus metadata to reduce parallel PR conflict hotspots.
 
 ## Prompting Pattern We Adopted
 
@@ -53,6 +54,10 @@ Agents can skip workflow steps when instructions are implied instead of explicit
    - upload raw ANSI artifacts and keep one collapsible plain-text `Visual Validation` PR comment
 6. For process/docs/tracker-only PRs with no runtime behavior change:
    - skip before/after visual-validation capture by default unless explicitly requested
+7. Tracker conflict minimization defaults:
+   - keep backlog execution logs append-only with unordered bullets
+   - do not renumber or reorder historical log entries
+   - avoid volatile metadata edits (for example `Last updated` and manual `Current Focus` fields) in routine feature slices
 
 ## Repository Mapping
 

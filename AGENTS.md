@@ -185,9 +185,11 @@ Current project-management files:
 1. Keep trackers up to date in the same change set as the implementation work.
 2. Update backlog status (`todo|in_progress|done|blocked`) when scenario state changes.
 3. Record execution slices and deferrals in the backlog tracker.
-4. Keep initiative tracker high-level; keep scenario-level detail in backlog artifacts.
-5. Keep cross-links between related planning/tracking files accurate.
-6. Do not close a task as done unless tests and acceptance checks are complete.
+4. Use append-only bullets in backlog execution logs; do not renumber, reorder, or rewrite prior log entries during routine slices.
+5. Keep initiative tracker high-level; keep scenario-level detail in backlog artifacts.
+6. Avoid volatile metadata churn in routine slices (for example, do not update `Last updated` and do not maintain manual `Current Focus` sections).
+7. Keep cross-links between related planning/tracking files accurate.
+8. Do not close a task as done unless tests and acceptance checks are complete.
 
 ## Definition of Done for Work Items
 
