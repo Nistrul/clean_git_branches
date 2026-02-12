@@ -9,6 +9,9 @@ This file defines repository-level operating rules for coding agents and contrib
 1. On every new user request, run a pre-flight workflow before making any non-read command:
    - classify request type (`implement`, `review`, `research`, `docs/process`)
    - run `git status --short --branch`
+   - review remaining backlog slices (`todo|in_progress|blocked`) and select the highest-priority unblocked slice before implementation
+   - note dependency relationships while prioritizing (what selected slice is blocked by and what it unblocks)
+   - check open pull requests for overlapping scope before implementation (`gh pr list --state open` plus title/files review)
    - confirm current branch is correct for the requested slice
    - expected baseline: starting a new slice from the previous feature branch is normal; treat switching to `main`, updating, and branching as routine alignment
 2. If branch/scope is wrong, stop and fix workflow first:
@@ -18,6 +21,7 @@ This file defines repository-level operating rules for coding agents and contrib
 3. Fail closed on workflow checks:
    - do not start implementation while branch alignment is unresolved
    - do not continue on a branch that mixes unrelated slices
+   - do not continue when overlap with an open PR is unresolved; either reuse that branch/PR for the same slice or select a different slice and record the deferral in trackers
 4. Before handoff, run an execution-close checklist:
    - ensure tracking docs reflect the delivered or deferred scope
    - apply PR creation/update and post-PR sync rules defined below (see Feature Branch and Pull Request sections)
@@ -185,9 +189,11 @@ Current project-management files:
 1. Keep trackers up to date in the same change set as the implementation work.
 2. Update backlog status (`todo|in_progress|done|blocked`) when scenario state changes.
 3. Record execution slices and deferrals in the backlog tracker.
-4. Keep initiative tracker high-level; keep scenario-level detail in backlog artifacts.
-5. Keep cross-links between related planning/tracking files accurate.
-6. Do not close a task as done unless tests and acceptance checks are complete.
+4. Use append-only bullets in backlog execution logs; do not renumber, reorder, or rewrite prior log entries during routine slices.
+5. Keep initiative tracker high-level; keep scenario-level detail in backlog artifacts.
+6. Avoid volatile metadata churn in routine slices (for example, do not update `Last updated` and do not maintain manual `Current Focus` sections).
+7. Keep cross-links between related planning/tracking files accurate.
+8. Do not close a task as done unless tests and acceptance checks are complete.
 
 ## Definition of Done for Work Items
 

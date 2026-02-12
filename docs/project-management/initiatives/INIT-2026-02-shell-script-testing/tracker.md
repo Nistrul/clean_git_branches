@@ -2,8 +2,7 @@
 
 - Initiative ID: `INIT-2026-02-shell-script-testing`
 - Status: Active
-- Current Feature Focus: `FEAT-010` safe-delete parity with Git `-d` (`INT-057`) and `FEAT-011` git-extension rename (`INT-058`).
-- Last updated: 2026-02-11
+- Focus source: Scenario focus is derived from `in_progress` and prioritized `todo` items in `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/backlog.md`.
 
 ## Completion Legend
 
@@ -35,7 +34,3 @@
 - This tracker is the source of truth for what is done vs pending.
 - Prioritized scenario backlog is in `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/backlog.md`.
 - Backlog execution log is in `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/backlog-tracker.md`.
-
-## Next Actions
-
-1. Start `INT-057` (`FEAT-010`) to add explicit safe-delete diagnostics that mirror `git branch -d` viability per branch.
