@@ -473,10 +473,14 @@ function _clean_git_branches_print_section() {
   fi
   if [ -n "$lines" ]; then
     while IFS= read -r line; do
-      [ -z "$line" ] && continue
       if [ "$mode" = "raw" ]; then
+        if [ -z "$line" ]; then
+          echo
+          continue
+        fi
         echo "$line"
       else
+        [ -z "$line" ] && continue
         echo "- $line"
       fi
     done <<< "$lines"
@@ -516,6 +520,7 @@ function clean_git_branches() {
   local equivalent_skipped=0
   local confirm_status
   local non_equivalent_details=""
+  local branch_divergence_details
 
   if ! _clean_git_branches_require_git_repo; then
     return 1
@@ -608,7 +613,11 @@ function clean_git_branches() {
         ;;
       non-equivalent)
         non_equivalent_lines="${non_equivalent_lines}${branch}"$'\n'
-        non_equivalent_details="${non_equivalent_details}$(_clean_git_branches_branch_divergence_details "$branch")"$'\n'
+        branch_divergence_details=$(_clean_git_branches_branch_divergence_details "$branch")
+        if [ -n "$non_equivalent_details" ]; then
+          non_equivalent_details="${non_equivalent_details}"$'\n\n'
+        fi
+        non_equivalent_details="${non_equivalent_details}${branch_divergence_details}"
         ;;
     esac
 

@@ -207,6 +207,10 @@
 70. Added `docs/project-management/initiatives/INIT-2026-02-shell-script-testing/feat-004-cli-color-system-plan.md` with semantic token roles, section mapping contract, accessibility/contrast constraints, and TTY/`NO_COLOR` behavior policy.
 71. Captured deferred visual critique checkpoint criteria and handoff constraints so palette review occurs after renderer centralization in `INT-048`.
 72. Updated backlog ordering and tracker next actions so `INT-048` is now the immediate next slice.
+73. Completed a whitespace-focused readability pass for `FEAT-009` dry-run divergence diagnostics on branch `feat/INIT-2026-02-shell-script-testing/FEAT-009-int-056-dry-run-divergence-diagnostics`.
+74. Updated raw section rendering to preserve intentional blank lines and added explicit spacing between non-equivalent divergence detail branch groups.
+75. Added deterministic visual-validation demo `demos/non-equivalent-divergence-layout.sh` plus catalog entry in `demos/README.md`.
+76. Verified regression safety via targeted integration run: `bats test/clean_git_branches.integration.bats --filter "dry-run reports non-merged divergence evidence across equivalence modes"` (passing).
 
 ## Current Focus
 
