@@ -15,6 +15,7 @@ Run a demo directly:
 | Demo ID | Script | Demonstrates |
 |---|---|---|
 | `minimal-safe-cleanup` | `demos/minimal-safe-cleanup.sh` | Deterministic preview of merged/equivalent/non-equivalent branch classification and deletion eligibility using isolated temporary Git fixtures. |
+| `non-equivalent-divergence-layout` | `demos/non-equivalent-divergence-layout.sh` | Divergence-details section spacing with multiple non-equivalent branches, focused on readability of grouped commit evidence. |
 
 ## Capture Utilities
 
