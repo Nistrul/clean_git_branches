@@ -225,3 +225,7 @@
 - Added prioritization guidance requiring dependency notes (blocked-by and unblocks) when choosing the next slice.
 - Rescoped `INT-057` (`FEAT-010`) from safe-delete parity diagnostics to classification-only commit-ancestry reporting, preserving existing deletion/cleanup behavior.
 - Added explicit `INT-057` scope notes for `merged-into-upstream` and `merged-into-head` categories, including definition, detection checks, and required output context.
+- Completed process-slice `INT-061` (`FEAT-006`) on branch `feat/INIT-2026-02-shell-script-testing/FEAT-006-int-061-scratch-temp-workflow`.
+- Added repo-local temporary-workspace policy in `AGENTS.md` requiring agent temp artifacts to use gitignored `scratch/` paths instead of OS temp directories.
+- Updated prompting guidance in `docs/project-management/agent-prompting-research.md` to encode `scratch/` as the default temporary workspace for routine slice execution.
+- Added `.gitignore` entry for `scratch/` so transient workflow artifacts remain untracked.

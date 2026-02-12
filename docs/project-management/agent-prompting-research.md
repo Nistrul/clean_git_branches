@@ -21,6 +21,7 @@ Agents can skip workflow steps when instructions are implied instead of explicit
 10. Design demos with enough repeated structure (for example multiple entries in the changed layout region) so whitespace or grouping changes are obvious in plain-text diffs.
 11. Enforce one canonical artifact filename set per slice and reject ad-hoc suffix/prefix variants so review always targets the current capture set.
 12. For shared tracker files, use append-only bullet logs and remove manual current-focus metadata to reduce parallel PR conflict hotspots.
+13. Use a repository-local gitignored scratch workspace for temporary files so sandbox restrictions do not block routine slice execution.
 
 ## Prompting Pattern We Adopted
 
@@ -66,6 +67,9 @@ Agents can skip workflow steps when instructions are implied instead of explicit
    - if overlap is partial or unclear, choose a non-overlapping highest-priority slice and record the overlap deferral in trackers
 9. Prioritization dependency defaults:
    - record dependency notes when selecting the next slice (for example, prerequisite slice IDs and any slices unblocked by completion)
+10. Temporary workspace defaults:
+   - keep transient files for the current slice under repo-local `scratch/` (create with `mkdir -p scratch` when needed)
+   - avoid OS temp paths (for example `/tmp`) for routine agent workflow artifacts in this repository
 
 ## Repository Mapping
 
