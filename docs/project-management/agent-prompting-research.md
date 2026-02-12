@@ -27,6 +27,8 @@ Agents can skip workflow steps when instructions are implied instead of explicit
 1. Intake pre-flight on every request:
    - classify request type
    - run `git status --short --branch`
+   - review remaining backlog work and pick the highest-priority unblocked slice
+   - check open PRs for overlapping scope before starting implementation
    - verify branch/scope alignment before any non-read command
    - treat "still on previous feature branch" as a normal start state; run routine alignment to `main` + new scoped branch
 2. If alignment fails:
@@ -58,6 +60,9 @@ Agents can skip workflow steps when instructions are implied instead of explicit
    - keep backlog execution logs append-only with unordered bullets
    - do not renumber or reorder historical log entries
    - avoid volatile metadata edits (for example `Last updated` and manual `Current Focus` fields) in routine feature slices
+8. Overlap handling defaults:
+   - if open PR scope overlaps the selected slice, continue on that existing branch/PR rather than creating a parallel duplicate slice
+   - if overlap is partial or unclear, choose a non-overlapping highest-priority slice and record the overlap deferral in trackers
 
 ## Repository Mapping
 

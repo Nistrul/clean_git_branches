@@ -221,3 +221,4 @@
 - Removed manual `Current Focus` sections and replaced initiative-level focus with backlog-derived status guidance in `tracker.md`.
 - Converted `backlog-tracker.md` execution-log entries to append-only bullet formatting so parallel PRs no longer collide on sequential renumbering.
 - Added explicit tracking hygiene rules in `AGENTS.md` and prompting guidance in `docs/project-management/agent-prompting-research.md` to avoid volatile metadata churn in routine PRs.
+- Added intake guardrails requiring backlog-priority selection and open-PR overlap checks before implementation so duplicate slices are avoided by default.
