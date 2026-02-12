@@ -45,6 +45,7 @@ create_merged_branch() {
 create_equivalent_diverged_branch() {
   local work_dir="$1"
   local branch_name="$2"
+  local keep_upstream="${3:-0}"
   local branch_file
 
   branch_file="${branch_name//\//_}.txt"
@@ -54,7 +55,9 @@ create_equivalent_diverged_branch() {
   git -C "$work_dir" add "$branch_file"
   git -C "$work_dir" commit -m "equivalent commit for $branch_name" >/dev/null
   git -C "$work_dir" push -u origin "$branch_name" >/dev/null
-  git -C "$work_dir" branch --unset-upstream "$branch_name" >/dev/null
+  if [ "$keep_upstream" -ne 1 ]; then
+    git -C "$work_dir" branch --unset-upstream "$branch_name" >/dev/null
+  fi
 
   git -C "$work_dir" checkout main >/dev/null
   echo "main divergence anchor for $branch_name" >> "$work_dir/README.md"
@@ -279,24 +282,33 @@ EOF_SHIM
 
   work_dir="$(create_repo_with_origin)"
   create_merged_branch "$work_dir" "feature/safe-delete-merged"
-  create_equivalent_diverged_branch "$work_dir" "feature/safe-delete-equivalent"
+  create_equivalent_diverged_branch "$work_dir" "feature/safe-delete-equivalent-no-upstream"
+  create_equivalent_diverged_branch "$work_dir" "feature/safe-delete-equivalent-with-upstream" 1
 
   run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --delete-equivalent
 
   [ "$status" -eq 0 ]
   [[ "$output" == *"Safe-delete diagnostics"* ]]
   [[ "$output" == *"feature/safe-delete-merged (merged): git branch -d would succeed"* ]]
-  [[ "$output" == *"feature/safe-delete-equivalent (equivalent): git branch -d would fail"* ]]
+  [[ "$output" == *"feature/safe-delete-equivalent-no-upstream (equivalent): git branch -d would fail"* ]]
+  [[ "$output" == *"feature/safe-delete-equivalent-with-upstream (equivalent): git branch -d would succeed"* ]]
 
   run git -C "$work_dir" branch -d feature/safe-delete-merged
   [ "$status" -eq 0 ]
 
-  run git -C "$work_dir" branch -d feature/safe-delete-equivalent
+  run git -C "$work_dir" branch -d feature/safe-delete-equivalent-no-upstream
   [ "$status" -ne 0 ]
 
-  run git -C "$work_dir" branch --list feature/safe-delete-equivalent
+  run git -C "$work_dir" branch --list feature/safe-delete-equivalent-no-upstream
   [ "$status" -eq 0 ]
-  [[ "$output" == *"feature/safe-delete-equivalent"* ]]
+  [[ "$output" == *"feature/safe-delete-equivalent-no-upstream"* ]]
+
+  run git -C "$work_dir" branch -d feature/safe-delete-equivalent-with-upstream
+  [ "$status" -eq 0 ]
+
+  run git -C "$work_dir" branch --list feature/safe-delete-equivalent-with-upstream
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
 }
 
 @test "integration: equivalent branch requires force flag when safe delete fails" {

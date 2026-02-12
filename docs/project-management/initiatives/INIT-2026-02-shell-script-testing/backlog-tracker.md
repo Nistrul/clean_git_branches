@@ -228,3 +228,6 @@
 - Added integration coverage that asserts the diagnostics section and validates alignment against actual `git branch -d` behavior for merged vs equivalent branches.
 - Verified regression safety via targeted test `bats test/clean_git_branches.integration.bats --filter "safe-delete diagnostics align with git branch -d behavior"` and full suite `test/run-tests.sh` (18 tests passing total: 4 mocked + 14 integration).
 - Captured required visual-validation artifacts using demo `minimal-safe-cleanup` with sanitized `before/after` ANSI transcripts and `before-after.diff`.
+- Expanded `INT-057` parity validation to include equivalent-branch upstream variants, proving the diagnostics contract matches actual `git branch -d` outcomes both when upstream is unset (fails) and when an upstream exists (succeeds).
+- Updated integration helper fixture setup so equivalent-diverged branches can be created with optional upstream retention for deterministic matrix validation.
+- Revalidated the expanded parity matrix with targeted and full-suite runs (`test/run-tests.sh`: 18 tests passing total: 4 mocked + 14 integration).
