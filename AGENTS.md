@@ -129,7 +129,7 @@ Bad:
    - run quickly (target under 10 seconds)
 9. Keep a demo catalog in `demos/README.md` and update it when adding/changing demos.
 10. Capture before output before implementation:
-   - create artifacts directory: `mkdir -p pr-artifacts`
+   - clear prior artifacts for the new slice: `rm -rf pr-artifacts && mkdir -p pr-artifacts`
    - run selected demo (raw capture): `script -q pr-artifacts/before.raw.ansi ./demos/${DEMO_ID}.sh`
    - sanitize capture: `python3 demos/sanitize-ansi.py pr-artifacts/before.raw.ansi pr-artifacts/before.ansi`
    - generate plain text: `sed -E 's/\x1b\[[0-9;]*m//g' pr-artifacts/before.ansi > pr-artifacts/before.txt`
@@ -140,12 +140,16 @@ Bad:
 12. Validate local behavior delta:
    - `diff -u pr-artifacts/before.txt pr-artifacts/after.txt > pr-artifacts/before-after.diff || true`
    - treat empty diffs (when change should be visible) or unexpected diffs as failures
-13. `pr-artifacts/` must be gitignored; never commit artifacts, logs, or screenshots.
-14. Publish artifacts in the PR:
+13. Use canonical artifact names only: `before.raw.ansi`, `before.ansi`, `before.txt`, `after.raw.ansi`, `after.ansi`, `after.txt`, `before-after.diff`.
+14. Do not create alternate artifact filenames (for example `*-layout.*`, `*-v2.*`). If the demo changes, reset `pr-artifacts/` and regenerate canonical files.
+15. Validate artifact set before handoff with `ls -1 pr-artifacts` and confirm only canonical filenames are present.
+16. `pr-artifacts/` must be gitignored; never commit artifacts, logs, or screenshots.
+17. Publish artifacts in the PR:
    - upload raw `.ansi` and diff files (for download/view with `less -R`)
    - post or update one `Visual Validation` PR comment with plain-text before/after output in collapsible `<details>` blocks
    - keep only one active `Visual Validation` comment per PR
-15. Use local-only execution for this workflow; do not depend on CI for visual validation capture.
+18. Ensure the selected demo output has enough repeated content to make the intended UI/layout delta visibly obvious in `before`/`after` text output.
+19. Use local-only execution for this workflow; do not depend on CI for visual validation capture.
 
 ## Title Style Rules (Mandatory)
 
