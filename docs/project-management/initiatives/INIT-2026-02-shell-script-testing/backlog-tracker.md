@@ -223,3 +223,8 @@
 - Added explicit tracking hygiene rules in `AGENTS.md` and prompting guidance in `docs/project-management/agent-prompting-research.md` to avoid volatile metadata churn in routine PRs.
 - Added intake guardrails requiring backlog-priority selection and open-PR overlap checks before implementation so duplicate slices are avoided by default.
 - Added prioritization guidance requiring dependency notes (blocked-by and unblocks) when choosing the next slice.
+- Completed `INT-057` (`FEAT-010`) on branch `feat/INIT-2026-02-shell-script-testing/FEAT-010-int-057-safe-delete-d-parity`.
+- Added explicit `Safe-delete diagnostics` output in `clean_git_branches.sh` to report per-candidate parity expectations for `git branch -d` (would succeed vs would fail).
+- Added integration coverage that asserts the diagnostics section and validates alignment against actual `git branch -d` behavior for merged vs equivalent branches.
+- Verified regression safety via targeted test `bats test/clean_git_branches.integration.bats --filter "safe-delete diagnostics align with git branch -d behavior"` and full suite `test/run-tests.sh` (18 tests passing total: 4 mocked + 14 integration).
+- Captured required visual-validation artifacts using demo `minimal-safe-cleanup` with sanitized `before/after` ANSI transcripts and `before-after.diff`.

@@ -95,7 +95,7 @@
 | INT-054 | FEAT-008 | Add GitHub Actions CI workflow that installs bats and runs `test/run-tests.sh` on pull requests and pushes to `main` | P1 | S | done |
 | INT-055 | FEAT-008 | Suppress Git default-branch advice warnings in CI logs by setting deterministic global Git defaults in workflow setup | P2 | S | done |
 | INT-056 | FEAT-009 | Expand dry-run reporting for non-merged branches with commit-level divergence evidence (for example unique commit subjects/counts) and verify parity under each equivalence strategy mode | P1 | M | done |
-| INT-057 | FEAT-010 | Add explicit safe-delete diagnostics that reflect whether Git `branch -d` would succeed for each candidate and validate classification alignment with actual `-d` behavior in tests | P1 | M | todo |
+| INT-057 | FEAT-010 | Add explicit safe-delete diagnostics that reflect whether Git `branch -d` would succeed for each candidate and validate classification alignment with actual `-d` behavior in tests | P1 | M | done |
 | INT-058 | FEAT-011 | Rename CLI to `git-branch-tidy`, add compatibility entrypoint for `git branch-tidy`, and update docs/tests/tooling references | P1 | S | todo |
 | INT-059 | FEAT-006 | Normalize visual-validation ANSI captures before text derivation so PTY control-sequence artifacts (for example `^D\\b\\b`) do not pollute PR artifacts | P1 | S | done |
 | INT-060 | FEAT-006 | Reduce tracking merge-conflict hotspots by removing manual current-focus fields, switching backlog execution logging to append-only bullets, avoiding volatile metadata churn in routine slices, requiring backlog-priority/open-PR overlap checks before implementation, and capturing dependency notes during slice prioritization | P1 | S | done |
@@ -107,4 +107,4 @@
 
 ## Sprintable Next Slice
 
-1. `INT-057` (`FEAT-010`): add explicit safe-delete diagnostics and validate parity with `git branch -d` behavior.
+1. `INT-058` (`FEAT-011`): rename the tool and add Git extension invocation support.

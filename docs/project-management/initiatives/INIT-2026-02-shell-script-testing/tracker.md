@@ -23,7 +23,7 @@
 9. `[x]` Validate integration-test coverage and close remaining `FEAT-007` slices.
 10. `[x]` Add CI entrypoint for tests.
 11. `[x]` Add dry-run divergence diagnostics and strategy-parity verification.
-12. `[ ]` Align safe-delete diagnostics with Git `branch -d` viability.
+12. `[x]` Align safe-delete diagnostics with Git `branch -d` viability.
 13. `[ ]` Rename CLI to `git-branch-tidy` and support `git branch-tidy`.
 
 ## Working Notes

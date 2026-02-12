@@ -313,6 +313,30 @@ function _clean_git_branches_branch_ahead_of_upstream() {
   return 1
 }
 
+function _clean_git_branches_safe_delete_viable() {
+  local branch="$1"
+  local upstream
+
+  if git merge-base --is-ancestor "$branch" HEAD >/dev/null 2>&1; then
+    return 0
+  fi
+
+  upstream=$(_clean_git_branches_branch_upstream "$branch")
+  if [ -z "$upstream" ]; then
+    return 1
+  fi
+
+  if ! git rev-parse --verify --quiet "$upstream" >/dev/null 2>&1; then
+    return 1
+  fi
+
+  if git merge-base --is-ancestor "$branch" "$upstream" >/dev/null 2>&1; then
+    return 0
+  fi
+
+  return 1
+}
+
 BASE_PATCH_IDS=""
 BASE_PATCH_IDS_READY=0
 function _clean_git_branches_load_base_patch_ids() {
@@ -500,10 +524,11 @@ function clean_git_branches() {
   local excluded_lines=""
   local merged_delete_list=""
   local equivalent_delete_list=""
+  local merged_candidate_list=""
+  local equivalent_candidate_list=""
   local merged_delete_count=0
   local equivalent_delete_count=0
   local redundant_type
-  local upstream
   local safety_reasons
   local exclusion_reason
   local delete_output
@@ -521,6 +546,8 @@ function clean_git_branches() {
   local confirm_status
   local non_equivalent_details=""
   local branch_divergence_details
+  local safe_delete_diagnostics=""
+  local safe_delete_result
 
   if ! _clean_git_branches_require_git_repo; then
     return 1
@@ -574,8 +601,6 @@ function clean_git_branches() {
     fi
 
     safety_reasons=""
-    upstream=$(_clean_git_branches_branch_upstream "$branch")
-
     if _clean_git_branches_branch_has_unpushed "$branch"; then
       safety_reasons="has unpushed commits"
     fi
@@ -592,9 +617,12 @@ function clean_git_branches() {
       merged)
         if [ -n "$safety_reasons" ]; then
           exclusion_reason="$safety_reasons"
-        elif [ "$APPLY" -eq 1 ]; then
-          merged_delete_list="${merged_delete_list}${branch}"$'\n'
-          merged_delete_count=$((merged_delete_count + 1))
+        else
+          merged_candidate_list="${merged_candidate_list}${branch}"$'\n'
+          if [ "$APPLY" -eq 1 ]; then
+            merged_delete_list="${merged_delete_list}${branch}"$'\n'
+            merged_delete_count=$((merged_delete_count + 1))
+          fi
         fi
 
         merged_lines="${merged_lines}${branch}"$'\n'
@@ -604,9 +632,12 @@ function clean_git_branches() {
           :
         elif [ -n "$safety_reasons" ]; then
           exclusion_reason="$safety_reasons"
-        elif [ "$APPLY" -eq 1 ]; then
-          equivalent_delete_list="${equivalent_delete_list}${branch}"$'\n'
-          equivalent_delete_count=$((equivalent_delete_count + 1))
+        else
+          equivalent_candidate_list="${equivalent_candidate_list}${branch}"$'\n'
+          if [ "$APPLY" -eq 1 ]; then
+            equivalent_delete_list="${equivalent_delete_list}${branch}"$'\n'
+            equivalent_delete_count=$((equivalent_delete_count + 1))
+          fi
         fi
 
         equivalent_lines="${equivalent_lines}${branch}"$'\n'
@@ -627,6 +658,26 @@ function clean_git_branches() {
 
     exclusion_reason=""
   done <<< "$branches"
+
+  while IFS= read -r branch; do
+    [ -z "$branch" ] && continue
+    if _clean_git_branches_safe_delete_viable "$branch"; then
+      safe_delete_result="would succeed"
+    else
+      safe_delete_result="would fail"
+    fi
+    safe_delete_diagnostics="${safe_delete_diagnostics}${branch} (merged): git branch -d ${safe_delete_result}"$'\n'
+  done <<< "$merged_candidate_list"
+
+  while IFS= read -r branch; do
+    [ -z "$branch" ] && continue
+    if _clean_git_branches_safe_delete_viable "$branch"; then
+      safe_delete_result="would succeed"
+    else
+      safe_delete_result="would fail"
+    fi
+    safe_delete_diagnostics="${safe_delete_diagnostics}${branch} (equivalent): git branch -d ${safe_delete_result}"$'\n'
+  done <<< "$equivalent_candidate_list"
 
   header_lines=""
   if [ "$APPLY" -eq 1 ]; then
@@ -674,6 +725,9 @@ function clean_git_branches() {
   fi
   if [ -n "${excluded_lines%$'\n'}" ]; then
     _clean_git_branches_print_section "Safety exclusions" "hard safety rules (never deleted)" "${excluded_lines%$'\n'}"
+  fi
+  if [ -n "${safe_delete_diagnostics%$'\n'}" ]; then
+    _clean_git_branches_print_section "Safe-delete diagnostics" "per-candidate parity with git branch -d" "${safe_delete_diagnostics%$'\n'}"
   fi
 
   if [ "$APPLY" -ne 1 ]; then

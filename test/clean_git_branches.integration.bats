@@ -274,6 +274,31 @@ EOF_SHIM
   [[ "$output" != *"feature/equivalent-divergence-evidence - unique commits ahead of main"* ]]
 }
 
+@test "integration: safe-delete diagnostics align with git branch -d behavior" {
+  local work_dir
+
+  work_dir="$(create_repo_with_origin)"
+  create_merged_branch "$work_dir" "feature/safe-delete-merged"
+  create_equivalent_diverged_branch "$work_dir" "feature/safe-delete-equivalent"
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --delete-equivalent
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Safe-delete diagnostics"* ]]
+  [[ "$output" == *"feature/safe-delete-merged (merged): git branch -d would succeed"* ]]
+  [[ "$output" == *"feature/safe-delete-equivalent (equivalent): git branch -d would fail"* ]]
+
+  run git -C "$work_dir" branch -d feature/safe-delete-merged
+  [ "$status" -eq 0 ]
+
+  run git -C "$work_dir" branch -d feature/safe-delete-equivalent
+  [ "$status" -ne 0 ]
+
+  run git -C "$work_dir" branch --list feature/safe-delete-equivalent
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"feature/safe-delete-equivalent"* ]]
+}
+
 @test "integration: equivalent branch requires force flag when safe delete fails" {
   local work_dir
 
