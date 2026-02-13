@@ -250,3 +250,6 @@
 - Added deterministic visual-validation demo `demos/ancestry-merged-states.sh` and catalog entry in `demos/README.md`.
 - Captured required visual-validation artifacts in `pr-artifacts/` and validated the local `before-after.diff` behavior delta.
 - Verified regression safety via targeted test `bats test/clean_git_branches.integration.bats -f "integration: ancestry-only merged states report upstream and head context without changing deletion behavior"` and full suite `test/run-tests.sh` (18 tests passing total: 4 mocked + 14 integration).
+- Refined `INT-057` output presentation to render three explicit sections: `merged-into-main`, `merged-into-upstream`, and `merged-into-head` (classification-only).
+- Updated ancestry integration coverage to use a more realistic mixed branch topology and verify section-specific rendering plus unchanged deletion safety behavior.
+- Refreshed visual-validation artifacts with updated demo output so before/after diff explicitly demonstrates the three new ancestry sections.
