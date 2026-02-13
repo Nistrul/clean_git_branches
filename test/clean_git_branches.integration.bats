@@ -274,6 +274,57 @@ EOF_SHIM
   [[ "$output" != *"feature/equivalent-divergence-evidence - unique commits ahead of main"* ]]
 }
 
+@test "integration: ancestry-only merged states report upstream and head context without changing deletion behavior" {
+  local work_dir
+  local head_branch
+
+  work_dir="$(create_repo_with_origin)"
+
+  git -C "$work_dir" checkout -b develop >/dev/null
+  git -C "$work_dir" push -u origin develop >/dev/null
+
+  git -C "$work_dir" checkout -b feature/upstream-contained >/dev/null
+  echo "upstream-contained content" > "$work_dir/upstream-contained.txt"
+  git -C "$work_dir" add upstream-contained.txt
+  git -C "$work_dir" commit -m "upstream-contained commit" >/dev/null
+  git -C "$work_dir" push -u origin feature/upstream-contained >/dev/null
+
+  git -C "$work_dir" checkout develop >/dev/null
+  git -C "$work_dir" checkout -b feature/head-contained >/dev/null
+  echo "head-contained content" > "$work_dir/head-contained.txt"
+  git -C "$work_dir" add head-contained.txt
+  git -C "$work_dir" commit -m "head-contained commit" >/dev/null
+  git -C "$work_dir" checkout develop >/dev/null
+  git -C "$work_dir" merge --ff-only feature/head-contained >/dev/null
+
+  head_branch="$(git -C "$work_dir" branch --show-current)"
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Ancestry-only merged states"* ]]
+  [[ "$output" == *"feature/upstream-contained - merged-into-upstream origin/feature/upstream-contained"* ]]
+  [[ "$output" == *"feature/head-contained - merged-into-head $head_branch"* ]]
+  [[ "$output" == *"Non-equivalent branches"* ]]
+  [[ "$output" == *"feature/upstream-contained"* ]]
+  [[ "$output" == *"feature/head-contained"* ]]
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --apply --delete-equivalent --force-delete-equivalent
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Execution results"* ]]
+  [[ "$output" == *"Merged deleted: 0"* ]]
+  [[ "$output" == *"Equivalent deleted (safe): 0"* ]]
+
+  run git -C "$work_dir" branch --list feature/upstream-contained
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"feature/upstream-contained"* ]]
+
+  run git -C "$work_dir" branch --list feature/head-contained
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"feature/head-contained"* ]]
+}
+
 @test "integration: equivalent branch requires force flag when safe delete fails" {
   local work_dir
 
