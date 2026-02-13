@@ -59,6 +59,9 @@ git commit -m "<clear message>"
 1. Always start commands with the actual executable token.
 2. Do not prefix commands with inline environment-variable assignments.
 3. Do not wrap commands in `sh -c` / `bash -lc` unless explicitly required.
+4. For temporary files/directories used by agent workflows, use repo-local `scratch/` paths instead of OS temp paths (for example `/tmp`).
+5. Create `scratch/` on demand (`mkdir -p scratch`) and keep all transient artifacts for the current slice under that directory.
+6. Keep `scratch/` gitignored and never commit its contents.
 
 Good:
 - `git -c core.editor=true rebase --continue`
