@@ -139,7 +139,7 @@ function _clean_git_branches_renderer_section_token() {
     "Equivalent branches")
       printf "cli.color.section.equivalent"
       ;;
-    "Non-equivalent branches"|"Non-equivalent divergence details"|"Ancestry-only merged states")
+    "Non-equivalent branches"|"Non-equivalent divergence details"|"merged-into-main"|"merged-into-upstream"|"merged-into-head")
       printf "cli.color.section.non_equivalent"
       ;;
     "Safety exclusions")
@@ -540,9 +540,10 @@ function clean_git_branches() {
   local confirm_status
   local non_equivalent_details=""
   local branch_divergence_details
-  local ancestry_only_lines=""
-  local ancestry_states
-  local ancestry_separator
+  local merged_into_main_lines=""
+  local merged_into_upstream_lines=""
+  local merged_into_head_lines=""
+  local merged_into_main_ref=""
   local head_context
 
   if ! _clean_git_branches_require_git_repo; then
@@ -563,6 +564,9 @@ function clean_git_branches() {
   remote_name=$(_clean_git_branches_detect_remote)
   base_branch=$(_clean_git_branches_detect_base_branch "$remote_name")
   BASE_REF=$(_clean_git_branches_resolve_base_ref "$remote_name" "$base_branch")
+  if git rev-parse --verify --quiet "main^{commit}" >/dev/null 2>&1; then
+    merged_into_main_ref="main"
+  fi
 
   _clean_git_branches_verbose "Remote: ${remote_name:-<none>}"
   _clean_git_branches_verbose "Base branch: ${base_branch:-<none>}"
@@ -644,21 +648,17 @@ function clean_git_branches() {
         ;;
     esac
 
-    ancestry_states=""
-    ancestry_separator=""
-    if [ "$redundant_type" != "merged" ]; then
-      if [ -n "$upstream" ] && _clean_git_branches_branch_tip_merged_into_ref "$branch" "$upstream"; then
-        ancestry_states="merged-into-upstream $upstream"
-        ancestry_separator="; "
-      fi
-
-      if _clean_git_branches_branch_tip_merged_into_ref "$branch" "HEAD"; then
-        head_context="${current_branch:-HEAD}"
-        ancestry_states="${ancestry_states}${ancestry_separator}merged-into-head ${head_context}"
-      fi
+    if [ -n "$merged_into_main_ref" ] && _clean_git_branches_branch_tip_merged_into_ref "$branch" "$merged_into_main_ref"; then
+      merged_into_main_lines="${merged_into_main_lines}${branch}"$'\n'
     fi
-    if [ -n "$ancestry_states" ]; then
-      ancestry_only_lines="${ancestry_only_lines}${branch} - ${ancestry_states}"$'\n'
+
+    if [ -n "$upstream" ] && _clean_git_branches_branch_tip_merged_into_ref "$branch" "$upstream"; then
+      merged_into_upstream_lines="${merged_into_upstream_lines}${branch} - ${upstream}"$'\n'
+    fi
+
+    if _clean_git_branches_branch_tip_merged_into_ref "$branch" "HEAD"; then
+      head_context="${current_branch:-HEAD}"
+      merged_into_head_lines="${merged_into_head_lines}${branch} - ${head_context}"$'\n'
     fi
 
     if [ -n "$exclusion_reason" ]; then
@@ -706,8 +706,14 @@ function clean_git_branches() {
     _clean_git_branches_print_section "Equivalent branches" "$equivalent_note" "${equivalent_lines%$'\n'}"
   fi
 
-  if [ -n "${ancestry_only_lines%$'\n'}" ]; then
-    _clean_git_branches_print_section "Ancestry-only merged states" "classification only; no deletion behavior changes" "${ancestry_only_lines%$'\n'}"
+  if [ -n "${merged_into_main_lines%$'\n'}" ]; then
+    _clean_git_branches_print_section "merged-into-main" "classification only; no deletion behavior changes" "${merged_into_main_lines%$'\n'}"
+  fi
+  if [ -n "${merged_into_upstream_lines%$'\n'}" ]; then
+    _clean_git_branches_print_section "merged-into-upstream" "classification only; no deletion behavior changes" "${merged_into_upstream_lines%$'\n'}"
+  fi
+  if [ -n "${merged_into_head_lines%$'\n'}" ]; then
+    _clean_git_branches_print_section "merged-into-head" "classification only; no deletion behavior changes" "${merged_into_head_lines%$'\n'}"
   fi
 
   if [ -n "${non_equivalent_lines%$'\n'}" ]; then

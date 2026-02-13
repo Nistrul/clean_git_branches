@@ -16,7 +16,7 @@ Run a demo directly:
 |---|---|---|
 | `minimal-safe-cleanup` | `demos/minimal-safe-cleanup.sh` | Deterministic preview of merged/equivalent/non-equivalent branch classification and deletion eligibility using isolated temporary Git fixtures. |
 | `non-equivalent-divergence-layout` | `demos/non-equivalent-divergence-layout.sh` | Divergence-details section spacing with multiple non-equivalent branches, focused on readability of grouped commit evidence. |
-| `ancestry-merged-states` | `demos/ancestry-merged-states.sh` | Classification-only ancestry reporting for `merged-into-upstream` and `merged-into-head` with explicit upstream/current-HEAD context. |
+| `ancestry-merged-states` | `demos/ancestry-merged-states.sh` | Explicit ancestry sections for `merged-into-main`, `merged-into-upstream`, and `merged-into-head` using a realistic mixed branch topology. |
 
 ## Capture Utilities
 
