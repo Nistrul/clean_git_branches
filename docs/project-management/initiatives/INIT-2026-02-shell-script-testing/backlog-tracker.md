@@ -241,3 +241,12 @@
 - Added repo-local temporary-workspace policy in `AGENTS.md` requiring agent temp artifacts to use gitignored `scratch/` paths instead of OS temp directories.
 - Updated prompting guidance in `docs/project-management/agent-prompting-research.md` to encode `scratch/` as the default temporary workspace for routine slice execution.
 - Added `.gitignore` entry for `scratch/` so transient workflow artifacts remain untracked.
+
+### 2026-02-13
+
+- Completed `INT-057` (`FEAT-010`) on branch `feat/INIT-2026-02-shell-script-testing/FEAT-010-int-057-ancestry-classification`.
+- Added classification-only ancestry reporting in `clean_git_branches.sh` for `merged-into-upstream` and `merged-into-head`, including upstream/HEAD context in output with no deletion behavior changes.
+- Added integration coverage in `test/clean_git_branches.integration.bats` to verify ancestry-state reporting and assert the branches remain non-deletion candidates in apply mode.
+- Added deterministic visual-validation demo `demos/ancestry-merged-states.sh` and catalog entry in `demos/README.md`.
+- Captured required visual-validation artifacts in `pr-artifacts/` and validated the local `before-after.diff` behavior delta.
+- Verified regression safety via targeted test `bats test/clean_git_branches.integration.bats -f "integration: ancestry-only merged states report upstream and head context without changing deletion behavior"` and full suite `test/run-tests.sh` (18 tests passing total: 4 mocked + 14 integration).

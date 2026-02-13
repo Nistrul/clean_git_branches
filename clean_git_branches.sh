@@ -139,7 +139,7 @@ function _clean_git_branches_renderer_section_token() {
     "Equivalent branches")
       printf "cli.color.section.equivalent"
       ;;
-    "Non-equivalent branches"|"Non-equivalent divergence details")
+    "Non-equivalent branches"|"Non-equivalent divergence details"|"Ancestry-only merged states")
       printf "cli.color.section.non_equivalent"
       ;;
     "Safety exclusions")
@@ -307,6 +307,25 @@ function _clean_git_branches_branch_ahead_of_upstream() {
   counts=$(git rev-list --left-right --count "$upstream...$branch" 2>/dev/null || echo "0 0")
   ahead_count=$(echo "$counts" | awk '{print $2}')
   if [ "${ahead_count:-0}" -gt 0 ]; then
+    return 0
+  fi
+
+  return 1
+}
+
+function _clean_git_branches_branch_tip_merged_into_ref() {
+  local branch="$1"
+  local target_ref="$2"
+
+  if [ -z "$target_ref" ]; then
+    return 1
+  fi
+
+  if ! git rev-parse --verify --quiet "${target_ref}^{commit}" >/dev/null 2>&1; then
+    return 1
+  fi
+
+  if git merge-base --is-ancestor "$branch" "$target_ref" >/dev/null 2>&1; then
     return 0
   fi
 
@@ -521,6 +540,10 @@ function clean_git_branches() {
   local confirm_status
   local non_equivalent_details=""
   local branch_divergence_details
+  local ancestry_only_lines=""
+  local ancestry_states
+  local ancestry_separator
+  local head_context
 
   if ! _clean_git_branches_require_git_repo; then
     return 1
@@ -621,6 +644,23 @@ function clean_git_branches() {
         ;;
     esac
 
+    ancestry_states=""
+    ancestry_separator=""
+    if [ "$redundant_type" != "merged" ]; then
+      if [ -n "$upstream" ] && _clean_git_branches_branch_tip_merged_into_ref "$branch" "$upstream"; then
+        ancestry_states="merged-into-upstream $upstream"
+        ancestry_separator="; "
+      fi
+
+      if _clean_git_branches_branch_tip_merged_into_ref "$branch" "HEAD"; then
+        head_context="${current_branch:-HEAD}"
+        ancestry_states="${ancestry_states}${ancestry_separator}merged-into-head ${head_context}"
+      fi
+    fi
+    if [ -n "$ancestry_states" ]; then
+      ancestry_only_lines="${ancestry_only_lines}${branch} - ${ancestry_states}"$'\n'
+    fi
+
     if [ -n "$exclusion_reason" ]; then
       excluded_lines="${excluded_lines}${branch} - skipped: $exclusion_reason"$'\n'
     fi
@@ -664,6 +704,10 @@ function clean_git_branches() {
   fi
   if [ -n "${equivalent_lines%$'\n'}" ]; then
     _clean_git_branches_print_section "Equivalent branches" "$equivalent_note" "${equivalent_lines%$'\n'}"
+  fi
+
+  if [ -n "${ancestry_only_lines%$'\n'}" ]; then
+    _clean_git_branches_print_section "Ancestry-only merged states" "classification only; no deletion behavior changes" "${ancestry_only_lines%$'\n'}"
   fi
 
   if [ -n "${non_equivalent_lines%$'\n'}" ]; then
