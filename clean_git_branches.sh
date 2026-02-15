@@ -133,13 +133,13 @@ function _clean_git_branches_renderer_section_token() {
   local title="$1"
 
   case "$title" in
-    "Merged branches")
-      printf "cli.color.section.merged"
-      ;;
     "Equivalent branches")
       printf "cli.color.section.equivalent"
       ;;
-    "Non-equivalent branches"|"Non-equivalent divergence details")
+    "Merged into upstream branches"|"Merged into local "*)
+      printf "cli.color.section.merged"
+      ;;
+    "Non-equivalent branches")
       printf "cli.color.section.non_equivalent"
       ;;
     "Safety exclusions")
@@ -313,6 +313,25 @@ function _clean_git_branches_branch_ahead_of_upstream() {
   return 1
 }
 
+function _clean_git_branches_branch_tip_merged_into_ref() {
+  local branch="$1"
+  local target_ref="$2"
+
+  if [ -z "$target_ref" ]; then
+    return 1
+  fi
+
+  if ! git rev-parse --verify --quiet "${target_ref}^{commit}" >/dev/null 2>&1; then
+    return 1
+  fi
+
+  if git merge-base --is-ancestor "$branch" "$target_ref" >/dev/null 2>&1; then
+    return 0
+  fi
+
+  return 1
+}
+
 BASE_PATCH_IDS=""
 BASE_PATCH_IDS_READY=0
 function _clean_git_branches_load_base_patch_ids() {
@@ -401,13 +420,12 @@ function _clean_git_branches_branch_divergence_details() {
   unique_count=$(git rev-list --count "$BASE_REF..$branch" 2>/dev/null || echo "0")
   sample_subjects=$(git log "$BASE_REF..$branch" --format='%s' --no-merges 2>/dev/null | awk 'NF {print; if (++count == 2) exit}')
 
-  printf -- "- %s\n" "$branch"
-  printf "  branch-only commits vs %s (ancestry): %s\n" "$BASE_REF" "$unique_count"
+  printf "branch-only commits vs %s (ancestry): %s\n" "$BASE_REF" "$unique_count"
   if [ -n "$sample_subjects" ]; then
-    printf "  sample commit subjects:\n"
+    printf "sample commit subjects:\n"
     while IFS= read -r sample_line; do
       [ -z "$sample_line" ] && continue
-      printf "    - %s\n" "$sample_line"
+      printf -- "- %s\n" "$sample_line"
     done <<< "$sample_subjects"
   fi
 }
@@ -508,7 +526,6 @@ function clean_git_branches() {
   local exclusion_reason
   local delete_output
   local safe_delete_failed
-  local merged_note
   local equivalent_note
   local header_lines
   local execution_lines
@@ -519,8 +536,15 @@ function clean_git_branches() {
   local merged_skipped=0
   local equivalent_skipped=0
   local confirm_status
-  local non_equivalent_details=""
   local branch_divergence_details
+  local branch_divergence_line
+  local merged_into_upstream_lines=""
+  local merged_into_head_lines=""
+  local head_context
+  local branch_merged_into_upstream
+  local branch_merged_into_head
+  local merged_into_upstream_title="Merged into upstream branches"
+  local merged_into_local_title
 
   if ! _clean_git_branches_require_git_repo; then
     return 1
@@ -537,6 +561,7 @@ function clean_git_branches() {
   fi
 
   current_branch=$(git branch --show-current)
+  merged_into_local_title="Merged into local ${current_branch:-HEAD}"
   remote_name=$(_clean_git_branches_detect_remote)
   base_branch=$(_clean_git_branches_detect_base_branch "$remote_name")
   BASE_REF=$(_clean_git_branches_resolve_base_ref "$remote_name" "$base_branch")
@@ -565,6 +590,8 @@ function clean_git_branches() {
       continue
     fi
 
+    upstream=$(_clean_git_branches_branch_upstream "$branch")
+
     if git merge-base --is-ancestor "$branch" "$BASE_REF" >/dev/null 2>&1; then
       redundant_type="merged"
     elif _clean_git_branches_is_equivalent "$branch"; then
@@ -574,7 +601,33 @@ function clean_git_branches() {
     fi
 
     safety_reasons=""
-    upstream=$(_clean_git_branches_branch_upstream "$branch")
+
+    if [ -n "$upstream" ] && _clean_git_branches_branch_tip_merged_into_ref "$branch" "$upstream"; then
+      branch_merged_into_upstream=1
+      if [ -n "$merged_into_upstream_lines" ]; then
+        merged_into_upstream_lines="${merged_into_upstream_lines}"$'\n'
+      fi
+      merged_into_upstream_lines="${merged_into_upstream_lines}- ${branch}"$'\n'
+      merged_into_upstream_lines="${merged_into_upstream_lines}  merged into upstream: ${upstream}"$'\n'
+    else
+      branch_merged_into_upstream=0
+    fi
+
+    branch_merged_into_head=0
+    if [ "$branch_merged_into_upstream" -ne 1 ] && _clean_git_branches_branch_tip_merged_into_ref "$branch" "HEAD"; then
+      branch_merged_into_head=1
+      head_context="${current_branch:-HEAD}"
+      if [ -n "$merged_into_head_lines" ]; then
+        merged_into_head_lines="${merged_into_head_lines}"$'\n'
+      fi
+      merged_into_head_lines="${merged_into_head_lines}- ${branch}"$'\n'
+      merged_into_head_lines="${merged_into_head_lines}  merged into head: ${head_context}"$'\n'
+      if [ "$redundant_type" = "non-equivalent" ]; then
+        merged_into_head_lines="${merged_into_head_lines}  divergent from ${BASE_REF}: yes"$'\n'
+      else
+        merged_into_head_lines="${merged_into_head_lines}  divergent from ${BASE_REF}: no"$'\n'
+      fi
+    fi
 
     if _clean_git_branches_branch_has_unpushed "$branch"; then
       safety_reasons="has unpushed commits"
@@ -612,12 +665,19 @@ function clean_git_branches() {
         equivalent_lines="${equivalent_lines}${branch}"$'\n'
         ;;
       non-equivalent)
-        non_equivalent_lines="${non_equivalent_lines}${branch}"$'\n'
-        branch_divergence_details=$(_clean_git_branches_branch_divergence_details "$branch")
-        if [ -n "$non_equivalent_details" ]; then
-          non_equivalent_details="${non_equivalent_details}"$'\n\n'
+        if [ "$branch_merged_into_head" -ne 1 ]; then
+          if [ -n "$non_equivalent_lines" ]; then
+            non_equivalent_lines="${non_equivalent_lines}"$'\n'
+          fi
+          non_equivalent_lines="${non_equivalent_lines}- ${branch}"$'\n'
+          branch_divergence_details=$(_clean_git_branches_branch_divergence_details "$branch")
+          if [ -n "$branch_divergence_details" ]; then
+            while IFS= read -r branch_divergence_line; do
+              [ -z "$branch_divergence_line" ] && continue
+              non_equivalent_lines="${non_equivalent_lines}  ${branch_divergence_line}"$'\n'
+            done <<< "$branch_divergence_details"
+          fi
         fi
-        non_equivalent_details="${non_equivalent_details}${branch_divergence_details}"
         ;;
     esac
 
@@ -645,15 +705,6 @@ function clean_git_branches() {
 
   _clean_git_branches_print_section "Run summary" "" "${header_lines%$'\n'}"
 
-  if [ "$APPLY" -eq 1 ]; then
-    merged_note="fully merged into $BASE_REF; candidates are deleted with git branch -d"
-  else
-    merged_note="fully merged into $BASE_REF; preview only (use --apply to delete)"
-  fi
-  if [ -n "${merged_lines%$'\n'}" ]; then
-    _clean_git_branches_print_section "Merged branches" "$merged_note" "${merged_lines%$'\n'}"
-  fi
-
   equivalent_note="patch-equivalent to $BASE_REF via $EQUIVALENCE_METHOD; default keep (use --delete-equivalent to include deletion)"
   if [ "$DELETE_EQUIVALENT" -eq 1 ]; then
     if [ "$APPLY" -eq 1 ]; then
@@ -666,11 +717,15 @@ function clean_git_branches() {
     _clean_git_branches_print_section "Equivalent branches" "$equivalent_note" "${equivalent_lines%$'\n'}"
   fi
 
-  if [ -n "${non_equivalent_lines%$'\n'}" ]; then
-    _clean_git_branches_print_section "Non-equivalent branches" "keep: contains unique commits" "${non_equivalent_lines%$'\n'}"
+  if [ -n "${merged_into_upstream_lines%$'\n'}" ]; then
+    _clean_git_branches_print_section "$merged_into_upstream_title" "classification only; no deletion behavior changes" "${merged_into_upstream_lines%$'\n'}" "raw"
   fi
-  if [ -n "${non_equivalent_details%$'\n'}" ]; then
-    _clean_git_branches_print_section "Non-equivalent divergence details" "dry-run evidence for non-equivalent branches" "${non_equivalent_details%$'\n'}" "raw"
+  if [ -n "${merged_into_head_lines%$'\n'}" ]; then
+    _clean_git_branches_print_section "$merged_into_local_title" "classification only; shown only when branch is not merged into upstream" "${merged_into_head_lines%$'\n'}" "raw"
+  fi
+
+  if [ -n "${non_equivalent_lines%$'\n'}" ]; then
+    _clean_git_branches_print_section "Non-equivalent branches" "keep: contains unique commits (details inline)" "${non_equivalent_lines%$'\n'}" "raw"
   fi
   if [ -n "${excluded_lines%$'\n'}" ]; then
     _clean_git_branches_print_section "Safety exclusions" "hard safety rules (never deleted)" "${excluded_lines%$'\n'}"

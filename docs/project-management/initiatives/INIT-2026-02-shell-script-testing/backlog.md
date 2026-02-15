@@ -96,7 +96,7 @@
 | INT-054 | FEAT-008 | Add GitHub Actions CI workflow that installs bats and runs `test/run-tests.sh` on pull requests and pushes to `main` | P1 | S | done |
 | INT-055 | FEAT-008 | Suppress Git default-branch advice warnings in CI logs by setting deterministic global Git defaults in workflow setup | P2 | S | done |
 | INT-056 | FEAT-009 | Expand dry-run reporting for non-merged branches with commit-level divergence evidence (for example unique commit subjects/counts) and verify parity under each equivalence strategy mode | P1 | M | done |
-| INT-057 | FEAT-010 | ~~Add explicit safe-delete diagnostics that reflect whether Git `branch -d` would succeed for each candidate and validate classification alignment with actual `-d` behavior in tests~~ Add classification-only ancestry reporting for `merged-into-upstream` and `merged-into-head`, including upstream/HEAD names in output, with no deletion or cleanup behavior changes | P1 | M | todo |
+| INT-057 | FEAT-010 | ~~Add explicit safe-delete diagnostics that reflect whether Git `branch -d` would succeed for each candidate and validate classification alignment with actual `-d` behavior in tests~~ Add classification-only ancestry reporting sections for `merged-into-main`, `merged-into-upstream`, and `merged-into-head`, including upstream/HEAD context in output, with no deletion or cleanup behavior changes | P1 | M | done |
 | INT-058 | FEAT-011 | Rename CLI to `git-branch-tidy`, add compatibility entrypoint for `git branch-tidy`, and update docs/tests/tooling references | P1 | S | todo |
 | INT-059 | FEAT-006 | Normalize visual-validation ANSI captures before text derivation so PTY control-sequence artifacts (for example `^D\\b\\b`) do not pollute PR artifacts | P1 | S | done |
 | INT-060 | FEAT-006 | Reduce tracking merge-conflict hotspots by removing manual current-focus fields, switching backlog execution logging to append-only bullets, avoiding volatile metadata churn in routine slices, requiring backlog-priority/open-PR overlap checks before implementation, and capturing dependency notes during slice prioritization | P1 | S | done |
@@ -132,6 +132,12 @@
 
 Improve reporting so the tool can explain more branch states using commit ancestry, without changing deletion or cleanup behavior. These new states are classification only.
 
+### Category: `merged-into-main`
+
+- Definition: branch tip commit is already contained in local `main`.
+- Detection: run `git merge-base --is-ancestor <branch_tip_commit> main` when `main` exists.
+- Output: render in explicit `merged-into-main` section.
+
 ### Category: `merged-into-upstream`
 
 - Definition: branch tip commit is already contained in the branch's configured upstream tracking branch.
@@ -139,11 +145,11 @@ Improve reporting so the tool can explain more branch states using commit ancest
   - Resolve upstream ref for the branch.
   - If upstream exists, run `git merge-base --is-ancestor <branch_tip_commit> <upstream_ref>`.
   - If true, classify as `merged-into-upstream`.
-- Output: include upstream name, for example `merged into upstream origin/develop`.
+- Output: render in explicit `merged-into-upstream` section with upstream ref context.
 
 ### Category: `merged-into-head`
 
 - Definition: branch tip commit is already contained in the currently checked-out branch (`HEAD`).
 - Detection: run `git merge-base --is-ancestor <branch_tip_commit> HEAD`.
 - If true, classify as `merged-into-head`.
-- Output: include current branch name, for example `merged into current HEAD develop`.
+- Output: render in explicit `merged-into-head` section with current branch name context.

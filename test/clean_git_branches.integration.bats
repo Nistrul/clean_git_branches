@@ -108,9 +108,8 @@ create_non_equivalent_branch() {
   [ "$status" -eq 0 ]
   [[ "$output" == *"Execution mode: dry-run (preview only)"* ]]
   [[ "$output" == *"Current branch: main"* ]]
-  [[ "$output" == *"Merged branches"* ]]
+  [[ "$output" == *"Merged into upstream branches"* ]]
   [[ "$output" == *"feature/dirty-worktree-merged"* ]]
-  [[ "$output" == *"preview only (use --apply to delete)"* ]]
 
   run git -C "$work_dir" branch --list feature/dirty-worktree-merged
   [ "$status" -eq 0 ]
@@ -150,7 +149,7 @@ create_non_equivalent_branch() {
 
   [ "$status" -eq 0 ]
   [[ "$output" == *"Execution mode: dry-run (preview only)"* ]]
-  [[ "$output" == *"Merged branches"* ]]
+  [[ "$output" == *"Merged into upstream branches"* ]]
   [[ "$output" == *"feature/subdir-merged"* ]]
   [[ "$output" == *"Non-equivalent branches"* ]]
   [[ "$output" == *"feature/subdir-non-equivalent"* ]]
@@ -252,11 +251,10 @@ EOF_SHIM
   [[ "$output" == *$'- feature/equivalent-divergence-evidence\n'* ]]
   [[ "$output" == *"Non-equivalent branches"* ]]
   [[ "$output" == *$'- feature/non-equivalent-divergence-evidence\n'* ]]
-  [[ "$output" == *"Non-equivalent divergence details"* ]]
-  [[ "$output" == *"- feature/non-equivalent-divergence-evidence"* ]]
+  [[ "$output" != *"Non-equivalent divergence details"* ]]
   [[ "$output" == *"branch-only commits vs main (ancestry): 1"* ]]
   [[ "$output" == *"sample commit subjects:"* ]]
-  [[ "$output" == *"- unique commit for feature/non-equivalent-divergence-evidence"* ]]
+  [[ "$output" == *"  - unique commit for feature/non-equivalent-divergence-evidence"* ]]
   [[ "$output" != *"feature/equivalent-divergence-evidence - unique commits ahead of main"* ]]
 
   run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --equivalence patch-id
@@ -266,12 +264,86 @@ EOF_SHIM
   [[ "$output" == *$'- feature/equivalent-divergence-evidence\n'* ]]
   [[ "$output" == *"Non-equivalent branches"* ]]
   [[ "$output" == *$'- feature/non-equivalent-divergence-evidence\n'* ]]
-  [[ "$output" == *"Non-equivalent divergence details"* ]]
-  [[ "$output" == *"- feature/non-equivalent-divergence-evidence"* ]]
+  [[ "$output" != *"Non-equivalent divergence details"* ]]
   [[ "$output" == *"branch-only commits vs main (ancestry): 1"* ]]
   [[ "$output" == *"sample commit subjects:"* ]]
-  [[ "$output" == *"- unique commit for feature/non-equivalent-divergence-evidence"* ]]
+  [[ "$output" == *"  - unique commit for feature/non-equivalent-divergence-evidence"* ]]
   [[ "$output" != *"feature/equivalent-divergence-evidence - unique commits ahead of main"* ]]
+}
+
+@test "integration: ancestry sections report merged-into-upstream/local with realistic branch states" {
+  local work_dir
+  local head_branch
+
+  work_dir="$(create_repo_with_origin)"
+
+  git -C "$work_dir" checkout -b develop >/dev/null
+  git -C "$work_dir" push -u origin develop >/dev/null
+
+  git -C "$work_dir" checkout main >/dev/null
+  git -C "$work_dir" checkout -b feature/main-contained >/dev/null
+  echo "main-contained content" > "$work_dir/main-contained.txt"
+  git -C "$work_dir" add main-contained.txt
+  git -C "$work_dir" commit -m "main-contained commit" >/dev/null
+  git -C "$work_dir" push -u origin feature/main-contained >/dev/null
+  git -C "$work_dir" checkout main >/dev/null
+  git -C "$work_dir" merge --no-ff feature/main-contained -m "merge feature/main-contained" >/dev/null
+  git -C "$work_dir" push origin main >/dev/null
+
+  git -C "$work_dir" checkout develop >/dev/null
+  git -C "$work_dir" checkout -b feature/upstream-contained >/dev/null
+  echo "upstream-contained content" > "$work_dir/upstream-contained.txt"
+  git -C "$work_dir" add upstream-contained.txt
+  git -C "$work_dir" commit -m "upstream-contained commit" >/dev/null
+  git -C "$work_dir" push -u origin feature/upstream-contained >/dev/null
+
+  git -C "$work_dir" checkout develop >/dev/null
+  git -C "$work_dir" checkout -b feature/head-contained >/dev/null
+  echo "head-contained content" > "$work_dir/head-contained.txt"
+  git -C "$work_dir" add head-contained.txt
+  git -C "$work_dir" commit -m "head-contained commit" >/dev/null
+  git -C "$work_dir" push origin feature/head-contained >/dev/null
+  git -C "$work_dir" checkout develop >/dev/null
+  git -C "$work_dir" merge --ff-only feature/head-contained >/dev/null
+
+  head_branch="$(git -C "$work_dir" branch --show-current)"
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Merged into upstream branches"* ]]
+  [[ "$output" == *$'- feature/main-contained\n'* ]]
+  [[ "$output" == *$'- feature/upstream-contained\n'* ]]
+  [[ "$output" == *"merged into upstream: origin/feature/main-contained"* ]]
+  [[ "$output" == *"merged into upstream: origin/feature/upstream-contained"* ]]
+  [[ "$output" == *"Merged into local $head_branch"* ]]
+  [[ "$output" == *$'- feature/head-contained\n'* ]]
+  [[ "$output" == *"merged into head: $head_branch"* ]]
+  [[ "$output" == *"divergent from main: yes"* ]]
+  [[ "$output" == *"Non-equivalent branches"* ]]
+  [[ "$output" == *$'- feature/upstream-contained\n'* ]]
+  [[ "$output" == *"- feature/upstream-contained"* ]]
+  [[ "$output" != *$'- feature/head-contained\n  branch-only commits vs main (ancestry):'* ]]
+  [[ "$output" != *"Non-equivalent divergence details"* ]]
+
+  run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --apply --delete-equivalent --force-delete-equivalent
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Execution results"* ]]
+  [[ "$output" == *"Merged deleted: 1"* ]]
+  [[ "$output" == *"Equivalent deleted (safe): 0"* ]]
+
+  run git -C "$work_dir" branch --list feature/main-contained
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+
+  run git -C "$work_dir" branch --list feature/upstream-contained
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"feature/upstream-contained"* ]]
+
+  run git -C "$work_dir" branch --list feature/head-contained
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"feature/head-contained"* ]]
 }
 
 @test "integration: equivalent branch requires force flag when safe delete fails" {
