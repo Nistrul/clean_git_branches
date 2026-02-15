@@ -253,3 +253,23 @@
 - Refined `INT-057` output presentation to render three explicit sections: `merged-into-main`, `merged-into-upstream`, and `merged-into-head` (classification-only).
 - Updated ancestry integration coverage to use a more realistic mixed branch topology and verify section-specific rendering plus unchanged deletion safety behavior.
 - Refreshed visual-validation artifacts with updated demo output so before/after diff explicitly demonstrates the three new ancestry sections.
+
+### 2026-02-15
+
+- Refined `INT-057` ancestry-state reporting to make sections mutually exclusive using ordered precedence: `merged-into-main`, then `merged-into-upstream`, then `merged-into-head`.
+- Updated section headers to document exclusions inline: `merged-into-upstream (not main)` and `merged-into-head (not main/upstream)`.
+- Added integration assertion coverage that `feature/main-contained` no longer appears in upstream ancestry output while preserving apply-mode deletion behavior checks.
+- Refreshed deterministic visual-validation artifacts with `demos/ancestry-merged-states.sh` and verified the expected before/after delta in `pr-artifacts/before-after.diff`.
+- Refined `INT-057` classification/output interplay so branches shown under `merged-into-head (not main/upstream)` include explicit divergence context (`divergent from <base>`) when applicable.
+- Updated reporting exclusivity so branches in `merged-into-head` are omitted from `Non-equivalent branches` and `Non-equivalent divergence details` to avoid duplicate categorization.
+- Expanded ancestry integration assertions to verify head-category divergence labeling and non-equivalent-section exclusion for the same branch.
+- Restructured ancestry output to treat `Merged branches` as an outer heading only (no direct branch list), with branch entries rendered only in descendant ancestry sections.
+- Added an `Unmerged branches` outer heading above `Non-equivalent branches` to clarify top-level state grouping.
+- Collapsed non-equivalent divergence reporting into inline per-branch details within `Non-equivalent branches`, removing the separate `Non-equivalent divergence details` section and duplicate listing.
+- Updated integration assertions and visual-validation demo expectations to verify heading hierarchy and single-list branch presentation.
+- Refined ancestry detail rendering so branch metadata is printed on labeled, indented child lines (for example `merged into upstream: ...`, `merged into head: ...`, `divergent from <base>: yes|no`) rather than inline suffixes on the branch line.
+- Updated renderer token mapping so `Unmerged branches` uses the non-equivalent section color token instead of falling through to default bright white.
+- Expanded ancestry integration assertions and visual-validation demo expectations to verify labeled detail indentation beneath branch rows.
+- Removed `Merged branches` and `Unmerged branches` outer headings from ancestry reporting so section hierarchy is flatter and branch lists are not duplicated under wrapper titles.
+- Replaced ancestry section headers with `Merged into upstream branches` and dynamic `Merged into local <current-branch>`, and kept local-section eligibility restricted to branches not merged into upstream.
+- Removed `merged-into-main` reporting so upstream/local sections define the ancestry classification surface, with per-branch labeled details preserved.

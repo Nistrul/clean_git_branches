@@ -72,5 +72,8 @@ echo "- feature/upstream-contained: not merged into main/develop; tip is present
 echo "- feature/head-contained: merged into current HEAD (develop), but not merged into main."
 
 section "PREVIEW (DEFAULT)"
-echo "Expected: explicit sections for merged-into-main, merged-into-upstream, and merged-into-head."
+echo "Expected: ancestry sections render as merged into upstream branches and merged into local develop."
+echo "Merged into local is shown only when a branch is not merged into its upstream."
+echo "Non-equivalent remains a separate section with inline details per branch."
+echo "Any branch details are labeled and indented on child lines under the branch name."
 "${CLEAN_SCRIPT}"

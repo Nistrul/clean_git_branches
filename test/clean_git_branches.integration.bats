@@ -108,9 +108,8 @@ create_non_equivalent_branch() {
   [ "$status" -eq 0 ]
   [[ "$output" == *"Execution mode: dry-run (preview only)"* ]]
   [[ "$output" == *"Current branch: main"* ]]
-  [[ "$output" == *"Merged branches"* ]]
+  [[ "$output" == *"Merged into upstream branches"* ]]
   [[ "$output" == *"feature/dirty-worktree-merged"* ]]
-  [[ "$output" == *"preview only (use --apply to delete)"* ]]
 
   run git -C "$work_dir" branch --list feature/dirty-worktree-merged
   [ "$status" -eq 0 ]
@@ -150,7 +149,7 @@ create_non_equivalent_branch() {
 
   [ "$status" -eq 0 ]
   [[ "$output" == *"Execution mode: dry-run (preview only)"* ]]
-  [[ "$output" == *"Merged branches"* ]]
+  [[ "$output" == *"Merged into upstream branches"* ]]
   [[ "$output" == *"feature/subdir-merged"* ]]
   [[ "$output" == *"Non-equivalent branches"* ]]
   [[ "$output" == *"feature/subdir-non-equivalent"* ]]
@@ -252,11 +251,10 @@ EOF_SHIM
   [[ "$output" == *$'- feature/equivalent-divergence-evidence\n'* ]]
   [[ "$output" == *"Non-equivalent branches"* ]]
   [[ "$output" == *$'- feature/non-equivalent-divergence-evidence\n'* ]]
-  [[ "$output" == *"Non-equivalent divergence details"* ]]
-  [[ "$output" == *"- feature/non-equivalent-divergence-evidence"* ]]
+  [[ "$output" != *"Non-equivalent divergence details"* ]]
   [[ "$output" == *"branch-only commits vs main (ancestry): 1"* ]]
   [[ "$output" == *"sample commit subjects:"* ]]
-  [[ "$output" == *"- unique commit for feature/non-equivalent-divergence-evidence"* ]]
+  [[ "$output" == *"  - unique commit for feature/non-equivalent-divergence-evidence"* ]]
   [[ "$output" != *"feature/equivalent-divergence-evidence - unique commits ahead of main"* ]]
 
   run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --equivalence patch-id
@@ -266,15 +264,14 @@ EOF_SHIM
   [[ "$output" == *$'- feature/equivalent-divergence-evidence\n'* ]]
   [[ "$output" == *"Non-equivalent branches"* ]]
   [[ "$output" == *$'- feature/non-equivalent-divergence-evidence\n'* ]]
-  [[ "$output" == *"Non-equivalent divergence details"* ]]
-  [[ "$output" == *"- feature/non-equivalent-divergence-evidence"* ]]
+  [[ "$output" != *"Non-equivalent divergence details"* ]]
   [[ "$output" == *"branch-only commits vs main (ancestry): 1"* ]]
   [[ "$output" == *"sample commit subjects:"* ]]
-  [[ "$output" == *"- unique commit for feature/non-equivalent-divergence-evidence"* ]]
+  [[ "$output" == *"  - unique commit for feature/non-equivalent-divergence-evidence"* ]]
   [[ "$output" != *"feature/equivalent-divergence-evidence - unique commits ahead of main"* ]]
 }
 
-@test "integration: ancestry sections report merged-into-main/upstream/head with realistic branch states" {
+@test "integration: ancestry sections report merged-into-upstream/local with realistic branch states" {
   local work_dir
   local head_branch
 
@@ -314,15 +311,20 @@ EOF_SHIM
   run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir"
 
   [ "$status" -eq 0 ]
-  [[ "$output" == *"merged-into-main"* ]]
+  [[ "$output" == *"Merged into upstream branches"* ]]
   [[ "$output" == *$'- feature/main-contained\n'* ]]
-  [[ "$output" == *"merged-into-upstream"* ]]
-  [[ "$output" == *"feature/upstream-contained - origin/feature/upstream-contained"* ]]
-  [[ "$output" == *"merged-into-head"* ]]
-  [[ "$output" == *"feature/head-contained - $head_branch"* ]]
+  [[ "$output" == *$'- feature/upstream-contained\n'* ]]
+  [[ "$output" == *"merged into upstream: origin/feature/main-contained"* ]]
+  [[ "$output" == *"merged into upstream: origin/feature/upstream-contained"* ]]
+  [[ "$output" == *"Merged into local $head_branch"* ]]
+  [[ "$output" == *$'- feature/head-contained\n'* ]]
+  [[ "$output" == *"merged into head: $head_branch"* ]]
+  [[ "$output" == *"divergent from main: yes"* ]]
   [[ "$output" == *"Non-equivalent branches"* ]]
-  [[ "$output" == *"feature/upstream-contained"* ]]
-  [[ "$output" == *"feature/head-contained"* ]]
+  [[ "$output" == *$'- feature/upstream-contained\n'* ]]
+  [[ "$output" == *"- feature/upstream-contained"* ]]
+  [[ "$output" != *$'- feature/head-contained\n  branch-only commits vs main (ancestry):'* ]]
+  [[ "$output" != *"Non-equivalent divergence details"* ]]
 
   run "$repo_root/test/helpers/run-in-repo.sh" "$work_dir" --apply --delete-equivalent --force-delete-equivalent
 
