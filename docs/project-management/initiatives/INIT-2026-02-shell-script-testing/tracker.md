@@ -25,6 +25,8 @@
 11. `[x]` Add dry-run divergence diagnostics and strategy-parity verification.
 12. `[ ]` Add classification-only commit-ancestry branch states (`merged-into-upstream`, `merged-into-head`) with upstream/HEAD context in reporting.
 13. `[ ]` Rename CLI to `git-branch-tidy` and support `git branch-tidy`.
+14. `[x]` Define explicit target-directed cleanup UX plan (`--merged-into <ref>`) and reason-first non-deletion diagnostics contract.
+15. `[ ]` Implement explicit target selection plus reason-first cleanup-plan reporting in CLI output/tests.
 
 ## Working Notes
 

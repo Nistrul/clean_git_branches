@@ -13,6 +13,18 @@
 
 ## Execution Log
 
+### 2026-02-15
+
+- Intake check selected `INT-058` as the highest-priority unblocked existing `todo` slice; deferred that implementation due explicit user-requested pivot planning for target-directed cleanup UX.
+- Confirmed open-PR overlap before planning changes: PR `#55` (`INT-057`) is ancestry-state reporting scope and does not overlap with explicit-target syntax planning.
+- Per branch-alignment workflow, stashed unrelated in-progress `INT-057` work, switched to `main`, fast-forwarded, and created branch `feat/INIT-2026-02-shell-script-testing/FEAT-004-int-062-explicit-target-plan` before edits.
+- Added `FEAT-012` and planning slice `INT-062` to define explicit target syntax (`--merged-into <ref>`) plus reason-first non-deletion diagnostics.
+- Added follow-on implementation/test slices `INT-063` to `INT-065` with dependency notes:
+  - `INT-062` unblocks `INT-063`, `INT-064`, `INT-065`
+  - `INT-063` unblocks `INT-064`, `INT-065`
+  - `INT-064` unblocks `INT-065`
+- Added design contract document `feat-012-explicit-target-cleanup-plan.md` covering CLI semantics, reporting architecture, rollout sequence, and acceptance criteria.
+
 ### 2026-02-11
 
 - Split a newly requested mixed scope into three separate PR-ready backlog slices so execution can proceed as isolated changesets.

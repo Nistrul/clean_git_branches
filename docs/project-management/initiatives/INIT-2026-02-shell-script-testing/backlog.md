@@ -34,6 +34,7 @@
 | FEAT-009 | Dry-run branch divergence diagnostics | Ensure dry-run output explains why non-merged branches differ and verifies classification parity across configured equivalence strategies. |
 | FEAT-010 | Commit-ancestry branch-state reporting | Ensure classification can explain additional branch states using commit ancestry without changing deletion or cleanup behavior. |
 | FEAT-011 | Git extension rename | Ensure the tool is renamed to `git-branch-tidy` and can be invoked as `git branch-tidy` while preserving existing behavior contracts. |
+| FEAT-012 | Explicit target-directed cleanup UX | Ensure users can explicitly choose cleanup target refs (for example `main` or `develop`) while keeping reason-first diagnostics for all non-deleted branches. |
 
 ## Backlog
 
@@ -100,15 +101,30 @@
 | INT-059 | FEAT-006 | Normalize visual-validation ANSI captures before text derivation so PTY control-sequence artifacts (for example `^D\\b\\b`) do not pollute PR artifacts | P1 | S | done |
 | INT-060 | FEAT-006 | Reduce tracking merge-conflict hotspots by removing manual current-focus fields, switching backlog execution logging to append-only bullets, avoiding volatile metadata churn in routine slices, requiring backlog-priority/open-PR overlap checks before implementation, and capturing dependency notes during slice prioritization | P1 | S | done |
 | INT-061 | FEAT-006 | Route agent temporary workspace operations to repo-local gitignored `scratch/` paths instead of OS temp directories to avoid sandbox-policy friction during routine slices | P1 | S | done |
+| INT-062 | FEAT-012 | Produce pivot design doc for explicit target syntax (`--merged-into <ref>`), reason-first `Not deleted` reporting contract, rollout sequencing, and acceptance checks | P1 | S | done |
+| INT-063 | FEAT-012 | Implement explicit cleanup-target flag (`--merged-into <ref>`) with ref validation, help/usage updates, and deterministic run-summary output that distinguishes auto-detected vs user-selected target refs | P1 | M | todo |
+| INT-064 | FEAT-012 | Restructure reporting into `Branch intelligence` + `Cleanup plan`, ensuring each branch renders one final action status plus one primary keep reason when not deleted | P1 | M | todo |
+| INT-065 | FEAT-012 | Add integration coverage and visual-validation demo updates for explicit target cleanup and reason-first non-deletion diagnostics across preview/apply flows | P1 | M | todo |
 
 ## Suggested Execution Order
 
-1. `INT-057` (`FEAT-010`) to add classification-only commit-ancestry states (`merged-into-upstream`, `merged-into-head`) with explicit upstream/current-HEAD output context.
-2. `INT-058` (`FEAT-011`) to rename the tool and add Git extension invocation support.
+1. `INT-057` (`FEAT-010`) to land open PR scope for ancestry-state reporting on `main` before additional reporting pivots are implemented.
+2. `INT-062` (`FEAT-012`) to finalize and merge the explicit-target + reason-first UX design contract before behavior changes.
+3. `INT-063` (`FEAT-012`) to implement explicit target selection syntax and output contract.
+4. `INT-064` (`FEAT-012`) to split reporting into intelligence vs action-plan views with single-reason keep diagnostics.
+5. `INT-065` (`FEAT-012`) to lock behavior with integration tests and refreshed visual-validation demo evidence.
+6. `INT-058` (`FEAT-011`) to rename the CLI after the explicit-target UX pivot is stable.
 
 ## Sprintable Next Slice
 
-1. `INT-057` (`FEAT-010`): add classification-only commit-ancestry states and output context (`merged-into-upstream`, `merged-into-head`) without changing deletion behavior.
+1. `INT-062` (`FEAT-012`): merge explicit-target and reason-first UX planning contract so implementation slices can proceed with stable acceptance criteria.
+
+## INT-062-INT-065 Dependency Notes
+
+- `INT-062` blocked by: none. Unblocks: `INT-063`, `INT-064`, `INT-065`.
+- `INT-063` blocked by: `INT-062` design contract merge. Unblocks: `INT-064`, `INT-065`.
+- `INT-064` blocked by: `INT-063` target-flag behavior contract. Unblocks: `INT-065`.
+- `INT-065` blocked by: merged behavior from `INT-063` and `INT-064`; visual-validation demo must reflect final reporting contract.
 
 ## INT-057 Scope Notes
 
